@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en-us">
+
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>About | Jon Ledbetter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" media="screen" href="assets\css\style.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="main.js"></script>
+</head>
+
+<body>
+
+  <style>
+    #logo,
+    footer {
+      animation-name: backfade;
+      animation-duration: 4s;
+      animation-direction: alternate;
+      animation-iteration-count: infinite;
+    }
+
+    h1,
+    footer {
+      animation-name: frontfade;
+      animation-duration: 4s;
+      animation-direction: alternate;
+      animation-iteration-count: infinite;
+    }
+
+    @keyframes backfade {
+      from {
+        background-color: darkslateblue;
+        border-color: darkslateblue;
+      }
+
+      to {
+        background-color: rgb(5, 5, 5);
+        border-color: rgb(5, 5, 5);
+      }
+    }
+
+    @keyframes frontfade {
+      from {
+        color: darkslateblue;
+      }
+
+      to {
+        color: rgb(5, 5, 5);
+      }
+    }
+  </style>
+
+  <header id="masthead">
+    <div class="container">
+      <a href="index.html" id="logo">Jon Ledbetter</a>
+      <div class="row">
+        <div class="col-10">
+          <nav class=row>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+              <a href="index.html">About</a></div>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+              <a href="portfolio.html">Portfolio</a></div>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+              <a href="contact.html">Contact</a></div>
+          </nav>
+        </div>
+      </div>
+    </div>
+    </div>
+  </header>
+
+  <!-- Original Header
+  <header id="masthead">
+    <div class="container">
+      <a href="index.html" id="logo">Your Name</a>
+      <nav>
+        <a href="index.html">About</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header> -->
+
+  <div id="main-container" class="container">
+    <section class="main-section">
+      <h1>About Me</h1>
+
+      <img src="assets/images/jon.png" class="auth-image" alt="Your Name">
+
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vestibulum luctus felis, ac rhoncus nunc
+        porttitor condimentum. Mauris sit amet dolor eu elit varius varius facilisis id arcu. Proin vel dui massa. Nunc
+        rhoncus fringilla pharetra. Vestibulum bibendum consectetur euismod. Proin commodo purus vitae sollicitudin
+        consectetur.</p>
+
+      <p>Donec vehicula lacus at leo feugiat lacinia. In et ex ultrices, ultrices neque non, pretium odio. Nunc id eros
+        iaculis, pulvinar quam eget, egestas mauris.</p>
+
+      <p>Suspendisse dictum, arcu at convallis faucibus, quam sapien tincidunt nunc, sit amet egestas nibh tortor et mi.
+        Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Lorem ipsum dolor sit
+        amet consectetur adipisicing elit. Atque quisquam, cumque quia quos quibusdam architecto vel, dolore tenetur
+        repellendus quod pariatur assumenda aspernatur incidunt repellat accusantium perspiciatis magnam voluptatum
+        nostrum.</p>
+
+    </section>
+
+  </div>
+
+  <footer>
+    <div class="container">
+      Copyright &copy;
+    </div>
+  </footer>
+</body>
+
+</html>
