@@ -264,9 +264,11 @@ footer {
 }
 
 @keyframes frontfade {
-  from {color: darkslateblue;}
+  from {color: darkslateblue;
+    border-color: darkslateblue;}
 
-  to {color: rgb(5, 5, 5);}
+  to {color: rgb(5, 5, 5);
+    border-color: rgb(5, 5, 5);}
 }
 
 
