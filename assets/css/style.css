@@ -22,6 +22,7 @@ body {
 h1,
 h2,
 h3,
+h4,
 p {
   margin-bottom: 20px;
 }
@@ -32,9 +33,9 @@ p:last-child {
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
   font-family: Georgia, Times, "Times New Roman", serif;
-  font-weight: 700;
   color: darkslateblue;
 }
 
@@ -45,10 +46,6 @@ h1 {
   border-bottom: 3px solid #dddddd;
 }
 
-h2,
-h3 {
-  font-size: 22px;
-}
 
 /* header */
 
@@ -156,9 +153,10 @@ h3, h2 {
 .work {
   position: relative;
   float: left;
-  width: 300px;
+  width: 100%;
+  height: 275px;
   margin: 20px 0 25px;
-  overflow: auto;
+  overflow: 0 auto;
   padding-right: 10px;
 }
 
@@ -168,18 +166,19 @@ h3, h2 {
 
 .work img {
   width: 100%;
+  height: 50%;
   border: 0 none;
-  opacity: 0.8;
+  opacity: 0.7;
   padding-bottom: 20px;
 }
 
 img {
   width: 100%;
   /* height: 59% */
-  height: 150px;
+  /* height: 150px; */
 }
 
-.work h3 {
+.work h3, h4{
   position: relative;
   bottom: 20px;
   width: 100%;
@@ -190,6 +189,7 @@ img {
   color: #ffffff;
   text-align: center;
   background: darkslateblue;
+  opacity: 0.7;
   border-bottom: 0;
 }
 
@@ -281,8 +281,7 @@ footer {
  /* fading effects: */
 /* portfolio page */
  #logo,
- .auth-image,
- .work h3 {
+ .auth-image, h4{
    animation-name: backfade;
    animation-duration: 4s;
    animation-direction: alternate;
@@ -291,7 +290,8 @@ footer {
 
  h1,
  h2,
- h3 {
+ h3,
+ {
    animation-name: frontfade;
    animation-duration: 4s;
    animation-direction: alternate;
