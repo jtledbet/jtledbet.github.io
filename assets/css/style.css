@@ -60,6 +60,10 @@ h1 {
   color: #ffffff;
   background: #ffffff;
   border-bottom: 2px solid #cccccc;
+  /* background: rgb(1,0,11); */
+  background: rgb(1,0,11);
+  background: rgb(1,0,11);
+  background: linear-gradient(151deg, rgba(1,0,11,1) 0%, rgba(47,16,75,1) 26%, rgba(84,85,85,0) 100%);
 }
 
 #logo {
@@ -89,6 +93,7 @@ nav {
   color: #999;
   text-decoration: none;
   border-left: 1px solid #efefef;
+  text-align: right;
 }
 
 /* hyperlinks */
@@ -105,7 +110,8 @@ a:visited {
 
 a:hover {
   text-decoration: none !important;
-  color: darkslateblue !important;
+  /* color: darkslateblue !important; */
+  text-shadow: 1px 1px 3px gray;
   font-weight: bold;
 }
 
