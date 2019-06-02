@@ -8,6 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" media="screen" href="assets\css\style.css">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel='stylesheet' type='text/css'>
 </head>
 
 <body>
@@ -32,35 +33,36 @@
 
   <div id="main-container" class="container">
     <section class="main-section">
-      <h1>Contact</h1>
+      <h1 class="header">Contact</h1>
 
-      <form id="contact-form">
+      <form id="contact-form" action="mailto:jon.ledbetter@gmail.com" method="post" enctype="text/plain">
         <ul>
           <li>
             <label for="name">Name</label>
-            <input class="text-light bg-dark" type="text" id="name" name="name" placeholder="John Smith" required="required">
+            <input class="text-light bg-dark" type="text" id="name" name="name" placeholder="John Smith"
+              required="required">
           </li>
           <li>
-            <label for="email">Email</label>
-            <input class="text-light bg-dark" type="email" id="email" name="email" placeholder="example@gmail.com" required="required">
+            <label for="email">E-mail</label>
+            <input class="text-light bg-dark" type="email" id="email" name="email" placeholder="example@gmail.com"
+              required="required">
           </li>
           <li>
             <label for="message">Message</label>
             <textarea class="text-light bg-dark" id="message" name="message" required="required"></textarea>
           </li>
         </ul>
-        <input type="submit" id="submit">
+        <div id="buttons">
+          <input class="button" type="submit" id="submit" value="Send">
+          <input class="button" type="reset" id="reset" value="Reset">
+        </div>
       </form>
-
     </section>
-
   </div>
 
-  <footer>
-    <div class="container">
+  <div id="footer" class="container">
       Copyright &copy;
     </div>
-  </footer>
 </body>
 
 </html>
