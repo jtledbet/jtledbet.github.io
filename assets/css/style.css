@@ -162,6 +162,11 @@ a:hover {
   opacity: 0.7;
 }
 
+/* .img-responsive {
+  width:50%; 
+  height:50%;
+} */
+
 .work h3, h4 {
   position: relative;
   width: 100%;
