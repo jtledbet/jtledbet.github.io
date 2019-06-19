@@ -113,6 +113,10 @@ a:hover {
   font-weight: bold;
 }
 
+#resume_link {
+  color: darkviolet;
+}
+
 /* footer */
 
 #footer {
