@@ -1,187 +1,755 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en-us">
-
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Portfolio | Jon Ledbetter</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-  <link rel="stylesheet" type="text/css" media="screen" href="assets\css\style.css">
-  <link rel="stylesheet" type="text/css" media="screen" href="assets\css\cards.css">
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel='stylesheet' type='text/css'>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d1a;
+      --surface: #13132a;
+      --card: #1a1a30;
+      --border: rgba(124, 92, 191, 0.2);
+      --purple: #8b68d4;
+      --purple-light: #a884f0;
+      --purple-dim: rgba(139, 104, 212, 0.12);
+      --text: #e2e8f0;
+      --muted: #8892a4;
+      --amber: #f59e0b;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 13, 26, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-logo::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--purple);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--purple);
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.4rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--text);
+      background: var(--purple-dim);
+    }
+
+    /* MAIN */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .page-header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* SECTION LABEL */
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      margin-bottom: 1rem;
+    }
+
+    /* FEATURED GRID */
+    .featured-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .featured-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .featured-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(139, 104, 212, 0.2);
+    }
+
+    .featured-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .featured-img-placeholder {
+      width: 100%;
+      height: 200px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+    }
+
+    .featured-body {
+      padding: 1.5rem;
+    }
+
+    .featured-body h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .featured-body p {
+      color: var(--muted);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .featured-actions {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    /* FILTER BAR */
+    .filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      color: var(--text);
+      border-color: var(--purple);
+    }
+
+    .filter-btn.active {
+      background: var(--purple-dim);
+      border-color: var(--purple);
+      color: var(--purple-light);
+    }
+
+    .filter-btn .count {
+      font-size: 0.75rem;
+      opacity: 0.55;
+      margin-left: 0.2rem;
+    }
+
+    /* PROJECT GRID */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .project-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .project-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 24px rgba(139, 104, 212, 0.18);
+    }
+
+    .project-card.hidden {
+      display: none;
+    }
+
+    .card-img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-img-placeholder {
+      width: 100%;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+
+    .card-body {
+      padding: 1rem;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+
+    .card-desc {
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.5;
+      margin-bottom: 0.75rem;
+    }
+
+    /* TAGS */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-bottom: 0.875rem;
+    }
+
+    .tag {
+      font-size: 0.68rem;
+      font-weight: 500;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      background: var(--purple-dim);
+      color: var(--purple-light);
+      border: 1px solid rgba(139, 104, 212, 0.2);
+    }
+
+    /* BUTTONS */
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, background 0.2s, border-color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .btn-primary {
+      background: var(--purple);
+      color: #fff;
+    }
+
+    .btn-primary:hover { opacity: 0.85; }
+
+    .btn-ghost {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--purple);
+      color: var(--text);
+    }
+
+    .btn-disabled {
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      cursor: default;
+      opacity: 0.5;
+      border: 1px solid var(--border);
+    }
+
+    .featured-actions .btn {
+      font-size: 0.85rem;
+      padding: 0.5rem 1.1rem;
+    }
+
+    /* UNAVAILABLE BADGE */
+    .badge-offline {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.6rem;
+      background: var(--amber);
+      color: #000;
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .featured-grid { grid-template-columns: 1fr; }
+      .projects-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 580px) {
+      .projects-grid { grid-template-columns: 1fr; }
+      .nav-inner { padding: 0 1rem; }
+      main { padding: 2rem 1rem 4rem; }
+    }
+  </style>
 </head>
 
 <body>
 
-  <header id="masthead">
-    <div class="container">
-      <a href="index.html" id="logo">Jon Ledbetter</a>
-      <div class="row">
-        <div class="col-10">
-          <nav class="row" id="nav-buttons">
-            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-              <a href="index.html">About</a></div>
-            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-              <a href="portfolio.html">Portfolio</a></div>
-            <!-- <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-              <a href="contact.html">Contact</a></div> -->
-          </nav>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <div id="main-container" class="container">
-    <section class="main-section">
-      
-      <h1 class="header">Portfolio</h1>
-      <h5>I have to find new hosting for all the Heroku projects. (Those are the good ones!) ;)</h5>
-      
-      <div class="row" id="workrow">
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="https://sites.google.com/uncc.edu/itis3300/home" target="_blank">
-            <img src="assets/images/agileworx.png" class="img-responsive" alt="AgileWorx"></a>
-    
-          <h4>Agile Worx</h4>
-        </div>
-        
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="https://jtledbet.github.io/Cinement/" target="_blank">
-            <img src="assets/images/cinement.png" class="img-responsive" alt="Cinement"></a>
-
-          <h4>Cinement</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="https://futurescaper.herokuapp.com/" target="_blank">
-            <img src="assets/images/futurescaper.png" class="img-responsive" alt="FutureScaper"></a>
-            
-            <h4>Future Scaper</h4>
-          </div>
-          
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-            <a href="https://damp-crag-12475.herokuapp.com/" target="_blank">
-              <img src="assets/images/flame_trans.png" class="img-responsive" alt="Mongo Scraper"></a>
-
-          <h4>Mongo Scraper</h4>
-        </div>
-
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="https://catburgers.herokuapp.com/" target="_blank">
-            <img src="https://placehold.co/200x300/gray/FFF" class="img-responsive" alt="CatBurger"></a>
-
-          <h4>Cat Burgers!</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="https://morning-hamlet-87772.herokuapp.com/" target="_blank">
-            <img src="https://placehold.co/200x300/gray/FFF" class="img-responsive" alt="SpiritAnimals"></a>
-
-          <h4>Spirit Animals</h4>
-        </div>
-
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="https://jtledbet.github.io/clickyfrandz/" target="_blank">
-            <img src="assets/images/chinchilla.png" class="img-responsive" alt="Clickyfriends"></a>
-
-          <h4>Clicky Frandz!</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="http://jtledbet.github.io/Word-Guess-Game/" target="_blank">
-            <img src="assets/images/hangman.png" class="img-responsive" alt="Word Guess"></a>
-
-          <h4>Word Guess</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="https://github.com/jtledbet/liri-node-app" target="_blank">
-            <img src="https://placehold.co/200x300/gray/FFF" class="img-responsive" alt="Liri Node App">
-
-            <h4>Liri Node App</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="http://jtledbet.github.io/unit-4-game/" target="_blank">
-            <img src="assets/images/blue_gem_sm.png" class="img-responsive" alt="Crystal Capture"></a>
-
-          <h4>Crystal Capture</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="http://jtledbet.github.io/HW_Wireframe/" target="_blank">
-            <img src="assets/images/wireframe.png" class="img-responsive" alt="Wireframe"></a>
-
-          <h4>Wire Frame Thing</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="http://jtledbet.github.io/RPS/" target="_blank">
-            <img src="assets/images/rps.png" class="img-circle" class="img-responsive" alt="Rock Paper Scissors"></a>
-
-          <h4>Rock Paper Scissors</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="http://jtledbet.github.io/Psychic-Game/" target="_blank">
-            <img src="assets/images/crystal_ball.png" class="img-responsive" alt="Psychic Game"></a>
-
-          <h4>Psychic Game</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="https://jtledbet.github.io/calc/" target="_blank">
-            <img src="assets/images/calc.png" class="img-responsive" alt="jQuery Calculator"></a>
-
-          <h4>jQuery Calc</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="https://jtledbet.github.io/TriviaGame/" target="_blank">
-            <img src="assets/images/dragon_sm.png" class="img-responsive" alt="Trivia Game"></a>
-
-          <h4>Trivia Game</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="https://jtledbet.github.io/Giphy/" target="_blank">
-            <img src="assets/images/giphy_trans.png" class="img-responsive" alt="Giphy"></a>
-
-          <h4>Giphy</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="https://jtledbet.github.io/Train_Schedule/" target="_blank">
-            <img src="assets/images/train_trans.png" class="img-responsive" alt="Train Schedule"></a>
-
-          <h4>Train Schedule</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="https://github.com/jtledbet/bamazon/" target="_blank">
-            <img src="https://placehold.co/200x300/gray/FFF" class="img-responsive" alt="Bamazon"></a>
-
-          <h4>Bamazon</h4>
-        </div>
-
-        <div class="work col-xs-12 col-sm-6 col-md-3 col-lg-2">
-          <a href="https://secret-earth-76608.herokuapp.com/" target="_blank">
-            <img src="https://placehold.co/200x300/gray/FFF" class="img-responsive" alt="FriendFinder"></a>
-
-          <h4>Friend Finder</h4>
-        </div>
-
-      </div>
+<header>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Jon Ledbetter</a>
+    <ul class="nav-links">
+      <li><a href="index.html">About</a></li>
+      <li><a href="portfolio.html" class="active">Portfolio</a></li>
+      <li><a href="mailto:jon.ledbetter@gmail.com">Contact</a></li>
+    </ul>
   </div>
-  </section>
-</div>
+</header>
 
-  <div id="footer" class="container">
-      Copyright &copy;
+<main>
+
+  <div class="page-header">
+    <h1>Portfolio</h1>
+    <p>A selection of projects spanning web apps, games, and developer tools.</p>
+  </div>
+
+  <!-- FEATURED -->
+  <div class="section-label">Featured Projects</div>
+  <div class="featured-grid">
+
+    <div class="featured-card">
+      <img src="assets/images/agileworx.png" class="featured-img" alt="Agile Worx"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="featured-img-placeholder" style="background: linear-gradient(135deg, #1e1e40, #3b1f6e);">🗂️</div>
+      <div class="featured-body">
+        <h2>Agile Worx</h2>
+        <p>A collaborative project management platform built for ITIS 3300 at UNC Charlotte, demonstrating agile methodology and full-team coordination.</p>
+        <div class="tags">
+          <span class="tag">Agile</span>
+          <span class="tag">Google Sites</span>
+          <span class="tag">Team Project</span>
+        </div>
+        <div class="featured-actions">
+          <a href="https://sites.google.com/uncc.edu/itis3300/home" target="_blank" class="btn btn-primary">View Project</a>
+        </div>
+      </div>
     </div>
-  </body>
 
+    <div class="featured-card">
+      <img src="assets/images/cinement.png" class="featured-img" alt="Cinement"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="featured-img-placeholder" style="background: linear-gradient(135deg, #1a1a3e, #2d0a4e);">🎬</div>
+      <div class="featured-body">
+        <h2>Cinement</h2>
+        <p>A movie discovery app powered by the TMDB API. Search for films, browse details, and explore recommendations in a clean, responsive interface.</p>
+        <div class="tags">
+          <span class="tag">JavaScript</span>
+          <span class="tag">TMDB API</span>
+          <span class="tag">HTML/CSS</span>
+        </div>
+        <div class="featured-actions">
+          <a href="https://jtledbet.github.io/Cinement/" target="_blank" class="btn btn-primary">View Project</a>
+          <a href="https://github.com/jtledbet/Cinement" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ALL PROJECTS -->
+  <div class="section-label">All Projects</div>
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">All <span class="count">16</span></button>
+    <button class="filter-btn" data-filter="webapp">Web Apps <span class="count">7</span></button>
+    <button class="filter-btn" data-filter="game">Games <span class="count">6</span></button>
+    <button class="filter-btn" data-filter="tool">Tools <span class="count">4</span></button>
+  </div>
+
+  <div class="projects-grid" id="projects-grid">
+
+    <!-- Future Scaper -->
+    <div class="project-card" data-category="webapp">
+      <span class="badge-offline">Offline</span>
+      <img src="assets/images/futurescaper.png" class="card-img" alt="Future Scaper"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #0d1b2a, #1b3a5c);">🚀</div>
+      <div class="card-body">
+        <div class="card-title">Future Scaper</div>
+        <div class="card-desc">Full-stack app for exploring and saving emerging technology trends.</div>
+        <div class="tags"><span class="tag">Node.js</span><span class="tag">MongoDB</span><span class="tag">Express</span></div>
+        <div class="card-actions">
+          <span class="btn btn-disabled">Offline</span>
+          <a href="https://github.com/jtledbet" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mongo Scraper -->
+    <div class="project-card" data-category="webapp">
+      <span class="badge-offline">Offline</span>
+      <img src="assets/images/flame_trans.png" class="card-img" alt="Mongo Scraper"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #2a0d0d, #5c1b1b);">📰</div>
+      <div class="card-body">
+        <div class="card-title">Mongo Scraper</div>
+        <div class="card-desc">News aggregator that scrapes articles and stores them with MongoDB, with user notes per article.</div>
+        <div class="tags"><span class="tag">Node.js</span><span class="tag">MongoDB</span><span class="tag">Cheerio</span></div>
+        <div class="card-actions">
+          <span class="btn btn-disabled">Offline</span>
+          <a href="https://github.com/jtledbet" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cat Burgers -->
+    <div class="project-card" data-category="webapp">
+      <span class="badge-offline">Offline</span>
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #1a0d2e, #3d1a5e);">🍔</div>
+      <div class="card-body">
+        <div class="card-title">Cat Burgers!</div>
+        <div class="card-desc">A quirky burger-ordering app with a feline theme, built with a full MVC architecture.</div>
+        <div class="tags"><span class="tag">Node.js</span><span class="tag">MySQL</span><span class="tag">Handlebars</span></div>
+        <div class="card-actions">
+          <span class="btn btn-disabled">Offline</span>
+          <a href="https://github.com/jtledbet" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spirit Animals -->
+    <div class="project-card" data-category="webapp">
+      <span class="badge-offline">Offline</span>
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #0d1a0d, #1a3d1a);">🦊</div>
+      <div class="card-body">
+        <div class="card-title">Spirit Animals</div>
+        <div class="card-desc">A personality quiz that matches you with your spirit animal based on your answers.</div>
+        <div class="tags"><span class="tag">Node.js</span><span class="tag">Express</span><span class="tag">Heroku</span></div>
+        <div class="card-actions">
+          <span class="btn btn-disabled">Offline</span>
+          <a href="https://github.com/jtledbet" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Friend Finder -->
+    <div class="project-card" data-category="webapp">
+      <span class="badge-offline">Offline</span>
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #0d0d2a, #1a1a5c);">👥</div>
+      <div class="card-body">
+        <div class="card-title">Friend Finder</div>
+        <div class="card-desc">Full-stack compatibility matchmaking app — fill out a survey and get matched with your most compatible "friend."</div>
+        <div class="tags"><span class="tag">Node.js</span><span class="tag">Express</span><span class="tag">REST API</span></div>
+        <div class="card-actions">
+          <span class="btn btn-disabled">Offline</span>
+          <a href="https://github.com/jtledbet" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Giphy -->
+    <div class="project-card" data-category="webapp">
+      <img src="assets/images/giphy_trans.png" class="card-img" alt="Giphy"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #1a0d2e, #4a1a7e);">🎞️</div>
+      <div class="card-body">
+        <div class="card-title">Giphy</div>
+        <div class="card-desc">Search and browse GIFs in real time, powered by the Giphy API.</div>
+        <div class="tags"><span class="tag">JavaScript</span><span class="tag">Giphy API</span><span class="tag">jQuery</span></div>
+        <div class="card-actions">
+          <a href="https://jtledbet.github.io/Giphy/" target="_blank" class="btn btn-primary">Live</a>
+          <a href="https://github.com/jtledbet/Giphy" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Train Schedule -->
+    <div class="project-card" data-category="webapp">
+      <img src="assets/images/train_trans.png" class="card-img" alt="Train Schedule"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #1a1a0d, #3d3d1a);">🚆</div>
+      <div class="card-body">
+        <div class="card-title">Train Schedule</div>
+        <div class="card-desc">Real-time train arrival tracker using Firebase for live data synchronization.</div>
+        <div class="tags"><span class="tag">Firebase</span><span class="tag">JavaScript</span><span class="tag">Real-time</span></div>
+        <div class="card-actions">
+          <a href="https://jtledbet.github.io/Train_Schedule/" target="_blank" class="btn btn-primary">Live</a>
+          <a href="https://github.com/jtledbet/Train_Schedule" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bamazon -->
+    <div class="project-card" data-category="tool">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #0d1a1a, #1a3d3d);">🛒</div>
+      <div class="card-body">
+        <div class="card-title">Bamazon</div>
+        <div class="card-desc">An Amazon-like storefront CLI app — customers browse and buy, managers track inventory.</div>
+        <div class="tags"><span class="tag">Node.js</span><span class="tag">MySQL</span><span class="tag">CLI</span></div>
+        <div class="card-actions">
+          <a href="https://github.com/jtledbet/bamazon/" target="_blank" class="btn btn-primary">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liri Node App -->
+    <div class="project-card" data-category="tool">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #0d0d1a, #1a1a3d);">🎵</div>
+      <div class="card-body">
+        <div class="card-title">Liri Node App</div>
+        <div class="card-desc">A CLI tool that queries Spotify, OMDB, and Bands in Town from the command line.</div>
+        <div class="tags"><span class="tag">Node.js</span><span class="tag">Spotify API</span><span class="tag">OMDB API</span></div>
+        <div class="card-actions">
+          <a href="https://github.com/jtledbet/liri-node-app" target="_blank" class="btn btn-primary">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery Calc -->
+    <div class="project-card" data-category="tool">
+      <img src="assets/images/calc.png" class="card-img" alt="jQuery Calculator"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d);">🔢</div>
+      <div class="card-body">
+        <div class="card-title">jQuery Calc</div>
+        <div class="card-desc">A clean, fully functional calculator built with jQuery and CSS.</div>
+        <div class="tags"><span class="tag">jQuery</span><span class="tag">JavaScript</span><span class="tag">CSS</span></div>
+        <div class="card-actions">
+          <a href="https://jtledbet.github.io/calc/" target="_blank" class="btn btn-primary">Live</a>
+          <a href="https://github.com/jtledbet/calc" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wire Frame Thing -->
+    <div class="project-card" data-category="tool">
+      <img src="assets/images/wireframe.png" class="card-img" alt="Wire Frame Thing"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #0a0a1a, #1a1a3d);">📐</div>
+      <div class="card-body">
+        <div class="card-title">Wire Frame Thing</div>
+        <div class="card-desc">A CSS layout exercise demonstrating grid and flexbox techniques for responsive design.</div>
+        <div class="tags"><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">Flexbox</span></div>
+        <div class="card-actions">
+          <a href="http://jtledbet.github.io/HW_Wireframe/" target="_blank" class="btn btn-primary">Live</a>
+          <a href="https://github.com/jtledbet/HW_Wireframe" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clicky Frandz -->
+    <div class="project-card" data-category="game">
+      <img src="assets/images/chinchilla.png" class="card-img" alt="Clicky Frandz"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #1a0d2e, #3d1a5e);">🐾</div>
+      <div class="card-body">
+        <div class="card-title">Clicky Frandz!</div>
+        <div class="card-desc">A memory game — click unique animal cards without repeating to set a high score.</div>
+        <div class="tags"><span class="tag">React</span><span class="tag">JavaScript</span></div>
+        <div class="card-actions">
+          <a href="https://jtledbet.github.io/clickyfrandz/" target="_blank" class="btn btn-primary">Live</a>
+          <a href="https://github.com/jtledbet/clickyfrandz" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Word Guess -->
+    <div class="project-card" data-category="game">
+      <img src="assets/images/hangman.png" class="card-img" alt="Word Guess"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #1a1a0d, #3d3d1a);">🔤</div>
+      <div class="card-body">
+        <div class="card-title">Word Guess</div>
+        <div class="card-desc">Classic hangman-style word guessing game with keyboard input and win/loss tracking.</div>
+        <div class="tags"><span class="tag">JavaScript</span><span class="tag">HTML</span><span class="tag">CSS</span></div>
+        <div class="card-actions">
+          <a href="http://jtledbet.github.io/Word-Guess-Game/" target="_blank" class="btn btn-primary">Live</a>
+          <a href="https://github.com/jtledbet/Word-Guess-Game" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Crystal Capture -->
+    <div class="project-card" data-category="game">
+      <img src="assets/images/blue_gem_sm.png" class="card-img" alt="Crystal Capture"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #0d1a2e, #1a2e5c);">💎</div>
+      <div class="card-body">
+        <div class="card-title">Crystal Capture</div>
+        <div class="card-desc">Use number keys to capture gems and reach the target score exactly — go over and you lose.</div>
+        <div class="tags"><span class="tag">JavaScript</span><span class="tag">jQuery</span></div>
+        <div class="card-actions">
+          <a href="http://jtledbet.github.io/unit-4-game/" target="_blank" class="btn btn-primary">Live</a>
+          <a href="https://github.com/jtledbet/unit-4-game" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rock Paper Scissors -->
+    <div class="project-card" data-category="game">
+      <img src="assets/images/rps.png" class="card-img" alt="Rock Paper Scissors"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #1a0a0a, #3d1a1a);">✊</div>
+      <div class="card-body">
+        <div class="card-title">Rock Paper Scissors</div>
+        <div class="card-desc">Classic RPS against the computer with score tracking and match history.</div>
+        <div class="tags"><span class="tag">JavaScript</span><span class="tag">HTML</span><span class="tag">CSS</span></div>
+        <div class="card-actions">
+          <a href="http://jtledbet.github.io/RPS/" target="_blank" class="btn btn-primary">Live</a>
+          <a href="https://github.com/jtledbet/RPS" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Psychic Game -->
+    <div class="project-card" data-category="game">
+      <img src="assets/images/crystal_ball.png" class="card-img" alt="Psychic Game"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #1a0d2e, #2d1a4e);">🔮</div>
+      <div class="card-body">
+        <div class="card-title">Psychic Game</div>
+        <div class="card-desc">Think of a letter — the "psychic" will guess it. An event-driven JS experiment.</div>
+        <div class="tags"><span class="tag">JavaScript</span><span class="tag">jQuery</span></div>
+        <div class="card-actions">
+          <a href="http://jtledbet.github.io/Psychic-Game/" target="_blank" class="btn btn-primary">Live</a>
+          <a href="https://github.com/jtledbet/Psychic-Game" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trivia Game -->
+    <div class="project-card" data-category="game">
+      <img src="assets/images/dragon_sm.png" class="card-img" alt="Trivia Game"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #1a0d0d, #3d1a1a);">🐉</div>
+      <div class="card-body">
+        <div class="card-title">Trivia Game</div>
+        <div class="card-desc">Timed trivia quiz with a countdown timer, score tracking, and multiple rounds.</div>
+        <div class="tags"><span class="tag">JavaScript</span><span class="tag">jQuery</span><span class="tag">Timers</span></div>
+        <div class="card-actions">
+          <a href="https://jtledbet.github.io/TriviaGame/" target="_blank" class="btn btn-primary">Live</a>
+          <a href="https://github.com/jtledbet/TriviaGame" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>Copyright &copy; Jon Ledbetter</footer>
+
+<script>
+  const buttons = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.project-card');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      cards.forEach(card => {
+        if (filter === 'all' || card.dataset.category === filter) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    });
+  });
+</script>
+
+</body>
 </html>
