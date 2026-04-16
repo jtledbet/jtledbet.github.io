@@ -40,3 +40,6 @@ ehthumbs.db
 # Node (in case you ever add any tooling)
 node_modules/
 npm-debug.log*
+
+# Claude Code internal files
+.claude/

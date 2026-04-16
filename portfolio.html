@@ -127,7 +127,7 @@
     /* FEATURED GRID */
     .featured-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.5rem;
       margin-bottom: 3rem;
     }
@@ -448,13 +448,34 @@
       </div>
     </div>
 
+    <div class="featured-card">
+      <img src="assets/images/news_scraper.svg" class="featured-img" alt="News Scraper"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="featured-img-placeholder" style="background: linear-gradient(135deg, #0d1f2d, #0f3d52);">📰</div>
+      <div class="featured-body">
+        <h2>News Scraper</h2>
+        <p>A full-stack news aggregator with Hacker News search (Algolia API), category filtering, favorites, per-article notes, timestamps, comment counts, and tabbed saved searches.</p>
+        <div class="tags">
+          <span class="tag">Node.js</span>
+          <span class="tag">MongoDB</span>
+          <span class="tag">Express</span>
+          <span class="tag">Cheerio</span>
+          <span class="tag">Algolia API</span>
+        </div>
+        <div class="featured-actions">
+          <a href="https://newsscraper-production-7c8c.up.railway.app/" target="_blank" class="btn btn-primary">View Project</a>
+          <a href="https://github.com/jtledbet/news_scraper" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- ALL PROJECTS -->
   <div class="section-label">All Projects</div>
   <div class="filter-bar">
-    <button class="filter-btn active" data-filter="all">All <span class="count">16</span></button>
-    <button class="filter-btn" data-filter="webapp">Web Apps <span class="count">7</span></button>
+    <button class="filter-btn active" data-filter="all">All <span class="count">15</span></button>
+    <button class="filter-btn" data-filter="webapp">Web Apps <span class="count">6</span></button>
     <button class="filter-btn" data-filter="game">Games <span class="count">6</span></button>
     <button class="filter-btn" data-filter="tool">Tools <span class="count">4</span></button>
   </div>
@@ -471,23 +492,6 @@
         <div class="card-title">Future Scaper</div>
         <div class="card-desc">Full-stack app for exploring and saving emerging technology trends.</div>
         <div class="tags"><span class="tag">Node.js</span><span class="tag">MongoDB</span><span class="tag">Express</span></div>
-        <div class="card-actions">
-          <span class="btn btn-disabled">Offline</span>
-          <a href="https://github.com/jtledbet" target="_blank" class="btn btn-ghost">GitHub</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mongo Scraper -->
-    <div class="project-card" data-category="webapp">
-      <span class="badge-offline">Offline</span>
-      <img src="assets/images/flame_trans.png" class="card-img" alt="Mongo Scraper"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #2a0d0d, #5c1b1b);">📰</div>
-      <div class="card-body">
-        <div class="card-title">Mongo Scraper</div>
-        <div class="card-desc">News aggregator that scrapes articles and stores them with MongoDB, with user notes per article.</div>
-        <div class="tags"><span class="tag">Node.js</span><span class="tag">MongoDB</span><span class="tag">Cheerio</span></div>
         <div class="card-actions">
           <span class="btn btn-disabled">Offline</span>
           <a href="https://github.com/jtledbet" target="_blank" class="btn btn-ghost">GitHub</a>
