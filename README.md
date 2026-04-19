@@ -1,17 +1,48 @@
 # jtledbet.github.io
 
-Personal website for JT Ledbetter, hosted via GitHub Pages.
+Personal portfolio for [Jon Ledbetter](https://jtledbet.github.io/) — cybersecurity engineer and full-stack developer.
+
+**Live:** https://jtledbet.github.io/
+
+---
+
+## Pages
+
+| File | Route | Description |
+|------|-------|-------------|
+| `index.html` | `/` | About, bio, credentials, social links |
+| `portfolio.html` | `/portfolio.html` | Project showcase with category filters |
+| `contact.html` | `/contact.html` | Contact info |
+
+## Stack
+
+Vanilla HTML, CSS, and JavaScript. No build step, no framework, no bundler. Hosted on GitHub Pages from `master`.
+
+## Projects
+
+16 projects across web apps, games, and CLI tools — including live deployments on GitHub Pages and Railway. See [portfolio.html](portfolio.html) for the full list.
+
+## Local Development
+
+Open any `.html` file directly in a browser, or serve locally:
+
+```bash
+python -m http.server 8080
+# → http://localhost:8080
+```
 
 ## Branches
 
-- `main` — production site
-- `redesign` — active redesign work in progress
+| Branch | Purpose |
+|--------|---------|
+| `master` | Production — auto-deployed to GitHub Pages |
+| `redesign` | Active design work — test locally before merging |
 
-## Structure
+## Assets
 
-- `index.html` — homepage
-- `contact.html` — contact page
-
-## Development
-
-Open any `.html` file directly in a browser for local preview. No build step required.
+```
+assets/
+  css/        Legacy stylesheets (superseded by inline styles in redesign)
+  images/     Project screenshots and UI assets
+  resume/     Resume PDF
+```
