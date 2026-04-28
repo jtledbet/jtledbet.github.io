@@ -36,7 +36,7 @@ python -m http.server 8080
 | Branch | Purpose |
 |--------|---------|
 | `master` | Production — auto-deployed to GitHub Pages |
-| `redesign` | Active design work — test locally before merging |
+| `redesign` | Merged to `master` — redesign complete |
 
 ## Assets
 
