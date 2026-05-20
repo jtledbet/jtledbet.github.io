@@ -54,7 +54,7 @@
 
   <!-- Date / edition line -->
   <text x="480" y="72" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.6)"
-        text-anchor="end">Vol. 1 — 2026</text>
+        text-anchor="end">Vol. 1, 2026</text>
 
   <!-- Divider -->
   <line x1="96" y1="116" x2="504" y2="116" stroke="#ff6600" stroke-width="1.5" opacity="0.4"/>

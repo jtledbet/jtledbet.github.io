@@ -1,6 +1,6 @@
 # jtledbet.github.io
 
-Personal portfolio for [Jon Ledbetter](https://jtledbet.github.io/) — cybersecurity engineer and full-stack developer.
+Personal portfolio for [Jon Ledbetter](https://jtledbet.github.io/), cybersecurity engineer and full-stack developer.
 
 **Live:** https://jtledbet.github.io/
 
@@ -20,7 +20,7 @@ Vanilla HTML, CSS, and JavaScript. No build step, no framework, no bundler. Host
 
 ## Projects
 
-16 projects across web apps, games, and CLI tools — including live deployments on GitHub Pages and Railway. See [portfolio.html](portfolio.html) for the full list.
+16 projects across web apps, games, and CLI tools, including live deployments on GitHub Pages and Railway. See [portfolio.html](portfolio.html) for the full list.
 
 ## Local Development
 
@@ -35,8 +35,8 @@ python -m http.server 8080
 
 | Branch | Purpose |
 |--------|---------|
-| `master` | Production — auto-deployed to GitHub Pages |
-| `redesign` | Merged to `master` — redesign complete |
+| `master` | Production, auto-deployed to GitHub Pages |
+| `redesign` | Merged to `master`, redesign complete |
 
 ## Assets
 

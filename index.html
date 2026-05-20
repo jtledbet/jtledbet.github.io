@@ -227,6 +227,37 @@
 
     .bio p:last-child { margin-bottom: 0; }
 
+    /* Rube Goldberg link: chain-reaction hover */
+    .rube-link {
+      color: var(--purple-light);
+      text-decoration: none;
+      font-weight: 500;
+      background-image: linear-gradient(var(--purple-light), var(--purple-light));
+      background-position: 0 100%;
+      background-repeat: no-repeat;
+      background-size: 0% 1px;
+      transition: background-size 0.45s cubic-bezier(0.65, 0, 0.35, 1), color 0.2s;
+    }
+
+    .rube-link:hover {
+      background-size: 100% 1px;
+      color: var(--text);
+    }
+
+    .rube-link::after {
+      content: '\2699';
+      display: inline-block;
+      margin-left: 0.3em;
+      font-size: 0.85em;
+      color: var(--purple);
+      transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .rube-link:hover::after {
+      transform: rotate(360deg);
+      color: var(--purple-light);
+    }
+
     /* CREDENTIALS GRID */
     .credentials {
       display: grid;
@@ -350,12 +381,15 @@
       With a Bachelor's in Computer Science, a Graduate Certificate in Information Security and Privacy,
       and a Master's of Science in Cybersecurity, I command a breadth of knowledge across the vast disciplines
       of computer science. My expertise spans programming, system maintenance, technical support, and the
-      nuanced realms of applied theory — including emerging fields like post-quantum encryption.
+      nuanced realms of applied theory, including emerging fields like post-quantum encryption.
     </p>
     <p>
       A current CompTIA A+ certification attests to my mastery of IT operations and technical support.
       Beyond the technical, I'm equally adept in written and verbal communication, earning the enduring
       trust of clients for my clarity and precision. I thrive on untangling complexity.
+    </p>
+    <p>
+      Also, I really like <a href="https://en.wikipedia.org/wiki/Rube_Goldberg_machine" target="_blank" rel="noopener noreferrer" class="rube-link">Rube Goldberg</a> machines.
     </p>
   </div>
 
