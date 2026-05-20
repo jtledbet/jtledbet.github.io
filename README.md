@@ -11,8 +11,8 @@ Personal portfolio for [Jon Ledbetter](https://jtledbet.github.io/), cybersecuri
 | File | Route | Description |
 |------|-------|-------------|
 | `index.html` | `/` | About, bio, credentials, social links |
-| `portfolio.html` | `/portfolio.html` | Project showcase with category filters |
-| `contact.html` | `/contact.html` | Contact info |
+| `portfolio/index.html` | `/portfolio/` | Project showcase with category filters |
+| `contact/index.html` | `/contact/` | Contact info |
 
 ## Stack
 
@@ -20,11 +20,11 @@ Vanilla HTML, CSS, and JavaScript. No build step, no framework, no bundler. Host
 
 ## Projects
 
-16 projects across web apps, games, and CLI tools, including live deployments on GitHub Pages and Railway. See [portfolio.html](portfolio.html) for the full list.
+16 projects across web apps, games, and CLI tools, including live deployments on GitHub Pages and Railway. See [portfolio](portfolio/) for the full list.
 
 ## Local Development
 
-Open any `.html` file directly in a browser, or serve locally:
+Serve locally:
 
 ```bash
 python -m http.server 8080
