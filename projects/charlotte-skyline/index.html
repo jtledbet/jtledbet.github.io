@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Charlotte Skyline Lighting Prototype | Jon Ledbetter</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #101c2d;
+      --panel-2: #14243a;
+      --line: rgba(255, 255, 255, 0.12);
+      --text: #edf4ff;
+      --muted: #9fb0c7;
+      --cyan: #4fd1ff;
+      --green: #6ee7b7;
+      --amber: #fbbf24;
+      --red: #fb7185;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    header {
+      min-height: 240px;
+      background:
+        linear-gradient(90deg, rgba(7, 17, 31, 0.92), rgba(7, 17, 31, 0.45)),
+        url("/assets/images/charlotte-skyline-lighting.jpg") center / cover;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      align-items: end;
+      padding: 2rem;
+    }
+
+    .hero {
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .back {
+      display: inline-flex;
+      margin-bottom: 1rem;
+      color: var(--cyan);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1;
+    }
+
+    .hero p {
+      max-width: 700px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .tab {
+      padding: 0.7rem 1rem;
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
+
+    .tab.active {
+      color: var(--text);
+      background: #17314d;
+      border-color: rgba(79, 209, 255, 0.6);
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .lighting-preview {
+      --preview-color: #4fd1ff;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 1rem;
+      align-items: end;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .skyline-mini {
+      min-height: 112px;
+      display: flex;
+      align-items: end;
+      gap: 0.35rem;
+      padding-top: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .tower {
+      width: 10%;
+      min-width: 24px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 24%),
+        linear-gradient(180deg, rgba(79, 209, 255, 0.1), rgba(79, 209, 255, 0.02)),
+        #0a1424;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 22px color-mix(in srgb, var(--preview-color), transparent 48%);
+      position: relative;
+    }
+
+    .tower::after {
+      content: "";
+      position: absolute;
+      inset: 8px 6px;
+      background:
+        repeating-linear-gradient(180deg, var(--preview-color) 0 3px, transparent 3px 10px),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.35) 0 2px, transparent 2px 8px);
+      opacity: 0.72;
+    }
+
+    .tower:nth-child(1) { height: 48px; }
+    .tower:nth-child(2) { height: 76px; }
+    .tower:nth-child(3) { height: 104px; }
+    .tower:nth-child(4) { height: 64px; }
+    .tower:nth-child(5) { height: 92px; }
+    .tower:nth-child(6) { height: 56px; }
+    .tower:nth-child(7) { height: 84px; }
+
+    .preview-copy {
+      min-width: 210px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .preview-copy strong {
+      display: block;
+      color: var(--text);
+      font-size: 0.95rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 1rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .panel h2, .panel h3 {
+      margin: 0 0 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.4rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.72rem;
+      background: #091525;
+      color: var(--text);
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .field-full { grid-column: 1 / -1; }
+
+    .actions {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      border-radius: 6px;
+      padding: 0.7rem 1rem;
+      background: var(--cyan);
+      color: #06111f;
+      font-weight: 700;
+    }
+
+    .btn.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .btn.approve { background: var(--green); }
+    .btn.reject { background: var(--red); color: #fff; }
+
+    .list {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .item {
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      border-radius: 8px;
+      padding: 0.9rem;
+    }
+
+    .item-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.35rem;
+      font-weight: 700;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    .swatches {
+      display: flex;
+      gap: 0.35rem;
+      margin-top: 0.55rem;
+    }
+
+    .swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.65);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.2rem 0.55rem;
+      background: rgba(251, 191, 36, 0.16);
+      color: var(--amber);
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    .badge.approved {
+      background: rgba(110, 231, 183, 0.14);
+      color: var(--green);
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 0.45rem;
+    }
+
+    .day, .weekday {
+      min-height: 78px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.5rem;
+      background: var(--panel);
+    }
+
+    .weekday {
+      min-height: 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .event-dot {
+      display: block;
+      margin-top: 0.4rem;
+      padding: 0.25rem 0.35rem;
+      border-radius: 4px;
+      background: rgba(79, 209, 255, 0.14);
+      color: var(--cyan);
+      font-size: 0.72rem;
+      line-height: 1.25;
+    }
+
+    .empty {
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    @media (max-width: 760px) {
+      header, main { padding: 1rem; }
+      .grid, .form-grid { grid-template-columns: 1fr; }
+      .lighting-preview { grid-template-columns: 1fr; }
+      .calendar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .weekday { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <a class="back" href="/portfolio/">Back to Portfolio</a>
+      <h1>Charlotte Skyline Lighting</h1>
+      <p>Interactive prototype for public event requests, skyline lighting review, and approved event visibility.</p>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabs" aria-label="Prototype views">
+      <button class="tab active" data-view="request">Submit Request</button>
+      <button class="tab" data-view="admin">Admin Review</button>
+      <button class="tab" data-view="calendar">Calendar</button>
+      <button class="tab" data-view="notifications">Notifications</button>
+    </nav>
+
+    <section class="panel lighting-preview" id="lighting-preview">
+      <div class="skyline-mini" aria-hidden="true">
+        <span class="tower"></span>
+        <span class="tower"></span>
+        <span class="tower"></span>
+        <span class="tower"></span>
+        <span class="tower"></span>
+        <span class="tower"></span>
+        <span class="tower"></span>
+      </div>
+      <div class="preview-copy">
+        <strong>Lighting Preview</strong>
+        <span id="preview-label">Charlotte Tech Week in #4fd1ff</span>
+      </div>
+    </section>
+
+    <section id="request" class="view active">
+      <div class="grid">
+        <form id="request-form" class="panel">
+          <h2>Lighting Request</h2>
+          <div class="form-grid">
+            <div>
+              <label for="name">Contact Name</label>
+              <input id="name" name="name" value="Jon Ledbetter" required>
+            </div>
+            <div>
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" value="jon@example.com" required>
+            </div>
+            <div>
+              <label for="eventName">Event Name</label>
+              <input id="eventName" name="eventName" value="Charlotte Tech Week" required>
+            </div>
+            <div>
+              <label for="startDate">Date</label>
+              <input id="startDate" name="startDate" type="date" required>
+            </div>
+            <div>
+              <label for="color">Primary Color</label>
+              <input id="color" name="color" type="color" value="#4fd1ff">
+            </div>
+            <div>
+              <label for="building">Primary Building</label>
+              <select id="building" name="building">
+                <option>Truist Center</option>
+                <option>Duke Energy Center</option>
+                <option>Bank of America Corporate Center</option>
+              </select>
+            </div>
+            <div class="field-full">
+              <label for="description">Purpose</label>
+              <textarea id="description" name="description">Coordinate skyline lighting for a community technology event in Uptown Charlotte.</textarea>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn" type="submit">Submit Request</button>
+            <button class="btn secondary" type="button" id="reset-demo">Reset Demo</button>
+          </div>
+        </form>
+
+        <aside class="panel">
+          <h3>Prototype Flow</h3>
+          <div class="list">
+            <div class="item">
+              <div class="item-title">1. Public intake</div>
+              <div class="meta">A requester submits an event, color, date, and building target.</div>
+            </div>
+            <div class="item">
+              <div class="item-title">2. Admin review</div>
+              <div class="meta">Requests move through approval or rejection before public display.</div>
+            </div>
+            <div class="item">
+              <div class="item-title">3. Public visibility</div>
+              <div class="meta">Approved events appear on the calendar and notifications view.</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="admin" class="view">
+      <div class="panel">
+        <h2>Admin Review Queue</h2>
+        <div id="pending-list" class="list"></div>
+      </div>
+    </section>
+
+    <section id="calendar" class="view">
+      <div class="panel">
+        <h2>Approved Lighting Calendar</h2>
+        <div id="calendar-grid" class="calendar"></div>
+      </div>
+    </section>
+
+    <section id="notifications" class="view">
+      <div class="panel">
+        <h2>Public Notifications</h2>
+        <div id="approved-list" class="list"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const storeKey = "skyline-prototype-events";
+    const today = new Date();
+    const isoToday = today.toISOString().slice(0, 10);
+
+    const seedEvents = [
+      {
+        id: "seed-1",
+        name: "Jon Ledbetter",
+        email: "jon@example.com",
+        eventName: "Niner Nation Week",
+        startDate: isoToday,
+        color: "#00703c",
+        building: "Duke Energy Center",
+        description: "Celebrate UNC Charlotte with green skyline lighting.",
+        status: "approved"
+      },
+      {
+        id: "seed-2",
+        name: "Community Team",
+        email: "health@example.com",
+        eventName: "Community Health Awareness",
+        startDate: offsetDate(5),
+        color: "#fb7185",
+        building: "Truist Center",
+        description: "Raise awareness for local health outreach programs.",
+        status: "pending"
+      }
+    ];
+
+    const dateInput = document.getElementById("startDate");
+    dateInput.value = offsetDate(3);
+    const colorInput = document.getElementById("color");
+    const eventNameInput = document.getElementById("eventName");
+
+    function offsetDate(days) {
+      const date = new Date();
+      date.setDate(date.getDate() + days);
+      return date.toISOString().slice(0, 10);
+    }
+
+    function loadEvents() {
+      const raw = localStorage.getItem(storeKey);
+      return raw ? JSON.parse(raw) : seedEvents.map(event => ({ ...event }));
+    }
+
+    function saveEvents(events) {
+      localStorage.setItem(storeKey, JSON.stringify(events));
+    }
+
+    function formatDate(value) {
+      return new Date(`${value}T12:00:00`).toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric"
+      });
+    }
+
+    function renderSwatch(color) {
+      return `<span class="swatch" style="background:${color}"></span>`;
+    }
+
+    function renderItem(event, actions = false) {
+      const badgeClass = event.status === "approved" ? "badge approved" : "badge";
+      const controls = actions ? `
+        <div class="actions">
+          <button class="btn approve" data-approve="${event.id}">Approve</button>
+          <button class="btn reject" data-reject="${event.id}">Reject</button>
+        </div>` : "";
+
+      return `
+        <div class="item">
+          <div class="item-title">
+            <span>${event.eventName}</span>
+            <span class="${badgeClass}">${event.status}</span>
+          </div>
+          <div class="meta">${formatDate(event.startDate)} | ${event.building}</div>
+          <div class="meta">${event.description}</div>
+          <div class="swatches">${renderSwatch(event.color)}</div>
+          ${controls}
+        </div>`;
+    }
+
+    function render() {
+      const events = loadEvents();
+      const pending = events.filter(event => event.status === "pending");
+      const approved = events.filter(event => event.status === "approved");
+
+      document.getElementById("pending-list").innerHTML = pending.length
+        ? pending.map(event => renderItem(event, true)).join("")
+        : `<div class="empty">No pending requests.</div>`;
+
+      document.getElementById("approved-list").innerHTML = approved.length
+        ? approved.map(event => renderItem(event)).join("")
+        : `<div class="empty">No approved events yet.</div>`;
+
+      renderCalendar(approved);
+    }
+
+    function renderCalendar(events) {
+      const calendar = document.getElementById("calendar-grid");
+      const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const days = new Date(year, month + 1, 0).getDate();
+      const eventMap = new Map();
+
+      events.forEach(event => {
+        const date = new Date(`${event.startDate}T12:00:00`);
+        if (date.getMonth() === month && date.getFullYear() === year) {
+          const list = eventMap.get(date.getDate()) || [];
+          list.push(event);
+          eventMap.set(date.getDate(), list);
+        }
+      });
+
+      const cells = weekdays.map(day => `<div class="weekday">${day}</div>`);
+      for (let day = 1; day <= days; day += 1) {
+        const eventsForDay = eventMap.get(day) || [];
+        cells.push(`
+          <div class="day">
+            <strong>${day}</strong>
+            ${eventsForDay.map(event => `<span class="event-dot">${event.eventName}</span>`).join("")}
+          </div>`);
+      }
+      calendar.innerHTML = cells.join("");
+    }
+
+    function updateLightingPreview() {
+      const color = colorInput.value || "#4fd1ff";
+      const name = eventNameInput.value.trim() || "New lighting request";
+      document.getElementById("lighting-preview").style.setProperty("--preview-color", color);
+      document.getElementById("preview-label").textContent = `${name} in ${color}`;
+    }
+
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(node => node.classList.remove("active"));
+        document.querySelectorAll(".view").forEach(node => node.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.view).classList.add("active");
+      });
+    });
+
+    document.getElementById("request-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const form = new FormData(event.currentTarget);
+      const events = loadEvents();
+      events.unshift({
+        id: String(Date.now()),
+        name: form.get("name"),
+        email: form.get("email"),
+        eventName: form.get("eventName"),
+        startDate: form.get("startDate"),
+        color: form.get("color"),
+        building: form.get("building"),
+        description: form.get("description"),
+        status: "pending"
+      });
+      saveEvents(events);
+      render();
+      document.querySelector('[data-view="admin"]').click();
+    });
+
+    colorInput.addEventListener("input", updateLightingPreview);
+    eventNameInput.addEventListener("input", updateLightingPreview);
+
+    document.addEventListener("click", event => {
+      const approveId = event.target.dataset.approve;
+      const rejectId = event.target.dataset.reject;
+      if (!approveId && !rejectId) return;
+
+      const events = loadEvents()
+        .map(item => approveId === item.id ? { ...item, status: "approved" } : item)
+        .filter(item => rejectId !== item.id);
+      saveEvents(events);
+      render();
+    });
+
+    document.getElementById("reset-demo").addEventListener("click", () => {
+      localStorage.removeItem(storeKey);
+      render();
+    });
+
+    render();
+    updateLightingPreview();
+  </script>
+</body>
+</html>
