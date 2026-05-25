@@ -416,19 +416,21 @@
   <div class="featured-grid">
 
     <div class="featured-card">
-      <img src="/assets/images/agileworx.png" class="featured-img" alt="Agile Worx"
+      <img src="/assets/images/charlotte-skyline-lighting.jpg" class="featured-img" alt="Charlotte skyline lighting"
         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="featured-img-placeholder" style="background: linear-gradient(135deg, #1e1e40, #3b1f6e);">🗂️</div>
+      <div class="featured-img-placeholder" style="background: linear-gradient(135deg, #081624, #23566f);">🌃</div>
       <div class="featured-body">
-        <h2>Agile Worx</h2>
-        <p>A collaborative project management platform built for ITIS 3300 at UNC Charlotte, demonstrating agile methodology and full-team coordination.</p>
+        <h2>Charlotte Skyline Lighting Coordination System</h2>
+        <p>A full-stack scheduling and request platform for Charlotte skyline lighting events, with public submissions, calendar views, admin review, notifications, and MongoDB-backed request records.</p>
         <div class="tags">
-          <span class="tag">Agile</span>
-          <span class="tag">Google Sites</span>
-          <span class="tag">Team Project</span>
+          <span class="tag">Node.js</span>
+          <span class="tag">MongoDB</span>
+          <span class="tag">Express</span>
+          <span class="tag">EJS</span>
+          <span class="tag">Passport</span>
         </div>
         <div class="featured-actions">
-          <a href="https://sites.google.com/uncc.edu/itis3300/home" target="_blank" class="btn btn-primary">View Project</a>
+          <a href="https://github.com/jledbe20/CC_Skyline" target="_blank" class="btn btn-primary">GitHub</a>
         </div>
       </div>
     </div>
@@ -473,18 +475,51 @@
       </div>
     </div>
 
+    <div class="featured-card">
+      <img src="/assets/images/agileworx.png" class="featured-img" alt="Agile Worx"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="featured-img-placeholder" style="background: linear-gradient(135deg, #1e1e40, #3b1f6e);">🗂️</div>
+      <div class="featured-body">
+        <h2>Agile Worx</h2>
+        <p>A collaborative project management platform built for ITIS 3300 at UNC Charlotte, demonstrating agile methodology and full-team coordination.</p>
+        <div class="tags">
+          <span class="tag">Agile</span>
+          <span class="tag">Google Sites</span>
+          <span class="tag">Team Project</span>
+        </div>
+        <div class="featured-actions">
+          <a href="https://sites.google.com/uncc.edu/itis3300/home" target="_blank" class="btn btn-primary">View Project</a>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- ALL PROJECTS -->
   <div class="section-label">All Projects</div>
   <div class="filter-bar">
-    <button class="filter-btn active" data-filter="all">All <span class="count">16</span></button>
-    <button class="filter-btn" data-filter="webapp">Web Apps <span class="count">6</span></button>
+    <button class="filter-btn active" data-filter="all">All <span class="count">17</span></button>
+    <button class="filter-btn" data-filter="webapp">Web Apps <span class="count">7</span></button>
     <button class="filter-btn" data-filter="game">Games <span class="count">6</span></button>
     <button class="filter-btn" data-filter="tool">Tools <span class="count">4</span></button>
   </div>
 
   <div class="projects-grid" id="projects-grid">
+
+    <!-- Charlotte Skyline Lighting -->
+    <div class="project-card" data-category="webapp">
+      <img src="/assets/images/charlotte-skyline-lighting.jpg" class="card-img" alt="Charlotte Skyline Lighting"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-placeholder" style="background: linear-gradient(135deg, #081624, #23566f);">🌃</div>
+      <div class="card-body">
+        <div class="card-title">Charlotte Skyline Lighting Coordination System</div>
+        <div class="card-desc">Request and scheduling system for Charlotte skyline lighting events, including public intake, calendar views, admin review, and notifications.</div>
+        <div class="tags"><span class="tag">Node.js</span><span class="tag">MongoDB</span><span class="tag">Express</span><span class="tag">EJS</span></div>
+        <div class="card-actions">
+          <a href="https://github.com/jledbe20/CC_Skyline" target="_blank" class="btn btn-primary">GitHub</a>
+        </div>
+      </div>
+    </div>
 
     <!-- Clicky Frandz -->
     <div class="project-card" data-category="game">
