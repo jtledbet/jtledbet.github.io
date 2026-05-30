@@ -12,6 +12,8 @@ Personal portfolio for [Jon Ledbetter](https://jtledbet.github.io/), cybersecuri
 |------|-------|-------------|
 | `index.html` | `/` | About, bio, credentials, social links |
 | `portfolio/index.html` | `/portfolio/` | Project showcase with category filters |
+| `support/index.html` | `/support/` | Coffee, tips, payment links, and paid-help entry point |
+| `coffee/index.html` | `/coffee/` | Separate shareable coffee/tip page |
 | `contact/index.html` | `/contact/` | Contact info |
 
 ## Stack

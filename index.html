@@ -4,7 +4,13 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>About | Jon Ledbetter</title>
+  <title>Jon Ledbetter | Cybersecurity Engineer &amp; Full-Stack Developer</title>
+  <meta name="description" content="Jon Ledbetter is a cybersecurity engineer and full-stack developer with experience in programming, IT operations, technical support, and applied security." />
+  <link rel="canonical" href="https://ledsec.dev/" />
+  <meta property="og:title" content="Jon Ledbetter | Cybersecurity Engineer &amp; Full-Stack Developer" />
+  <meta property="og:description" content="Portfolio, projects, credentials, and contact information for Jon Ledbetter." />
+  <meta property="og:url" content="https://ledsec.dev/" />
+  <meta property="og:type" content="website" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -311,6 +317,25 @@
 
     /* RESPONSIVE */
     @media (max-width: 640px) {
+      header { position: static; }
+
+      .nav-inner {
+        height: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+        padding: 1rem;
+      }
+
+      .nav-links {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .nav-links a {
+        padding: 0.35rem 0.75rem;
+      }
+
       .hero {
         grid-template-columns: 1fr;
       }
@@ -325,7 +350,6 @@
         grid-template-columns: 1fr;
       }
 
-      .nav-inner { padding: 0 1rem; }
       main { padding: 2.5rem 1rem 4rem; }
     }
   </style>
@@ -339,6 +363,7 @@
     <ul class="nav-links">
       <li><a href="/" class="active">About</a></li>
       <li><a href="/portfolio/">Portfolio</a></li>
+      <li><a href="/support/">Support</a></li>
       <li><a href="/contact/">Contact</a></li>
     </ul>
   </div>
@@ -360,10 +385,11 @@
       <h1>Jon Ledbetter</h1>
       <div class="tagline">Cybersecurity Engineer &amp; Full-Stack Developer</div>
       <div class="hero-actions">
-        <a href="/assets/resume/Resume_Jon_Ledbetter_2026.pdf" target="_blank" class="btn btn-primary">
+        <a href="/assets/resume/Resume_Jon_Ledbetter_2026.pdf" target="_blank" rel="nofollow noopener noreferrer" class="btn btn-primary">
           Download Résumé
         </a>
         <a href="/portfolio/" class="btn btn-ghost">View Portfolio</a>
+        <a href="/support/" class="btn btn-ghost">Buy Coffee</a>
       </div>
       <div class="social-links">
         <a href="mailto:jon.ledbetter@gmail.com" class="social-link">✉ Email</a>

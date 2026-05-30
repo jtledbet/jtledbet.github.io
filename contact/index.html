@@ -5,6 +5,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Contact | Jon Ledbetter</title>
+  <meta name="description" content="Contact information for Jon Ledbetter, including email, LinkedIn, GitHub, and support links." />
+  <link rel="canonical" href="https://ledsec.dev/contact/" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -170,7 +172,7 @@
     /* CONTACT CARDS */
     .contact-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
       margin-bottom: 3rem;
     }
@@ -231,8 +233,23 @@
 
     /* RESPONSIVE */
     @media (max-width: 580px) {
+      header { position: static; }
+
       .contact-grid { grid-template-columns: 1fr; }
-      .nav-inner { padding: 0 1rem; }
+      .nav-inner {
+        height: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+        padding: 1rem;
+      }
+      .nav-links {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+      .nav-links a {
+        padding: 0.35rem 0.75rem;
+      }
       main { padding: 2.5rem 1rem 4rem; }
     }
   </style>
@@ -246,6 +263,7 @@
     <ul class="nav-links">
       <li><a href="/">About</a></li>
       <li><a href="/portfolio/">Portfolio</a></li>
+      <li><a href="/support/">Support</a></li>
       <li><a href="/contact/" class="active">Contact</a></li>
     </ul>
   </div>
@@ -272,8 +290,9 @@
     <span class="line"><span class="t-key">email</span><span class="t-val">jon.ledbetter@gmail.com</span></span>
     <span class="line"><span class="t-key">linkedin</span><span class="t-val">linkedin.com/in/jon-ledbetter-37744558/</span></span>
     <span class="line"><span class="t-key">github</span><span class="t-val">github.com/jtledbet</span></span>
+    <span class="line"><span class="t-key">support</span><span class="t-val">ledsec.dev/support</span></span>
     <span class="spacer"></span>
-    <span class="line t-success">✓ All endpoints reachable.</span>
+    <span class="line t-success">Endpoints listed.</span>
     <span class="line"><span class="t-prompt">$ </span><span class="t-cursor"></span></span>
   </div>
 
@@ -299,6 +318,13 @@
       <div class="cc-label">GitHub</div>
       <div class="cc-value">jtledbet</div>
       <div class="cc-sub">Code &amp; projects</div>
+    </a>
+
+    <a href="/support/" class="contact-card">
+      <span class="cc-icon">$</span>
+      <div class="cc-label">Support</div>
+      <div class="cc-value">Coffee budget</div>
+      <div class="cc-sub">Tips, payments, paid help</div>
     </a>
 
   </div>

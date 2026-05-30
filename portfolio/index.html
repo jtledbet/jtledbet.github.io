@@ -5,6 +5,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Portfolio | Jon Ledbetter</title>
+  <meta name="description" content="Selected web apps, games, tools, and technical projects by Jon Ledbetter." />
+  <link rel="canonical" href="https://ledsec.dev/portfolio/" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -385,7 +387,21 @@
 
     @media (max-width: 580px) {
       .projects-grid { grid-template-columns: 1fr; }
-      .nav-inner { padding: 0 1rem; }
+      header { position: static; }
+      .nav-inner {
+        height: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+        padding: 1rem;
+      }
+      .nav-links {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+      .nav-links a {
+        padding: 0.35rem 0.75rem;
+      }
       main { padding: 2rem 1rem 4rem; }
     }
   </style>
@@ -399,6 +415,7 @@
     <ul class="nav-links">
       <li><a href="/">About</a></li>
       <li><a href="/portfolio/" class="active">Portfolio</a></li>
+      <li><a href="/support/">Support</a></li>
       <li><a href="/contact/">Contact</a></li>
     </ul>
   </div>

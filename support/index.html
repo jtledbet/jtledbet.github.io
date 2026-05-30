@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Support | Jon Ledbetter</title>
+  <meta name="description" content="Coffee, tips, payment links, and paid technical help for Jon Ledbetter." />
+  <link rel="canonical" href="https://ledsec.dev/support/" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d1a;
+      --card: #1a1a30;
+      --surface: #13132a;
+      --border: rgba(124, 92, 191, 0.2);
+      --purple: #8b68d4;
+      --purple-light: #a884f0;
+      --purple-dim: rgba(139, 104, 212, 0.12);
+      --green: #4ade80;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 13, 26, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-logo::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--purple);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--purple);
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.4rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--text);
+      background: var(--purple-dim);
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 4rem 2rem 6rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .page-header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      max-width: 680px;
+    }
+
+    .support-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .support-panel h2 {
+      font-size: 1.35rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .support-panel p {
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    .support-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, border-color 0.2s, color 0.2s, background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-primary {
+      background: var(--purple);
+      color: #fff;
+    }
+
+    .btn-primary:hover { opacity: 0.85; }
+
+    .btn-ghost {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--purple);
+      color: var(--text);
+    }
+
+    .support-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .support-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+
+    .support-card .label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      margin-bottom: 0.45rem;
+    }
+
+    .support-card .value {
+      color: var(--text);
+      font-weight: 650;
+      margin-bottom: 0.4rem;
+    }
+
+    .support-card p {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .terminal-note {
+      color: var(--green);
+      font-family: 'Fira Code', 'JetBrains Mono', 'Courier New', monospace;
+      font-size: 0.86rem;
+      margin-top: 1.5rem;
+    }
+
+    .fine-print {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      margin-top: 1rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 680px) {
+      header { position: static; }
+
+      .nav-inner {
+        height: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+        padding: 1rem;
+      }
+
+      .nav-links {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .nav-links a {
+        padding: 0.35rem 0.75rem;
+      }
+
+      main { padding: 2.5rem 1rem 4rem; }
+      .support-panel { padding: 1.5rem; }
+      .support-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Jon Ledbetter</a>
+    <ul class="nav-links">
+      <li><a href="/">About</a></li>
+      <li><a href="/portfolio/">Portfolio</a></li>
+      <li><a href="/support/" class="active">Support</a></li>
+      <li><a href="/contact/">Contact</a></li>
+    </ul>
+  </div>
+</header>
+
+<main>
+
+  <div class="page-header">
+    <h1>Support</h1>
+    <p>If something I made, wrote, fixed, or explained saved you time, this is the sanctioned button cluster for converting that saved time into coffee.</p>
+  </div>
+
+  <section class="support-panel">
+    <h2>Coffee, Tips, and Small Acts of Internet Generosity</h2>
+    <p>
+      This is not a charity and not tax-deductible. It is a place for voluntary coffee money from
+      friends, strangers, and anyone who benefited from a useful thing.
+    </p>
+    <div class="support-actions">
+      <a href="https://paypal.me/JonLedbetter" target="_blank" rel="noopener noreferrer" class="btn btn-primary">PayPal</a>
+      <a href="https://account.venmo.com/u/Jon_Tiberius" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">Venmo</a>
+      <a href="https://cash.app/$maxsubtlety" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">Cash App</a>
+      <a href="mailto:jon.ledbetter@gmail.com?subject=Paid%20technical%20help" class="btn btn-ghost">Paid Help</a>
+    </div>
+    <div class="terminal-note">$ coffee --accept tips --avoid enterprise-java</div>
+    <div class="fine-print">Payment profiles may show account names or handles after click-through.</div>
+  </section>
+
+  <div class="support-grid">
+    <div class="support-card">
+      <div class="label">Tips</div>
+      <div class="value">Small thanks</div>
+      <p>For when something public saved you time and no further conversation is required.</p>
+    </div>
+
+    <div class="support-card">
+      <div class="label">Paid Help</div>
+      <div class="value">Actual work</div>
+      <p>For code review, debugging, cleanup, research, or a focused technical second opinion.</p>
+    </div>
+
+    <div class="support-card">
+      <div class="label">Public Work</div>
+      <div class="value">Keep it viable</div>
+      <p>For notes, tools, experiments, and other internet debris that was somehow useful.</p>
+    </div>
+  </div>
+
+</main>
+
+<footer>Copyright &copy; Jon Ledbetter</footer>
+
+</body>
+</html>
