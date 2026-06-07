@@ -12,6 +12,7 @@ Personal portfolio for [Jon Ledbetter](https://jtledbet.github.io/), cybersecuri
 |------|-------|-------------|
 | `index.html` | `/` | About, bio, credentials, social links |
 | `portfolio/index.html` | `/portfolio/` | Project showcase with category filters |
+| `cummings/index.html` | `/cummings/` | Public-domain E. E. Cummings reader |
 | `support/index.html` | `/support/` | Coffee, tips, payment links, and paid-help entry point |
 | `coffee/index.html` | `/coffee/` | Separate shareable coffee/tip page |
 | `contact/index.html` | `/contact/` | Contact info |
@@ -22,7 +23,7 @@ Vanilla HTML, CSS, and JavaScript. No build step, no framework, no bundler. Host
 
 ## Projects
 
-16 projects across web apps, games, and CLI tools, including live deployments on GitHub Pages and Railway. See [portfolio](portfolio/) for the full list.
+17 projects across web apps, games, and CLI tools, including live deployments on GitHub Pages and Railway. See [portfolio](portfolio/) for the full list.
 
 ## Local Development
 

@@ -1,0 +1,173 @@
+{
+  "source": {
+    "name": "e.e. cummings free poetry archive",
+    "url": "https://cummings.ee/",
+    "downloads_url": "https://cummings.ee/downloads/",
+    "publisher": "Ben Welsh",
+    "public_domain_note": "Curated from cummings.ee materials marked public domain."
+  },
+  "books": [
+    {
+      "slug": "tulips-and-chimneys",
+      "title": "Tulips and Chimneys",
+      "year": 1923,
+      "public_domain": true,
+      "html_url": "https://cummings.ee/book/tulips-and-chimneys/"
+    },
+    {
+      "slug": "and",
+      "title": "&",
+      "year": 1925,
+      "public_domain": true,
+      "html_url": "https://cummings.ee/book/and/"
+    },
+    {
+      "slug": "xli-poems",
+      "title": "XLI Poems",
+      "year": 1925,
+      "public_domain": true,
+      "html_url": "https://cummings.ee/book/xli-poems/"
+    },
+    {
+      "slug": "is-5",
+      "title": "is 5",
+      "year": 1926,
+      "public_domain": true,
+      "html_url": "https://cummings.ee/book/is-5/"
+    }
+  ],
+  "poems": [
+    {
+      "id": "tulips-and-chimneys/chansons-innocentes-i",
+      "title": "Chansons Innocentes I",
+      "first_line": "in Just-",
+      "book_slug": "tulips-and-chimneys",
+      "book_title": "Tulips and Chimneys",
+      "year": 1923,
+      "text": "in Just-\nspring     when the world is mud-\nluscious the little\nlame balloonman\n\nwhistles    far    and wee\n\nand eddieandbill come\nrunning from marbles and\npiracies and it’s\nspring\n\nwhen the world is puddle-wonderful\n\nthe queer\nold balloonman whistles\nfar    and    wee\nand bettyandisbel come dancing\n\nfrom hop-scotch and jump-rope and\n\nit’s\nspring\nand\n   the\n\n         goat-footed\n\nballoonMan    whistles\nfar\nand\nwee",
+      "html_url": "https://cummings.ee/book/tulips-and-chimneys/poem/chansons-innocentes-i/",
+      "txt_url": "https://cummings.ee/book/tulips-and-chimneys/poem/chansons-innocentes-i.txt"
+    },
+    {
+      "id": "and/and-seven-poems-iii",
+      "title": "&:Seven Poems III",
+      "first_line": "Spring is like a perhaps hand",
+      "book_slug": "and",
+      "book_title": "&",
+      "year": 1925,
+      "text": "Spring is like a perhaps hand\n(which comes carefully\nout of Nowhere)arranging\na window,into which people look(while\npeople stare arranging and changing placing\ncarefully there a strange\nthing and a known thing here)and\n\nchanging everything carefully\n\nspring is like a perhaps\nHand in a window\n(carefully to\nand fro moving New and\nOld things,while\npeople stare carefully\nmoving a perhaps\nfraction of flower here placing\nan inch of air there)and\n\nwithout breaking anything.",
+      "html_url": "https://cummings.ee/book/and/poem/and-seven-poems-iii/",
+      "txt_url": "https://cummings.ee/book/and/poem/and-seven-poems-iii.txt"
+    },
+    {
+      "id": "and/and-seven-poems-vii",
+      "title": "&:Seven Poems VII",
+      "first_line": "who knows if the moon’s",
+      "book_slug": "and",
+      "book_title": "&",
+      "year": 1925,
+      "text": "who knows if the moon’s\na balloon,coming out of a keen city\nin the sky—filled with pretty people?\n(and if you and i should\n\nget into it,if they\nshould take me and take you into their balloon.\nwhy then\nwe’d go up higher with all the pretty people\n\nthan houses and steeples and clouds:\ngo sailing\naway and away sailing into a keen\ncity which nobody’s ever visited,where\n\nalways\n       it’s\n            Spring)and everyone’s\nin love and flowers pick themselves",
+      "html_url": "https://cummings.ee/book/and/poem/and-seven-poems-vii/",
+      "txt_url": "https://cummings.ee/book/and/poem/and-seven-poems-vii.txt"
+    },
+    {
+      "id": "is-5/four-vii",
+      "title": "FOUR VII",
+      "first_line": "since feeling is first",
+      "book_slug": "is-5",
+      "book_title": "is 5",
+      "year": 1926,
+      "text": "since feeling is first\nwho pays any attention\nto the syntax of things\nwill never wholly kiss you;\n\nwholly to be a fool\nwhile Spring is in the world\n\nmy blood approves,\nand kisses are a better fate\nthan wisdom\nlady i swear by all flowers.  Don’t cry\n—the best gesture of my brain is less than\nyour eyelids’ flutter which says\n\nwe are for each other:then\nlaugh,leaning back in my arms\nfor life’s not a paragraph\n\nAnd death i think is no parenthesis",
+      "html_url": "https://cummings.ee/book/is-5/poem/four-vii/",
+      "txt_url": "https://cummings.ee/book/is-5/poem/four-vii.txt"
+    },
+    {
+      "id": "is-5/two-iii",
+      "title": "TWO III",
+      "first_line": "“next to of course god america i",
+      "book_slug": "is-5",
+      "book_title": "is 5",
+      "year": 1926,
+      "text": "“next to of course god america i\nlove you land of the pilgrims’ and so forth oh\nsay can you see by the dawn’s early my\ncountry ’tis of centuries come and go\nand are no more what of it we should worry\nin every language even deafanddumb\nthy sons acclaim your glorious name by gorry\nby jingo by gee by gosh by gum\nwhy talk of beauty what could be more beaut-\niful than these heroic happy dead\nwho rushed like lions to the roaring slaughter\nthey do not stop to think they died instead\nthen shall the voice of liberty be mute?”\n\nHe spoke.   And drank rapidly a glass of water",
+      "html_url": "https://cummings.ee/book/is-5/poem/two-iii/",
+      "txt_url": "https://cummings.ee/book/is-5/poem/two-iii.txt"
+    },
+    {
+      "id": "tulips-and-chimneys/portraits-viii",
+      "title": "Portraits VIII",
+      "first_line": "Buffalo Bill ’s",
+      "book_slug": "tulips-and-chimneys",
+      "book_title": "Tulips and Chimneys",
+      "year": 1923,
+      "text": "Buffalo Bill ’s\ndefunct\n        who used to\n        ride a watersmooth-silver\n                                  stallion\nand break onetwothreefourfive pigeonsjustlikethat\n                                                  Jesus\n\nhe was a handsome man\n                      and what i want to know is\nhow do you like your blueeyed boy\nMister Death",
+      "html_url": "https://cummings.ee/book/tulips-and-chimneys/poem/portraits-viii/",
+      "txt_url": "https://cummings.ee/book/tulips-and-chimneys/poem/portraits-viii.txt"
+    },
+    {
+      "id": "tulips-and-chimneys/songs-iv",
+      "title": "Songs IV",
+      "first_line": "All in green went my love riding",
+      "book_slug": "tulips-and-chimneys",
+      "book_title": "Tulips and Chimneys",
+      "year": 1923,
+      "text": "All in green went my love riding\non a great horse of gold\ninto the silver dawn.\n\nfour lean hounds crouched low and smiling\nthe merry deer ran before.\n\nFleeter be they than dappled dreams\nthe swift sweet deer\nthe red rare deer.\n\nFour red roebuck at a white water\nthe cruel bugle sang before.\n\nHorn at hip went my love riding\nriding the echo down\ninto the silver dawn.\n\nfour lean hounds crouched low and smiling\nthe level meadows ran before.\n\nSofter be they than slippered sleep\nthe lean lithe deer\nthe fleet flown deer.\n\nFour fleet does at a gold valley\nthe famished arrow sang before.\n\nBow at belt went my love riding\nriding the mountain down\ninto the silver dawn.\n\nfour lean houds crouched low and smiling\nthe sheer peaks ran before.\n\nPaler be they than daunting death\nthe sleek slim deer\nthe tall tense deer.\n\nFour tall stags at a green mountain\nthe lucky hunter sang before.\n\nAll in green went my love riding\non a great horse of gold\ninto the silver dawn.\n\nfour lean hounds crouched low and smiling\nmy heart fell dead before.",
+      "html_url": "https://cummings.ee/book/tulips-and-chimneys/poem/songs-iv/",
+      "txt_url": "https://cummings.ee/book/tulips-and-chimneys/poem/songs-iv.txt"
+    },
+    {
+      "id": "tulips-and-chimneys/la-guerre-ii",
+      "title": "La Guerre II",
+      "first_line": "O sweet spontaneous",
+      "book_slug": "tulips-and-chimneys",
+      "book_title": "Tulips and Chimneys",
+      "year": 1923,
+      "text": "O sweet spontaneous\nearth how often have\nthe\ndoting\n\n      fingers of\nprurient philosphers pinched\nand\npoked\n\nthee\n,has the naughty thumb\nof science prodded\nthy\n\n   beauty     .how\noften have religions taken\nthee upon their scraggy knees\nsqueezing and\n\nbuffeting thee that thou mightest conceive\ngods\n    (but\ntrue\n\nto the incomparable\ncouch of death thy\nrhythmic\nlover\n\n     thou answerest\n\nthem only with\n\n               spring)",
+      "html_url": "https://cummings.ee/book/tulips-and-chimneys/poem/la-guerre-ii/",
+      "txt_url": "https://cummings.ee/book/tulips-and-chimneys/poem/la-guerre-ii.txt"
+    },
+    {
+      "id": "tulips-and-chimneys/sonnets-unrealities-i",
+      "title": "Sonnets—Unrealities I",
+      "first_line": "it may not always be so;and i say",
+      "book_slug": "tulips-and-chimneys",
+      "book_title": "Tulips and Chimneys",
+      "year": 1923,
+      "text": "it may not always be so;and i say\nthat if your lips,which i have loved,should touch\nanother’s,and your dear strong fingers clutch\nhis heart,as mine in time not far away;\nif on another’s face your sweet hair lay\nin such silence as i know,or such\ngreat writhing words as,uttering overmuch,\nstand helplessly before the spirit at bay;\n\nif this should be,i say if this should be—\nyou of my heart,send me a little word;\nthat i may go unto him,and take his hands,\nsaying, Accept all happiness from me.\nThen shall i turn my face,and hear one bird\nsing terribly afar in the lost lands.",
+      "html_url": "https://cummings.ee/book/tulips-and-chimneys/poem/sonnets-unrealities-i/",
+      "txt_url": "https://cummings.ee/book/tulips-and-chimneys/poem/sonnets-unrealities-i.txt"
+    },
+    {
+      "id": "is-5/one-xxii",
+      "title": "ONE XXII",
+      "first_line": "she being Brand",
+      "book_slug": "is-5",
+      "book_title": "is 5",
+      "year": 1926,
+      "text": "she being Brand\n\n-new;and you\nknow consequently a\nlittle stiff i was\ncareful of her and(having\n\nthoroughly oiled the universal\njoint tested my gas felt of\nher radiator made sure her springs were O.\n\nK.)i went right to it flooded-the-carburetor cranked her\n\nup,slipped the\nclutch(and then somehow got into reverse she\nkicked what\nthe hell)next\nminute i was back in neutral tried and\n\nagain slo-wly;bare,ly nudg.   ing(my\n\nlev-er Right-\noh and her gears being in\nA 1 shape passed\nfrom low through\nsecond-in-to-high like\ngreasedlightning)just as we turned the corner of Divinity\n\navenue i touched the accelerator and give\n\nher the juice,good\n\n                  (it\n\nwas the first ride and believe i we was\nhappy to see how nice she acted right up to\nthe last minute coming back down by the Public\nGardens i slammed on\nthe internalexpanding\n&\nexternalcontracting\nbrakes Bothatonce and\n\nbrought allofher tremB\n-ling\nto a:dead\n\nstand-\n;Still)",
+      "html_url": "https://cummings.ee/book/is-5/poem/one-xxii/",
+      "txt_url": "https://cummings.ee/book/is-5/poem/one-xxii.txt"
+    },
+    {
+      "id": "is-5/two-xi",
+      "title": "TWO XI",
+      "first_line": "my sweet old etcetera",
+      "book_slug": "is-5",
+      "book_title": "is 5",
+      "year": 1926,
+      "text": "my sweet old etcetera\naunt lucy during the recent\n\nwar could and what\nis more did tell you just\nwhat everybody was fighting\n\nfor,\nmy sister\n\nisabel created hundreds\n(and\nhundreds)of socks not to\nmentions shirts fleaproof earwarmers\n\netcetera wristers etcetera,my\n\nmother hoped that\n\ni would die etcetera\nbravely of course my father used\nto become hoarse talking about how it was\na privilege and if only he\ncould meanwhile my\n\nself etcetera lay quietly\nin the deep mud et\n\ncetera\n(dreaming,\net\n  cetera,of\nYour smile\neyes knees and of your Etcetera)",
+      "html_url": "https://cummings.ee/book/is-5/poem/two-xi/",
+      "txt_url": "https://cummings.ee/book/is-5/poem/two-xi.txt"
+    },
+    {
+      "id": "tulips-and-chimneys/sonnets-realities-i",
+      "title": "Sonnets—Realities I",
+      "first_line": "the Cambridge ladies who live in furnished souls",
+      "book_slug": "tulips-and-chimneys",
+      "book_title": "Tulips and Chimneys",
+      "year": 1923,
+      "text": "the Cambridge ladies who live in furnished souls\nare unbeautiful and have comfortable minds\n(also,with the church’s protestant blessings\ndaughters,unscented shapeless spirited)\nthey believe in Christ and Longfellow,both dead,\nare invariably interested in so many things—\nat the present writing one still finds\ndelighted fingers knitting for the is it Poles?\nperhaps.   While permanent faces coyly bandy\nscandal of Mrs. N and Professor D\n....the Cambridge ladies do not care,above\nCambridge if sometimes in its box of\nsky lavender and cornerless,the\nmoon rattles like a fragment of angry candy",
+      "html_url": "https://cummings.ee/book/tulips-and-chimneys/poem/sonnets-realities-i/",
+      "txt_url": "https://cummings.ee/book/tulips-and-chimneys/poem/sonnets-realities-i.txt"
+    }
+  ]
+}

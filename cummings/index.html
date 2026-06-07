@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>e.e. cummings | Jon Ledbetter</title>
+  <meta name="description" content="A small reader for public-domain E. E. Cummings poems, sourced from cummings.ee." />
+  <link rel="canonical" href="https://ledsec.dev/cummings/" />
+  <meta property="og:title" content="e.e. cummings | Jon Ledbetter" />
+  <meta property="og:description" content="A small reader for public-domain E. E. Cummings poems." />
+  <meta property="og:url" content="https://ledsec.dev/cummings/" />
+  <meta property="og:type" content="website" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d1a;
+      --surface: #13132a;
+      --card: #1a1a30;
+      --paper: #f4efe7;
+      --paper-edge: #d4c5aa;
+      --ink: #151821;
+      --ink-muted: #5b6070;
+      --border: rgba(124, 92, 191, 0.2);
+      --purple: #8b68d4;
+      --purple-light: #a884f0;
+      --purple-dim: rgba(139, 104, 212, 0.12);
+      --green: #4ade80;
+      --gold: #d6b46d;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(214, 180, 109, 0.08), transparent 28rem),
+        radial-gradient(circle at bottom right, rgba(139, 104, 212, 0.11), transparent 30rem),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 13, 26, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-logo::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--purple);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--purple);
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.4rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--text);
+      background: var(--purple-dim);
+    }
+
+    main {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+    }
+
+    .reader-shell {
+      display: grid;
+      grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+      gap: 1.25rem;
+      align-items: start;
+      min-width: 0;
+    }
+
+    .library-panel,
+    .rights-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.35rem;
+      min-width: 0;
+    }
+
+    .section-label {
+      color: var(--purple-light);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 4vw, 3.45rem);
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 0.95;
+      margin-bottom: 0.9rem;
+      overflow-wrap: break-word;
+    }
+
+    .intro {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 1.25rem;
+    }
+
+    .search-field {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(13, 13, 26, 0.72);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.9rem;
+      padding: 0.75rem 0.85rem;
+      margin-bottom: 0.9rem;
+      outline: none;
+    }
+
+    .search-field:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(139, 104, 212, 0.12);
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 1rem;
+    }
+
+    .filter-btn,
+    .poem-row,
+    .icon-btn {
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .filter-btn {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 0.36rem 0.7rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+      max-width: 100%;
+      white-space: normal;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      color: var(--text);
+      border-color: var(--purple);
+      background: var(--purple-dim);
+    }
+
+    .poem-list {
+      display: grid;
+      gap: 0.5rem;
+      list-style: none;
+      max-height: 54vh;
+      overflow-y: auto;
+      padding-right: 0.15rem;
+    }
+
+    .poem-row {
+      width: 100%;
+      text-align: left;
+      border: 1px solid rgba(124, 92, 191, 0.16);
+      border-radius: 8px;
+      background: rgba(26, 26, 48, 0.72);
+      color: var(--text);
+      padding: 0.78rem;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    }
+
+    .poem-row:hover,
+    .poem-row.active {
+      border-color: var(--purple);
+      background: rgba(139, 104, 212, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .poem-row strong {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .poem-row span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .empty-state {
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      padding: 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .poem-panel {
+      background: var(--paper);
+      color: var(--ink);
+      border: 1px solid var(--paper-edge);
+      border-radius: 12px;
+      min-height: 680px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+      min-width: 0;
+    }
+
+    .poem-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+      padding: 1.4rem 1.6rem;
+      border-bottom: 1px solid rgba(21, 24, 33, 0.12);
+      background: rgba(255, 255, 255, 0.32);
+    }
+
+    .poem-kicker {
+      color: var(--ink-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .poem-title {
+      color: var(--ink);
+      font-size: clamp(1.45rem, 3vw, 2.45rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+      margin-bottom: 0.45rem;
+    }
+
+    .poem-subtitle {
+      color: var(--ink-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .poem-actions {
+      display: flex;
+      gap: 0.45rem;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      border: 1px solid rgba(21, 24, 33, 0.16);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.46);
+      color: var(--ink);
+      padding: 0.55rem 0.7rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .icon-btn:hover {
+      border-color: rgba(21, 24, 33, 0.35);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .poem-text-wrap {
+      padding: clamp(1.5rem, 4vw, 3rem);
+      overflow-x: auto;
+    }
+
+    .poem-text {
+      color: var(--ink);
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(1.02rem, 1.65vw, 1.24rem);
+      line-height: 1.62;
+      letter-spacing: 0;
+      white-space: pre;
+      tab-size: 4;
+      min-width: max-content;
+    }
+
+    .rights-panel {
+      margin-top: 1.25rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .rights-panel p {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.65;
+    }
+
+    .source-links {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0.6rem 0.85rem;
+      text-decoration: none;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    .btn:hover {
+      color: var(--text);
+      border-color: var(--purple);
+      background: var(--purple-dim);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+
+    a { color: inherit; }
+
+    @media (max-width: 900px) {
+      .reader-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .poem-list {
+        max-height: none;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .poem-panel {
+        min-height: 0;
+      }
+    }
+
+    @media (max-width: 680px) {
+      header { position: static; }
+
+      .nav-inner {
+        height: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+        padding: 1rem;
+      }
+
+      .nav-links {
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        width: 100%;
+      }
+
+      .nav-links a {
+        font-size: 0.78rem;
+        padding: 0.35rem 0.6rem;
+      }
+
+      h1 {
+        font-size: 2.28rem;
+      }
+
+      .filter-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      .filter-btn {
+        width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .library-panel > * {
+        max-width: calc(100vw - 5rem);
+      }
+
+      .search-field,
+      .filter-row,
+      .poem-list {
+        width: calc(100vw - 5rem);
+        max-width: calc(100vw - 5rem);
+      }
+
+      .poem-list {
+        grid-template-columns: 1fr;
+        max-height: 340px;
+        overflow-y: auto;
+      }
+
+      main {
+        padding: 2rem 1rem 4rem;
+      }
+
+      .poem-toolbar,
+      .rights-panel {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+      }
+
+      .poem-toolbar {
+        align-items: stretch;
+      }
+
+      .poem-actions,
+      .source-links {
+        justify-content: flex-start;
+      }
+
+      .library-panel,
+      .poem-panel,
+      .rights-panel {
+        width: calc(100vw - 2rem);
+        max-width: calc(100vw - 2rem);
+        overflow: hidden;
+      }
+
+      .poem-text-wrap {
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      .poem-text {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="nav-inner" aria-label="Main navigation">
+      <a href="/" class="nav-logo">Jon Ledbetter</a>
+      <ul class="nav-links">
+        <li><a href="/">About</a></li>
+        <li><a href="/portfolio/">Portfolio</a></li>
+        <li><a href="/cummings/" class="active">Cummings</a></li>
+        <li><a href="/support/">Support</a></li>
+        <li><a href="/contact/">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="reader-shell" aria-label="E. E. Cummings reader">
+      <aside class="library-panel">
+        <div class="section-label">Public Domain Reader</div>
+        <h1>e.e. cummings</h1>
+        <p class="intro">A small, exact-text reader for early Cummings poems now in the public domain. Line breaks and spacing are preserved.</p>
+        <label for="poem-search" class="section-label">Find</label>
+        <input id="poem-search" class="search-field" type="search" autocomplete="off" placeholder="Search title, first line, or book" />
+        <div id="book-filters" class="filter-row" aria-label="Filter by book"></div>
+        <ol id="poem-list" class="poem-list"></ol>
+      </aside>
+
+      <article class="poem-panel" aria-live="polite">
+        <div class="poem-toolbar">
+          <div>
+            <div id="poem-kicker" class="poem-kicker"></div>
+            <h2 id="poem-title" class="poem-title"></h2>
+            <p id="poem-subtitle" class="poem-subtitle"></p>
+          </div>
+          <div class="poem-actions">
+            <a id="source-link" class="icon-btn" href="https://cummings.ee/" target="_blank" rel="noopener">Source</a>
+            <button id="copy-link" class="icon-btn" type="button">Copy Link</button>
+          </div>
+        </div>
+        <div class="poem-text-wrap">
+          <pre id="poem-text" class="poem-text"></pre>
+        </div>
+      </article>
+    </section>
+
+    <section class="rights-panel" aria-label="Source and rights">
+      <p>Poem texts are public-domain works by E. E. Cummings, sourced from the e.e. cummings free poetry archive by Ben Welsh. This page intentionally includes only poems from books the archive marks public domain.</p>
+      <div class="source-links">
+        <a class="btn" href="https://cummings.ee/" target="_blank" rel="noopener">cummings.ee</a>
+        <a class="btn" href="https://cummings.ee/downloads/" target="_blank" rel="noopener">Bulk Data</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Jon Ledbetter. Poem texts are public domain.</p>
+  </footer>
+
+  <script>
+    const state = {
+      data: null,
+      activeBook: 'all',
+      query: '',
+      selectedId: null
+    };
+
+    const els = {
+      search: document.getElementById('poem-search'),
+      filters: document.getElementById('book-filters'),
+      list: document.getElementById('poem-list'),
+      kicker: document.getElementById('poem-kicker'),
+      title: document.getElementById('poem-title'),
+      subtitle: document.getElementById('poem-subtitle'),
+      text: document.getElementById('poem-text'),
+      sourceLink: document.getElementById('source-link'),
+      copyLink: document.getElementById('copy-link')
+    };
+
+    function compact(value) {
+      return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char]));
+    }
+
+    function filteredPoems() {
+      const query = state.query.toLowerCase();
+      return state.data.poems.filter((poem) => {
+        const bookMatches = state.activeBook === 'all' || poem.book_slug === state.activeBook;
+        const haystack = [poem.title, poem.first_line, poem.book_title].map(compact).join(' ').toLowerCase();
+        return bookMatches && (!query || haystack.includes(query));
+      });
+    }
+
+    function renderFilters() {
+      const counts = state.data.poems.reduce((acc, poem) => {
+        acc[poem.book_slug] = (acc[poem.book_slug] || 0) + 1;
+        return acc;
+      }, {});
+      const books = state.data.books.filter((book) => counts[book.slug]);
+      const buttons = [{ slug: 'all', title: 'All', count: state.data.poems.length }, ...books.map((book) => ({
+        slug: book.slug,
+        title: book.title,
+        count: counts[book.slug]
+      }))];
+
+      els.filters.innerHTML = buttons.map((book) => `
+        <button class="filter-btn${book.slug === state.activeBook ? ' active' : ''}" type="button" data-book="${escapeHtml(book.slug)}">
+          ${escapeHtml(book.title)} (${book.count})
+        </button>
+      `).join('');
+    }
+
+    function renderList() {
+      const poems = filteredPoems();
+      if (!poems.length) {
+        els.list.innerHTML = '<li class="empty-state">No matching poems.</li>';
+        return;
+      }
+
+      els.list.innerHTML = poems.map((poem) => `
+        <li>
+          <button class="poem-row${poem.id === state.selectedId ? ' active' : ''}" type="button" data-id="${escapeHtml(poem.id)}">
+            <strong>${escapeHtml(poem.title)}</strong>
+            <span>${escapeHtml(compact(poem.first_line))}</span>
+            <span>${escapeHtml(poem.book_title)}, ${poem.year}</span>
+          </button>
+        </li>
+      `).join('');
+    }
+
+    function setSelectedPoem(id, updateHash = true) {
+      const poem = state.data.poems.find((item) => item.id === id) || state.data.poems[0];
+      state.selectedId = poem.id;
+      els.kicker.textContent = `${poem.book_title}, ${poem.year}`;
+      els.title.textContent = poem.title;
+      els.subtitle.textContent = compact(poem.first_line);
+      els.text.textContent = poem.text;
+      els.sourceLink.href = poem.html_url;
+      document.title = `${poem.title} | e.e. cummings | Jon Ledbetter`;
+      if (updateHash) {
+        history.replaceState(null, '', `#${encodeURIComponent(poem.id)}`);
+      }
+      renderList();
+    }
+
+    function render() {
+      renderFilters();
+      const poems = filteredPoems();
+      if (!poems.some((poem) => poem.id === state.selectedId)) {
+        setSelectedPoem(poems[0]?.id || state.data.poems[0].id, false);
+      }
+      renderList();
+    }
+
+    async function init() {
+      try {
+        const response = await fetch('./poems.json', { cache: 'no-cache' });
+        if (!response.ok) throw new Error('Poem data failed to load');
+        state.data = await response.json();
+        const requestedId = decodeURIComponent(window.location.hash.slice(1));
+        state.selectedId = state.data.poems.some((poem) => poem.id === requestedId) ? requestedId : state.data.poems[0].id;
+        render();
+        setSelectedPoem(state.selectedId, Boolean(requestedId));
+      } catch (error) {
+        els.list.innerHTML = '<li class="empty-state">Poem data could not be loaded.</li>';
+        els.title.textContent = 'Reader unavailable';
+        els.subtitle.textContent = 'The local poem data file did not load.';
+      }
+    }
+
+    els.search.addEventListener('input', (event) => {
+      state.query = event.target.value;
+      render();
+    });
+
+    els.filters.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-book]');
+      if (!button) return;
+      state.activeBook = button.dataset.book;
+      render();
+    });
+
+    els.list.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-id]');
+      if (!button) return;
+      setSelectedPoem(button.dataset.id);
+    });
+
+    els.copyLink.addEventListener('click', async () => {
+      const url = `${window.location.origin}${window.location.pathname}#${encodeURIComponent(state.selectedId)}`;
+      try {
+        await navigator.clipboard.writeText(url);
+        els.copyLink.textContent = 'Copied';
+        setTimeout(() => { els.copyLink.textContent = 'Copy Link'; }, 1200);
+      } catch (error) {
+        window.location.hash = encodeURIComponent(state.selectedId);
+      }
+    });
+
+    window.addEventListener('hashchange', () => {
+      const requestedId = decodeURIComponent(window.location.hash.slice(1));
+      if (state.data?.poems.some((poem) => poem.id === requestedId)) {
+        setSelectedPoem(requestedId, false);
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
