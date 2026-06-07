@@ -129,6 +129,30 @@
       min-width: 0;
     }
 
+    .library-panel {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .library-panel > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .library-panel::after {
+      content: 'love is the every only god';
+      position: absolute;
+      right: -0.8rem;
+      bottom: 1rem;
+      width: 14rem;
+      color: rgba(168, 132, 240, 0.06);
+      font-size: 2.25rem;
+      font-weight: 700;
+      line-height: 0.92;
+      text-align: right;
+      pointer-events: none;
+    }
+
     .section-label {
       color: var(--purple-light);
       font-size: 0.72rem;
@@ -152,6 +176,46 @@
       font-size: 0.95rem;
       line-height: 1.7;
       margin-bottom: 1.25rem;
+    }
+
+    .favorite-note {
+      display: grid;
+      gap: 0.2rem;
+      padding: 0.75rem 0;
+      margin-bottom: 1.25rem;
+      border-top: 1px solid rgba(124, 92, 191, 0.16);
+      border-bottom: 1px solid rgba(124, 92, 191, 0.16);
+    }
+
+    .favorite-note span {
+      color: var(--purple-light);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .favorite-note a {
+      color: var(--text);
+      font-size: 0.92rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .favorite-note a:hover {
+      color: var(--purple-light);
+    }
+
+    .favorite-note small {
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.45;
+    }
+
+    .favorite-note small a {
+      color: var(--purple-light);
+      font-size: inherit;
+      font-weight: 700;
     }
 
     .search-field {
@@ -359,31 +423,6 @@
       justify-content: flex-end;
     }
 
-    .later-panel {
-      margin-top: 1.25rem;
-      background: rgba(26, 26, 48, 0.72);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.35rem;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    .later-panel h2 {
-      font-size: 1.15rem;
-      line-height: 1.25;
-      letter-spacing: 0;
-      margin-bottom: 0.35rem;
-    }
-
-    .later-panel p {
-      color: var(--muted);
-      font-size: 0.88rem;
-      line-height: 1.65;
-    }
-
     .btn {
       display: inline-flex;
       align-items: center;
@@ -489,8 +528,7 @@
       }
 
       .poem-toolbar,
-      .rights-panel,
-      .later-panel {
+      .rights-panel {
         grid-template-columns: 1fr;
         flex-direction: column;
       }
@@ -506,8 +544,7 @@
 
       .library-panel,
       .poem-panel,
-      .rights-panel,
-      .later-panel {
+      .rights-panel {
         width: calc(100vw - 2rem);
         max-width: calc(100vw - 2rem);
         overflow: hidden;
@@ -520,6 +557,11 @@
 
       .poem-text {
         font-size: 1rem;
+      }
+
+      .library-panel::after {
+        width: 11rem;
+        font-size: 1.8rem;
       }
     }
   </style>
@@ -544,6 +586,11 @@
         <div class="section-label">Public Domain Reader</div>
         <h1>e.e. cummings</h1>
         <p class="intro">A small, exact-text reader for early Cummings poems now in the public domain. Line breaks and spacing are preserved.</p>
+        <p class="favorite-note">
+          <span>Later favorite</span>
+          <a href="https://books.google.com/books/about/100_Selected_Poems.html?id=nxPnBAAAQBAJ" target="_blank" rel="noopener">love is the every only god</a>
+          <small>Linked only. <cite>50 Poems</cite> remains protected until 2036. <a href="https://cummings.ee/book/50-poems/" target="_blank" rel="noopener">Rights note</a>.</small>
+        </p>
         <label for="poem-search" class="section-label">Find</label>
         <input id="poem-search" class="search-field" type="search" autocomplete="off" placeholder="Search title, first line, or book" />
         <div id="book-filters" class="filter-row" aria-label="Filter by book"></div>
@@ -573,17 +620,6 @@
       <div class="source-links">
         <a class="btn" href="https://cummings.ee/" target="_blank" rel="noopener">cummings.ee</a>
         <a class="btn" href="https://cummings.ee/downloads/" target="_blank" rel="noopener">Bulk Data</a>
-      </div>
-    </section>
-
-    <section class="later-panel" aria-label="Later Cummings work">
-      <div>
-        <div class="section-label">Later Cummings</div>
-        <h2>love is the every only god</h2>
-        <p>From <cite>50 Poems</cite> (1940). cummings.ee marks the book protected until 2036, so this reader links to the source note instead of republishing the poem text.</p>
-      </div>
-      <div class="source-links">
-        <a class="btn" href="https://cummings.ee/book/50-poems/" target="_blank" rel="noopener">Source Note</a>
       </div>
     </section>
   </main>
