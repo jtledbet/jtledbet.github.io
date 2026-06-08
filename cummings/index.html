@@ -240,6 +240,52 @@
       background: rgba(214, 180, 109, 0.14);
     }
 
+    .protected-watch {
+      border: 1px solid rgba(214, 180, 109, 0.32);
+      border-radius: 8px;
+      background: rgba(214, 180, 109, 0.07);
+      padding: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .watch-title {
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: 0.45rem;
+    }
+
+    .watch-note {
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.55;
+      margin-bottom: 0.8rem;
+    }
+
+    .countdown-value {
+      color: var(--gold);
+      font-size: 1.28rem;
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 0.25rem;
+    }
+
+    .countdown-label {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.85rem;
+    }
+
+    .watch-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
     .poem-list {
       display: grid;
       gap: 0.5rem;
@@ -483,6 +529,7 @@
       .search-field,
       .filter-row,
       .utility-row,
+      .protected-watch,
       .poem-list {
         width: calc(100vw - 5rem);
         max-width: calc(100vw - 5rem);
@@ -561,6 +608,17 @@
         <div class="utility-row">
           <button id="random-poem" class="random-btn" type="button">Random Poem</button>
         </div>
+        <section class="protected-watch" aria-label="2036 public domain countdown">
+          <div class="section-label">2036 Watch</div>
+          <h2 class="watch-title">love is the every only god</h2>
+          <p class="watch-note">A protected favorite from <em>50 Poems</em>. This reader can add it when the book enters the public domain.</p>
+          <div id="protected-countdown" class="countdown-value">Counting down</div>
+          <div class="countdown-label">until January 1, 2036</div>
+          <div class="watch-links">
+            <a class="btn" href="https://openlibrary.org/isbn/9780871401779" target="_blank" rel="noopener">Open Library</a>
+            <a class="btn" href="https://cummings.ee/book/50-poems/" target="_blank" rel="noopener">Rights Note</a>
+          </div>
+        </section>
         <ol id="poem-list" class="poem-list"></ol>
       </aside>
 
@@ -596,6 +654,9 @@
   </footer>
 
   <script>
+    const DEFAULT_POEM_ID = 'tulips-and-chimneys/chansons-innocentes-i';
+    const PUBLIC_DOMAIN_TARGET = new Date(2036, 0, 1);
+
     const state = {
       data: null,
       activeBook: 'all',
@@ -614,6 +675,7 @@
       text: document.getElementById('poem-text'),
       sourceLink: document.getElementById('source-link'),
       random: document.getElementById('random-poem'),
+      protectedCountdown: document.getElementById('protected-countdown'),
       copyLink: document.getElementById('copy-link')
     };
 
@@ -678,7 +740,7 @@
     }
 
     function setSelectedPoem(id, updateHash = true) {
-      const poem = state.data.poems.find((item) => item.id === id) || state.data.poems[0];
+      const poem = state.data.poems.find((item) => item.id === id) || state.data.poems.find((item) => item.id === DEFAULT_POEM_ID) || state.data.poems[0];
       state.selectedId = poem.id;
       els.kicker.textContent = `${poem.book_title}, ${poem.year}`;
       els.title.textContent = poem.title;
@@ -692,11 +754,25 @@
       renderList();
     }
 
+    function updateProtectedCountdown() {
+      const diff = PUBLIC_DOMAIN_TARGET.getTime() - Date.now();
+      if (diff <= 0) {
+        els.protectedCountdown.textContent = 'Public domain now';
+        return;
+      }
+
+      const totalMinutes = Math.floor(diff / 60000);
+      const days = Math.floor(totalMinutes / 1440);
+      const hours = Math.floor((totalMinutes % 1440) / 60);
+      const minutes = totalMinutes % 60;
+      els.protectedCountdown.textContent = `${days.toLocaleString()} days ${hours}h ${minutes}m`;
+    }
+
     function render() {
       renderFilters();
       const poems = filteredPoems();
       if (!poems.some((poem) => poem.id === state.selectedId)) {
-        setSelectedPoem(poems[0]?.id || state.data.poems[0].id, false);
+        setSelectedPoem(poems[0]?.id || DEFAULT_POEM_ID, false);
       }
       renderList();
     }
@@ -709,7 +785,9 @@
         const bookCount = state.data.books.filter((book) => state.data.poems.some((poem) => poem.book_slug === book.slug)).length;
         els.count.textContent = `${state.data.poems.length} poems across ${bookCount} public-domain books`;
         const requestedId = decodeURIComponent(window.location.hash.slice(1));
-        state.selectedId = state.data.poems.some((poem) => poem.id === requestedId) ? requestedId : state.data.poems[0].id;
+        state.selectedId = state.data.poems.some((poem) => poem.id === requestedId) ? requestedId : DEFAULT_POEM_ID;
+        updateProtectedCountdown();
+        setInterval(updateProtectedCountdown, 60000);
         render();
         setSelectedPoem(state.selectedId, Boolean(requestedId));
       } catch (error) {
