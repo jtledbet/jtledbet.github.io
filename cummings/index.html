@@ -5,10 +5,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>e.e. cummings | Jon Ledbetter</title>
-  <meta name="description" content="A small reader for public-domain E. E. Cummings poems, sourced from cummings.ee." />
+  <meta name="description" content="A public-domain E. E. Cummings reader, sourced from cummings.ee." />
   <link rel="canonical" href="https://ledsec.dev/cummings/" />
   <meta property="og:title" content="e.e. cummings | Jon Ledbetter" />
-  <meta property="og:description" content="A small reader for public-domain E. E. Cummings poems." />
+  <meta property="og:description" content="A public-domain E. E. Cummings reader." />
   <meta property="og:url" content="https://ledsec.dev/cummings/" />
   <meta property="og:type" content="website" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -155,6 +155,15 @@
       margin-bottom: 1.25rem;
     }
 
+    .reader-count {
+      color: var(--gold);
+      font-size: 0.83rem;
+      font-weight: 700;
+      line-height: 1.5;
+      margin: -0.45rem 0 1.15rem;
+      min-height: 1.25rem;
+    }
+
 
     .search-field {
       width: 100%;
@@ -183,6 +192,7 @@
 
     .filter-btn,
     .poem-row,
+    .random-btn,
     .icon-btn {
       font-family: inherit;
       cursor: pointer;
@@ -206,6 +216,28 @@
       color: var(--text);
       border-color: var(--purple);
       background: var(--purple-dim);
+    }
+
+    .utility-row {
+      display: flex;
+      margin-bottom: 1rem;
+    }
+
+    .random-btn {
+      width: 100%;
+      border: 1px solid rgba(214, 180, 109, 0.45);
+      border-radius: 8px;
+      background: rgba(214, 180, 109, 0.08);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 0.7rem 0.85rem;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .random-btn:hover {
+      border-color: var(--gold);
+      background: rgba(214, 180, 109, 0.14);
     }
 
     .poem-list {
@@ -450,6 +482,7 @@
 
       .search-field,
       .filter-row,
+      .utility-row,
       .poem-list {
         width: calc(100vw - 5rem);
         max-width: calc(100vw - 5rem);
@@ -519,11 +552,15 @@
       <aside class="library-panel">
         <div class="section-label">Public Domain Reader</div>
         <h1>e.e. cummings</h1>
-        <p class="intro">A small, exact-text reader for early Cummings poems now in the public domain. Line breaks and spacing are preserved.</p>
+        <p class="intro">An exact-text reader for Cummings poems now in the public domain. Line breaks and spacing are preserved.</p>
+        <p id="reader-count" class="reader-count"></p>
 
         <label for="poem-search" class="section-label">Find</label>
         <input id="poem-search" class="search-field" type="search" autocomplete="off" placeholder="Search title, first line, or book" />
         <div id="book-filters" class="filter-row" aria-label="Filter by book"></div>
+        <div class="utility-row">
+          <button id="random-poem" class="random-btn" type="button">Random Poem</button>
+        </div>
         <ol id="poem-list" class="poem-list"></ol>
       </aside>
 
@@ -568,6 +605,7 @@
 
     const els = {
       search: document.getElementById('poem-search'),
+      count: document.getElementById('reader-count'),
       filters: document.getElementById('book-filters'),
       list: document.getElementById('poem-list'),
       kicker: document.getElementById('poem-kicker'),
@@ -575,6 +613,7 @@
       subtitle: document.getElementById('poem-subtitle'),
       text: document.getElementById('poem-text'),
       sourceLink: document.getElementById('source-link'),
+      random: document.getElementById('random-poem'),
       copyLink: document.getElementById('copy-link')
     };
 
@@ -667,6 +706,8 @@
         const response = await fetch('./poems.json', { cache: 'no-cache' });
         if (!response.ok) throw new Error('Poem data failed to load');
         state.data = await response.json();
+        const bookCount = state.data.books.filter((book) => state.data.poems.some((poem) => poem.book_slug === book.slug)).length;
+        els.count.textContent = `${state.data.poems.length} poems across ${bookCount} public-domain books`;
         const requestedId = decodeURIComponent(window.location.hash.slice(1));
         state.selectedId = state.data.poems.some((poem) => poem.id === requestedId) ? requestedId : state.data.poems[0].id;
         render();
@@ -694,6 +735,15 @@
       const button = event.target.closest('[data-id]');
       if (!button) return;
       setSelectedPoem(button.dataset.id);
+    });
+
+    els.random.addEventListener('click', () => {
+      if (!state.data) return;
+      const poems = filteredPoems();
+      const pool = poems.length ? poems : state.data.poems;
+      const poem = pool[Math.floor(Math.random() * pool.length)];
+      if (!poem) return;
+      setSelectedPoem(poem.id);
     });
 
     els.copyLink.addEventListener('click', async () => {
