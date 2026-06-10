@@ -242,8 +242,12 @@
   });
 
   function bindLongPress() {
-    document.querySelectorAll('.nav-logo').forEach((logo) => {
-      logo.addEventListener('pointerdown', (event) => {
+    document.querySelectorAll('.egg-trigger').forEach((trigger) => {
+      trigger.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+      });
+
+      trigger.addEventListener('pointerdown', (event) => {
         if (event.pointerType === 'mouse' && event.button !== 0) return;
         clearPressTimer();
         longPressTriggered = false;
@@ -255,10 +259,10 @@
       });
 
       ['pointerup', 'pointercancel', 'pointerleave'].forEach((eventName) => {
-        logo.addEventListener(eventName, clearPressTimer);
+        trigger.addEventListener(eventName, clearPressTimer);
       });
 
-      logo.addEventListener('click', (event) => {
+      trigger.addEventListener('click', (event) => {
         if (!longPressTriggered) return;
         event.preventDefault();
         event.stopPropagation();

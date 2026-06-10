@@ -73,14 +73,34 @@
       gap: 0.5rem;
     }
 
-    .nav-logo::before {
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-dot {
+      width: 32px;
+      height: 32px;
+      margin: -12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: default;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+    }
+
+    .nav-dot::before {
       content: '';
       width: 8px;
       height: 8px;
       background: var(--purple);
       border-radius: 50%;
       box-shadow: 0 0 8px var(--purple);
-      flex-shrink: 0;
     }
 
     .nav-links {
@@ -583,7 +603,10 @@
 <body>
   <header>
     <nav class="nav-inner" aria-label="Main navigation">
-      <a href="/" class="nav-logo">Jon Ledbetter</a>
+      <div class="nav-brand">
+        <span class="nav-dot egg-trigger" aria-hidden="true"></span>
+        <a href="/" class="nav-logo">Jon Ledbetter</a>
+      </div>
       <ul class="nav-links">
         <li><a href="/">About</a></li>
         <li><a href="/portfolio/">Portfolio</a></li>

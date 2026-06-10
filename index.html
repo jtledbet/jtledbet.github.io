@@ -63,14 +63,34 @@
       gap: 0.5rem;
     }
 
-    .nav-logo::before {
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-dot {
+      width: 32px;
+      height: 32px;
+      margin: -12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: default;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+    }
+
+    .nav-dot::before {
       content: '';
       width: 8px;
       height: 8px;
       background: var(--purple);
       border-radius: 50%;
       box-shadow: 0 0 8px var(--purple);
-      flex-shrink: 0;
     }
 
     .nav-links {
@@ -141,6 +161,14 @@
       color: var(--purple-light);
       font-size: 1rem;
       font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .hero-text .shadow-tagline {
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 500;
+      opacity: 0.72;
       margin-bottom: 1.25rem;
     }
 
@@ -359,7 +387,10 @@
 
 <header>
   <div class="nav-inner">
-    <a href="/" class="nav-logo">Jon Ledbetter</a>
+    <div class="nav-brand">
+      <span class="nav-dot egg-trigger" aria-hidden="true"></span>
+      <a href="/" class="nav-logo">Jon Ledbetter</a>
+    </div>
     <ul class="nav-links">
       <li><a href="/" class="active">About</a></li>
       <li><a href="/portfolio/">Portfolio</a></li>
@@ -385,6 +416,7 @@
     <div class="hero-text">
       <h1>Jon Ledbetter</h1>
       <div class="tagline">Cybersecurity Engineer &amp; Full-Stack Developer</div>
+      <div class="shadow-tagline">Drugstore Cowboy / Pinball Wizard</div>
       <div class="hero-actions">
         <a href="/assets/resume/Resume_Jon_Ledbetter_2026.pdf" target="_blank" rel="nofollow noopener noreferrer" class="btn btn-primary">
           Download Résumé
