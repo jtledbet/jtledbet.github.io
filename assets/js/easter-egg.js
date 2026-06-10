@@ -1,8 +1,11 @@
 (function () {
   const triggers = ['cowboy', 'wizard', 'drugstorecowboypinballwizard'];
+  const longPressMs = 700;
   let typed = '';
   let active = false;
   let stylesLoaded = false;
+  let pressTimer = null;
+  let longPressTriggered = false;
 
   function loadStyles() {
     if (stylesLoaded) return;
@@ -187,6 +190,12 @@
     active = false;
   }
 
+  function clearPressTimer() {
+    if (!pressTimer) return;
+    window.clearTimeout(pressTimer);
+    pressTimer = null;
+  }
+
   function launchEgg() {
     if (active) return;
     active = true;
@@ -231,4 +240,36 @@
       launchEgg();
     }
   });
+
+  function bindLongPress() {
+    document.querySelectorAll('.nav-logo').forEach((logo) => {
+      logo.addEventListener('pointerdown', (event) => {
+        if (event.pointerType === 'mouse' && event.button !== 0) return;
+        clearPressTimer();
+        longPressTriggered = false;
+        pressTimer = window.setTimeout(() => {
+          pressTimer = null;
+          longPressTriggered = true;
+          launchEgg();
+        }, longPressMs);
+      });
+
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach((eventName) => {
+        logo.addEventListener(eventName, clearPressTimer);
+      });
+
+      logo.addEventListener('click', (event) => {
+        if (!longPressTriggered) return;
+        event.preventDefault();
+        event.stopPropagation();
+        longPressTriggered = false;
+      }, true);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindLongPress);
+  } else {
+    bindLongPress();
+  }
 })();
