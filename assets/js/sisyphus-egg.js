@@ -384,7 +384,13 @@
   });
 
   function bindLongPress() {
-    document.querySelectorAll('.sisyphus-trigger').forEach((trigger) => {
+    // The footer copyright is the hidden mobile long-press target (parallel to the
+    // pinball egg's nav dot). Any element can also opt in via class .sisyphus-trigger.
+    document.querySelectorAll('footer, .sisyphus-trigger').forEach((trigger) => {
+      // keep the 700ms hold from selecting text or popping the iOS callout menu
+      trigger.style.webkitTouchCallout = 'none';
+      trigger.style.webkitUserSelect = 'none';
+      trigger.style.userSelect = 'none';
       trigger.addEventListener('contextmenu', (e) => e.preventDefault());
       trigger.addEventListener('pointerdown', (event) => {
         if (event.pointerType === 'mouse' && event.button !== 0) return;
