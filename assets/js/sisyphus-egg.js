@@ -1,6 +1,6 @@
 (function () {
   // Sisyphus easter egg: a deliberately unwinnable boulder climb.
-  // Triggered by typing a word, or long-pressing an .sisyphus-trigger element.
+  // Triggered by typing a word, or long-pressing the footer (or any .sisyphus-trigger element).
   const triggers = ['sisyphus', 'boulder'];
   const longPressMs = 700;
   let typed = '';
@@ -111,6 +111,16 @@
       target?.isContentEditable;
   }
 
+  // ----- lifetime persistence: Sisyphus's curse outlives the tab -----
+  const STORE_KEY = 'sisyphus.crests';
+  function loadLifetime() {
+    try { return parseInt(localStorage.getItem(STORE_KEY) || '0', 10) || 0; }
+    catch (e) { return 0; }
+  }
+  function saveLifetime(n) {
+    try { localStorage.setItem(STORE_KEY, String(n)); } catch (e) {}
+  }
+
   // ----- game instance (created per launch) -----
   function createGame(canvas, statusEl) {
     const W = 480;
@@ -121,15 +131,20 @@
     const ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
 
-    // hill: boulder travels from B (bottom-left) to S (summit, top-right)
-    const B = { x: 46, y: H - 36 };
-    const S = { x: W - 64, y: 52 };
-    const dx = S.x - B.x;
-    const dy = S.y - B.y;
-    const hillLen = Math.hypot(dx, dy);
-    const dir = { x: dx / hillLen, y: dy / hillLen };
-    const normal = { x: dir.y, y: -dir.x }; // points up-left, off the slope surface
     const r = 17;
+    const B = { x: 46, y: H - 36 };       // bottom of the hill (fixed)
+    const baseS = { x: W - 64, y: 52 };   // summit at rest
+    let steepen = 0;                      // grows each crest -> hill steepens, summit recedes
+
+    // current hill geometry, recomputed as `steepen` grows
+    function geom() {
+      const S = { x: baseS.x - steepen, y: baseS.y };
+      const dx = S.x - B.x, dy = S.y - B.y;
+      const hillLen = Math.hypot(dx, dy);
+      const dir = { x: dx / hillLen, y: dy / hillLen };
+      const normal = { x: dir.y, y: -dir.x }; // points up-left, off the slope surface
+      return { S, dir, normal, hillLen };
+    }
 
     // physics in progress-space p in [0, 1]
     let p = 0;
@@ -142,24 +157,34 @@
     let roll = 0;           // boulder rotation
     let flashUntil = 0;
     let impossibleNoted = false;
+    let lifetime = loadLifetime();
     let raf = null;
     let last = performance.now();
     let destroyed = false;
 
-    function pointOnHill(t) {
-      return { x: B.x + dir.x * hillLen * t, y: B.y + dir.y * hillLen * t };
+    // returning visitors are greeted by the boulder's memory (the curse is eternal)
+    if (lifetime > 0) {
+      statusEl.textContent = `The boulder knows you: ${lifetime} crest${lifetime === 1 ? '' : 's'}, none final.`;
+    }
+
+    function pointOnHill(t, g) {
+      return { x: B.x + g.dir.x * g.hillLen * t, y: B.y + g.dir.y * g.hillLen * t };
     }
 
     function crest() {
       attempts += 1;
-      v = -0.85;                                  // shove it back down
-      gravity += 0.035;                           // the hill gets steeper
+      lifetime += 1;
+      saveLifetime(lifetime);
+      v = -0.85;                                    // shove it back down
+      gravity += 0.035;                             // gravity grows
       pushPower = Math.max(0.18, pushPower - 0.05); // and you tire
+      steepen = Math.min(150, steepen + 16);        // the summit visibly recedes
       flashUntil = performance.now() + 1500;
       statusEl.textContent = crestLines[(attempts - 1) % crestLines.length];
+      if (navigator.vibrate) { try { navigator.vibrate(25); } catch (e) {} }
     }
 
-    function update(dt) {
+    function update(dt, g) {
       const net = (pushing ? pushPower : 0) - gravity;
       v += net * dt;
       v -= v * 0.9 * dt;            // friction / drag
@@ -171,16 +196,17 @@
 
       best = Math.max(best, p);
       // rotate boulder by linear distance travelled
-      roll += (p - prevP) * hillLen / r;
+      roll += (p - prevP) * g.hillLen / r;
 
-      // once holding can no longer make progress, the climb is impossible
+      // once holding can no longer out-push gravity, the climb is impossible for good
       if (!impossibleNoted && pushPower < gravity) {
         impossibleNoted = true;
-        statusEl.textContent = 'The hill now outpaces you. It cannot be climbed. Keep pushing anyway.';
+        statusEl.textContent = 'The hill has outpaced you for good. One must imagine Sisyphus happy.';
       }
     }
 
-    function draw(now) {
+    function draw(now, g) {
+      const S = g.S, dir = g.dir, normal = g.normal;
       ctx.clearRect(0, 0, W, H);
 
       // sky
@@ -200,12 +226,13 @@
       ctx.closePath();
       ctx.fillStyle = '#1b2233';
       ctx.fill();
-      // slope edge
+      // slope edge — shifts from purple toward red as the climb grows hopeless
+      const heat = Math.min(1, steepen / 150);
       ctx.beginPath();
       ctx.moveTo(B.x, B.y);
       ctx.lineTo(S.x, S.y);
       ctx.lineWidth = 2;
-      ctx.strokeStyle = 'rgba(139, 104, 212, 0.7)';
+      ctx.strokeStyle = `rgba(${Math.round(139 + 100 * heat)}, ${Math.round(104 - 60 * heat)}, ${Math.round(212 - 120 * heat)}, 0.7)`;
       ctx.stroke();
 
       // summit flag
@@ -224,11 +251,11 @@
       ctx.fill();
 
       // boulder + Sisyphus
-      const surf = pointOnHill(p);
+      const surf = pointOnHill(p, g);
       const c = { x: surf.x + normal.x * r, y: surf.y + normal.y * r };
 
       // figure, just downhill of the boulder, leaning in
-      const fBase = pointOnHill(Math.max(0, p - 0.06));
+      const fBase = pointOnHill(Math.max(0, p - 0.06), g);
       const hipX = fBase.x + normal.x * 6 - dir.x * 10;
       const hipY = fBase.y + normal.y * 6 - dir.y * 10;
       ctx.strokeStyle = '#e7e2ff';
@@ -283,8 +310,9 @@
       let dt = (now - last) / 1000;
       last = now;
       if (dt > 0.05) dt = 0.05; // clamp after tab-switch
-      update(dt);
-      draw(now);
+      const g = geom();
+      update(dt, g);
+      draw(now, g);
       const pct = Math.round(best * 100);
       titleRight.textContent = `ATTEMPTS ${attempts}  ·  BEST ${pct}%`;
       raf = requestAnimationFrame(loop);
