@@ -1,6 +1,7 @@
 (function () {
   const triggers = ['cowboy', 'wizard', 'drugstorecowboypinballwizard'];
   const longPressMs = 700;
+  const highScoreKey = 'pinball.highScore.v1';
   const tableWidth = 480;
   const tableHeight = 640;
   const leftKeys = new Set(['a', 'A', 'ArrowLeft']);
@@ -55,6 +56,19 @@
       .egg-score strong {
         color: #f9f4d0;
         font-weight: 900;
+      }
+
+      .egg-highscore {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 8px;
+        padding: 8px 12px;
+        border: 1px solid rgba(249, 244, 208, 0.2);
+        border-radius: 6px;
+        color: rgba(249, 244, 208, 0.82);
+        background: rgba(5, 7, 10, 0.54);
+        font: 800 12px/1.2 Consolas, Monaco, monospace;
       }
 
       .egg-playfield {
@@ -121,6 +135,7 @@
         .egg-overlay { padding: 12px; }
         .egg-machine { padding: 12px; }
         .egg-score { font-size: 12px; }
+        .egg-highscore { font-size: 11px; }
         .egg-help { font-size: 12px; }
         .egg-touch-zones span { margin: 0 8px 8px; padding: 8px; }
       }
@@ -155,10 +170,32 @@
     pressTimer = null;
   }
 
-  function createPinballGame(canvas, scoreNode, ballNode) {
+  function loadHighScore() {
+    try {
+      const value = Number(window.localStorage.getItem(highScoreKey) || '0');
+      return Number.isFinite(value) ? Math.max(0, value) : 0;
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  function saveHighScore(score) {
+    try {
+      window.localStorage.setItem(highScoreKey, String(score));
+    } catch (error) {
+      // The game still plays if persistence is unavailable.
+    }
+  }
+
+  function formatScore(score) {
+    return String(score).padStart(6, '0');
+  }
+
+  function createPinballGame(canvas, scoreNode, highScoreNode, ballNode) {
     const ctx = canvas.getContext('2d');
     const state = {
       score: 0,
+      highScore: loadHighScore(),
       ball: 1,
       bestCombo: 0,
       combo: 0,
@@ -169,13 +206,15 @@
       animationId: 0,
       particles: [],
       bumpers: [
-        { x: 150, y: 185, r: 34, value: 50, flash: 0, label: 'C' },
-        { x: 322, y: 210, r: 34, value: 75, flash: 0, label: 'W' },
-        { x: 235, y: 330, r: 38, value: 100, flash: 0, label: 'P' }
+        { x: 236, y: 190, r: 32, value: 50, flash: 0, label: '50' },
+        { x: 154, y: 310, r: 34, value: 75, flash: 0, label: '75' },
+        { x: 330, y: 386, r: 36, value: 100, flash: 0, label: '100' }
       ],
       lanes: [
-        { x: 92, y1: 86, y2: 190, lit: 0 },
-        { x: 388, y1: 86, y2: 190, lit: 0 }
+        { x: 116, y1: 88, y2: 168, lit: 0 },
+        { x: 196, y1: 72, y2: 152, lit: 0 },
+        { x: 284, y1: 72, y2: 152, lit: 0 },
+        { x: 364, y1: 88, y2: 168, lit: 0 }
       ],
       ballState: null
     };
@@ -194,8 +233,14 @@
     }
 
     function updateScore() {
+      if (state.score > state.highScore) {
+        state.highScore = state.score;
+        saveHighScore(state.highScore);
+      }
+
       scoreNode.innerHTML = '<span>DRUGSTORE COWBOY / PINBALL WIZARD</span><strong>' +
-        String(state.score).padStart(6, '0') + '</strong>';
+        formatScore(state.score) + '</strong>';
+      highScoreNode.textContent = formatScore(state.highScore);
       ballNode.textContent = 'BALL ' + state.ball + ' · COMBO ' + state.bestCombo;
     }
 
@@ -221,16 +266,18 @@
 
     function flipperLine(side) {
       const held = side === 'left' ? state.leftHeld : state.rightHeld;
-      const anchor = side === 'left' ? { x: 176, y: 545 } : { x: 304, y: 545 };
-      const length = 112;
-      const angle = side === 'left'
-        ? (held ? -0.56 : 0.34)
-        : (held ? Math.PI + 0.56 : Math.PI - 0.34);
+      const rest = side === 'left'
+        ? { ax: 148, ay: 550, bx: 222, by: 562 }
+        : { ax: 332, ay: 550, bx: 258, by: 562 };
+      const raised = side === 'left'
+        ? { bx: 216, by: 514 }
+        : { bx: 264, by: 514 };
+
       return {
-        ax: anchor.x,
-        ay: anchor.y,
-        bx: anchor.x + Math.cos(angle) * length,
-        by: anchor.y + Math.sin(angle) * length,
+        ax: rest.ax,
+        ay: rest.ay,
+        bx: held ? raised.bx : rest.bx,
+        by: held ? raised.by : rest.by,
         held
       };
     }
@@ -418,23 +465,32 @@
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, tableWidth, tableHeight);
 
-      ctx.fillStyle = 'rgba(139,104,212,0.18)';
+      ctx.fillStyle = 'rgba(139,104,212,0.12)';
       ctx.beginPath();
-      ctx.arc(tableWidth / 2, 126, 116, 0, Math.PI * 2);
+      ctx.roundRect(82, 56, 316, 112, 16);
       ctx.fill();
 
       drawRail([{ x: 32, y: 34 }, { x: 32, y: 520 }, { x: 142, y: 602 }], 'rgba(255,255,255,0.42)');
       drawRail([{ x: 448, y: 34 }, { x: 448, y: 520 }, { x: 338, y: 602 }], 'rgba(255,255,255,0.42)');
-      drawRail([{ x: 100, y: 96 }, { x: 132, y: 88 }, { x: 164, y: 98 }], 'rgba(114,255,171,0.42)');
-      drawRail([{ x: 316, y: 98 }, { x: 350, y: 88 }, { x: 382, y: 96 }], 'rgba(114,255,171,0.42)');
+      drawRail([{ x: 88, y: 212 }, { x: 170, y: 232 }, { x: 208, y: 292 }], 'rgba(114,255,171,0.42)');
+      drawRail([{ x: 392, y: 250 }, { x: 310, y: 270 }, { x: 270, y: 340 }], 'rgba(114,255,171,0.42)');
+      drawRail([{ x: 114, y: 438 }, { x: 210, y: 408 }], 'rgba(249,244,208,0.34)');
+      drawRail([{ x: 370, y: 478 }, { x: 276, y: 444 }], 'rgba(249,244,208,0.34)');
 
       state.lanes.forEach((lane) => {
         ctx.strokeStyle = lane.lit ? '#f9f4d0' : 'rgba(245,245,245,0.32)';
-        ctx.lineWidth = lane.lit ? 5 : 3;
+        ctx.lineWidth = lane.lit ? 6 : 4;
         ctx.beginPath();
         ctx.moveTo(lane.x, lane.y1);
         ctx.lineTo(lane.x, lane.y2);
         ctx.stroke();
+      });
+
+      ctx.fillStyle = 'rgba(245,245,245,0.34)';
+      ctx.font = '800 11px Consolas, Monaco, monospace';
+      ctx.textAlign = 'center';
+      ['1', '2', '3', '4'].forEach((label, index) => {
+        ctx.fillText(label, state.lanes[index].x, state.lanes[index].y1 - 12);
       });
 
       state.bumpers.forEach((bumper) => {
@@ -495,10 +551,10 @@
       ctx.stroke();
       ctx.restore();
 
-      ctx.fillStyle = 'rgba(245,245,245,0.26)';
-      ctx.font = '900 42px Consolas, Monaco, monospace';
+      ctx.fillStyle = 'rgba(245,245,245,0.24)';
+      ctx.font = '900 24px Consolas, Monaco, monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('PINBALL', tableWidth / 2, 82);
+      ctx.fillText('FREE PLAY', tableWidth / 2, 122);
     }
 
     function setFlipper(side, pressed) {
@@ -532,6 +588,7 @@
         <div class="egg-score" aria-live="polite">
           <span>DRUGSTORE COWBOY / PINBALL WIZARD</span><strong>000000</strong>
         </div>
+        <div class="egg-highscore"><span>HI-SCORE</span><strong class="egg-highscore-value">000000</strong></div>
         <div class="egg-playfield">
           <canvas class="egg-canvas" width="480" height="640" aria-label="Playable pinball table"></canvas>
           <div class="egg-touch-zones" aria-hidden="true"><span>LEFT</span><span>RIGHT</span></div>
@@ -545,8 +602,9 @@
 
     const canvas = overlay.querySelector('.egg-canvas');
     const scoreNode = overlay.querySelector('.egg-score');
+    const highScoreNode = overlay.querySelector('.egg-highscore-value');
     const ballNode = overlay.querySelector('.egg-ball-readout');
-    currentGame = createPinballGame(canvas, scoreNode, ballNode);
+    currentGame = createPinballGame(canvas, scoreNode, highScoreNode, ballNode);
 
     function pointerSide(event) {
       const rect = canvas.getBoundingClientRect();
