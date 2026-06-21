@@ -39,11 +39,7 @@
         box-shadow: 0 24px 90px rgba(0, 0, 0, 0.48);
       }
 
-      .egg-score {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        gap: 8px;
+      .egg-title {
         padding: 12px;
         border: 1px solid rgba(114, 255, 171, 0.35);
         border-radius: 6px;
@@ -51,24 +47,57 @@
         background: #05070a;
         font: 700 14px/1.2 Consolas, Monaco, monospace;
         letter-spacing: 0;
+        text-align: center;
       }
 
-      .egg-score strong {
-        color: #f9f4d0;
-        font-weight: 900;
-      }
-
-      .egg-highscore {
-        display: flex;
-        justify-content: space-between;
+      .egg-scoreboard {
+        display: grid;
         gap: 8px;
         margin-top: 8px;
-        padding: 8px 12px;
+      }
+
+      .egg-score-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: baseline;
         border: 1px solid rgba(249, 244, 208, 0.2);
         border-radius: 6px;
         color: rgba(249, 244, 208, 0.82);
         background: rgba(5, 7, 10, 0.54);
         font: 800 12px/1.2 Consolas, Monaco, monospace;
+        padding: 9px 12px;
+      }
+
+      .egg-score-row strong {
+        color: #f9f4d0;
+        font-size: 20px;
+        font-weight: 900;
+      }
+
+      .egg-state-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .egg-state-row span {
+        flex: 1 1 0;
+        min-width: 0;
+        border: 1px solid rgba(249, 244, 208, 0.2);
+        border-radius: 6px;
+        color: rgba(249, 244, 208, 0.82);
+        background: rgba(5, 7, 10, 0.54);
+        font: 800 11px/1.2 Consolas, Monaco, monospace;
+        padding: 8px 10px;
+      }
+
+      .egg-state-row strong {
+        margin-left: 0.4rem;
+        color: #f9f4d0;
+        font-size: 13px;
+        font-weight: 900;
       }
 
       .egg-playfield {
@@ -134,8 +163,11 @@
       @media (max-width: 520px) {
         .egg-overlay { padding: 12px; }
         .egg-machine { padding: 12px; }
-        .egg-score { font-size: 12px; }
-        .egg-highscore { font-size: 11px; }
+        .egg-title { font-size: 12px; }
+        .egg-score-row { font-size: 11px; padding: 8px 10px; }
+        .egg-score-row strong { font-size: 16px; }
+        .egg-state-row span { font-size: 10px; padding: 7px 8px; }
+        .egg-state-row strong { font-size: 12px; }
         .egg-help { font-size: 12px; }
         .egg-touch-zones span { margin: 0 8px 8px; padding: 8px; }
       }
@@ -191,7 +223,7 @@
     return String(score).padStart(6, '0');
   }
 
-  function createPinballGame(canvas, scoreNode, highScoreNode, ballNode) {
+  function createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode) {
     const ctx = canvas.getContext('2d');
     const state = {
       score: 0,
@@ -238,10 +270,10 @@
         saveHighScore(state.highScore);
       }
 
-      scoreNode.innerHTML = '<span>DRUGSTORE COWBOY / PINBALL WIZARD</span><strong>' +
-        formatScore(state.score) + '</strong>';
+      scoreNode.textContent = formatScore(state.score);
+      ballNode.textContent = String(state.ball);
+      comboNode.textContent = String(state.bestCombo);
       highScoreNode.textContent = formatScore(state.highScore);
-      ballNode.textContent = 'BALL ' + state.ball + ' · COMBO ' + state.bestCombo;
     }
 
     function addScore(points) {
@@ -585,15 +617,20 @@
     overlay.innerHTML = `
       <button class="egg-close" type="button" aria-label="Close">x</button>
       <div class="egg-machine">
-        <div class="egg-score" aria-live="polite">
-          <span>DRUGSTORE COWBOY / PINBALL WIZARD</span><strong>000000</strong>
+        <div class="egg-title">DRUGSTORE COWBOY / PINBALL WIZARD</div>
+        <div class="egg-scoreboard" aria-live="polite">
+          <div class="egg-score-row"><span>CURRENT SCORE</span><strong class="egg-score-value">000000</strong></div>
+          <div class="egg-score-row"><span>HI-SCORE</span><strong class="egg-highscore-value">000000</strong></div>
         </div>
-        <div class="egg-highscore"><span>HI-SCORE</span><strong class="egg-highscore-value">000000</strong></div>
+        <div class="egg-state-row" aria-live="polite">
+          <span>BALL<strong class="egg-ball-readout">1</strong></span>
+          <span>COMBO<strong class="egg-combo-readout">0</strong></span>
+        </div>
         <div class="egg-playfield">
           <canvas class="egg-canvas" width="480" height="640" aria-label="Playable pinball table"></canvas>
           <div class="egg-touch-zones" aria-hidden="true"><span>LEFT</span><span>RIGHT</span></div>
         </div>
-        <div class="egg-help"><span class="egg-ball-readout">BALL 1 · COMBO 0</span> · A/D, arrow keys, or tap either side.</div>
+        <div class="egg-help">Controls: A/D, arrow keys, or tap either side to flip.</div>
       </div>
     `;
 
@@ -601,10 +638,11 @@
     document.body.appendChild(overlay);
 
     const canvas = overlay.querySelector('.egg-canvas');
-    const scoreNode = overlay.querySelector('.egg-score');
-    const highScoreNode = overlay.querySelector('.egg-highscore-value');
+    const scoreNode = overlay.querySelector('.egg-score-value');
     const ballNode = overlay.querySelector('.egg-ball-readout');
-    currentGame = createPinballGame(canvas, scoreNode, highScoreNode, ballNode);
+    const comboNode = overlay.querySelector('.egg-combo-readout');
+    const highScoreNode = overlay.querySelector('.egg-highscore-value');
+    currentGame = createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode);
 
     function pointerSide(event) {
       const rect = canvas.getBoundingClientRect();
