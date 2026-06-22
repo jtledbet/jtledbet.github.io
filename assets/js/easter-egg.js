@@ -146,6 +146,15 @@
         font: 600 13px/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
 
+      .egg-effect-status {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+      }
+
       .egg-close {
         position: fixed;
         top: 18px;
@@ -233,7 +242,7 @@
     return String(score).padStart(6, '0');
   }
 
-  function createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode) {
+  function createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode, effectNode) {
     const ctx = canvas.getContext('2d');
     const state = {
       score: 0,
@@ -246,6 +255,7 @@
       running: true,
       lastTime: 0,
       animationId: 0,
+      tableFlipTimer: 0,
       particles: [],
       bumpers: [
         { x: 236, y: 190, r: 32, value: 50, flash: 0, label: '50' },
@@ -303,6 +313,13 @@
           life: 0.42 + Math.random() * 0.24,
           color
         });
+      }
+    }
+
+    function triggerTableFlip() {
+      state.tableFlipTimer = 1.15;
+      if (effectNode) {
+        effectNode.textContent = `Table flip. Ball ${state.ball} served.`;
       }
     }
 
@@ -446,8 +463,11 @@
 
       if (ball.y > tableHeight + 24) {
         state.ball += 1;
+        triggerTableFlip();
         resetBall(true);
       }
+
+      state.tableFlipTimer = Math.max(0, state.tableFlipTimer - dt);
 
       state.bumpers.forEach((bumper) => {
         bumper.flash = Math.max(0, bumper.flash - dt * 3.6);
@@ -494,6 +514,29 @@
       ctx.font = '700 12px Consolas, Monaco, monospace';
       ctx.textAlign = 'center';
       ctx.fillText(activeSide === 'left' ? 'A' : 'D', line.ax, line.ay + 34);
+    }
+
+    function drawTableFlip() {
+      if (state.tableFlipTimer <= 0) return;
+
+      const alpha = Math.min(1, state.tableFlipTimer * 2.2);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = 'rgba(5, 7, 10, 0.68)';
+      ctx.strokeStyle = 'rgba(249, 244, 208, 0.38)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(78, 454, 324, 52, 10);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#f9f4d0';
+      ctx.shadowColor = 'rgba(249, 244, 208, 0.44)';
+      ctx.shadowBlur = 12;
+      ctx.font = '900 20px Consolas, Monaco, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('(╯°□°)╯︵ ┻━┻', tableWidth / 2, 480);
+      ctx.restore();
     }
 
     function draw() {
@@ -563,6 +606,7 @@
 
       drawFlipper(flipperLine('left'), 'left');
       drawFlipper(flipperLine('right'), 'right');
+      drawTableFlip();
 
       state.particles.forEach((particle) => {
         ctx.globalAlpha = Math.max(0, particle.life);
@@ -639,6 +683,7 @@
         <div class="egg-playfield">
           <canvas class="egg-canvas" width="480" height="640" aria-label="Playable pinball table"></canvas>
           <div class="egg-touch-zones" aria-hidden="true"><span>LEFT</span><span>RIGHT</span></div>
+          <span class="egg-effect-status" aria-live="polite"></span>
         </div>
         <div class="egg-help">Controls: A/D, arrow keys, or tap either side to flip.</div>
       </div>
@@ -652,7 +697,8 @@
     const ballNode = overlay.querySelector('.egg-ball-readout');
     const comboNode = overlay.querySelector('.egg-combo-readout');
     const highScoreNode = overlay.querySelector('.egg-highscore-value');
-    currentGame = createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode);
+    const effectNode = overlay.querySelector('.egg-effect-status');
+    currentGame = createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode, effectNode);
 
     function pointerSide(event) {
       const rect = canvas.getBoundingClientRect();
