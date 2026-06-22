@@ -202,6 +202,16 @@
     pressTimer = null;
   }
 
+  function isDirectPinballLink() {
+    return window.location.hash.toLowerCase() === '#pinball';
+  }
+
+  function launchFromUrl() {
+    if (isDirectPinballLink()) {
+      launchEgg();
+    }
+  }
+
   function loadHighScore() {
     try {
       const value = Number(window.localStorage.getItem(highScoreKey) || '0');
@@ -742,8 +752,14 @@
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bindLongPress);
+    document.addEventListener('DOMContentLoaded', () => {
+      bindLongPress();
+      launchFromUrl();
+    });
   } else {
     bindLongPress();
+    launchFromUrl();
   }
+
+  window.addEventListener('hashchange', launchFromUrl);
 })();
