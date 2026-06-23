@@ -593,6 +593,37 @@
       ctx.restore();
     }
 
+    function drawLaneMessage() {
+      const tiltActive = state.tableFlipTimer > 0;
+      const pulse = Math.sin(state.tableFlipTimer * 28);
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      if (tiltActive && pulse > -0.25) {
+        const alpha = 0.62 + Math.max(0, pulse) * 0.38;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = '#f9f4d0';
+        ctx.shadowColor = 'rgba(249, 244, 208, 0.92)';
+        ctx.shadowBlur = 22 + Math.max(0, pulse) * 16;
+        ctx.font = '900 31px Consolas, Monaco, monospace';
+        ctx.fillText('TILT', tableWidth / 2, 122);
+
+        ctx.globalAlpha = alpha * 0.3;
+        ctx.strokeStyle = '#d16a8a';
+        ctx.lineWidth = 2;
+        ctx.strokeText('TILT', tableWidth / 2, 122);
+      } else {
+        ctx.globalAlpha = 0.24;
+        ctx.fillStyle = '#f5f5f5';
+        ctx.font = '900 24px Consolas, Monaco, monospace';
+        ctx.fillText('FREE PLAY', tableWidth / 2, 122);
+      }
+
+      ctx.restore();
+    }
+
     function draw() {
       const ball = state.ballState;
       ctx.clearRect(0, 0, tableWidth, tableHeight);
@@ -691,10 +722,7 @@
       ctx.stroke();
       ctx.restore();
 
-      ctx.fillStyle = 'rgba(245,245,245,0.24)';
-      ctx.font = '900 24px Consolas, Monaco, monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('FREE PLAY', tableWidth / 2, 122);
+      drawLaneMessage();
     }
 
     function setFlipper(side, pressed) {
