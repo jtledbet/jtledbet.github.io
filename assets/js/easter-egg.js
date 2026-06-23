@@ -845,19 +845,35 @@
       drawRail([{ x: 370, y: 478 }, { x: 276, y: 444 }], 'rgba(249,244,208,0.34)');
 
       state.lanes.forEach((lane) => {
-        ctx.strokeStyle = lane.lit ? '#f9f4d0' : 'rgba(245,245,245,0.32)';
-        ctx.lineWidth = lane.lit ? 6 : 4;
+        const hot = lane.lit > 0;
+        const glow = hot ? 0.5 + lane.lit * 0.45 : 0.34;
+
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = hot ? `rgba(249,244,208,${glow})` : 'rgba(209,106,138,0.34)';
+        ctx.lineWidth = hot ? 13 : 10;
+        ctx.shadowColor = hot ? 'rgba(249,244,208,0.86)' : 'rgba(209,106,138,0.62)';
+        ctx.shadowBlur = hot ? 24 : 14;
         ctx.beginPath();
         ctx.moveTo(lane.x, lane.y1);
         ctx.lineTo(lane.x, lane.y2);
         ctx.stroke();
-      });
 
-      ctx.fillStyle = 'rgba(245,245,245,0.34)';
-      ctx.font = '800 11px Consolas, Monaco, monospace';
-      ctx.textAlign = 'center';
-      ['1', '2', '3', '4'].forEach((label, index) => {
-        ctx.fillText(label, state.lanes[index].x, state.lanes[index].y1 - 12);
+        ctx.strokeStyle = hot ? '#f9f4d0' : '#d16a8a';
+        ctx.lineWidth = hot ? 5 : 4;
+        ctx.shadowBlur = hot ? 14 : 8;
+        ctx.beginPath();
+        ctx.moveTo(lane.x, lane.y1);
+        ctx.lineTo(lane.x, lane.y2);
+        ctx.stroke();
+
+        ctx.fillStyle = hot ? 'rgba(249,244,208,0.9)' : 'rgba(209,106,138,0.58)';
+        [lane.y1, lane.y2].forEach((capY) => {
+          ctx.beginPath();
+          ctx.arc(lane.x, capY, hot ? 4.6 : 3.6, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
       });
 
       drawPet();
