@@ -130,26 +130,6 @@
         cursor: pointer;
       }
 
-      .egg-touch-zones {
-        position: absolute;
-        inset: 0;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        pointer-events: none;
-      }
-
-      .egg-touch-zones span {
-        align-self: end;
-        margin: 0 10px 10px;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 999px;
-        color: rgba(245, 245, 245, 0.78);
-        background: rgba(5, 5, 12, 0.42);
-        font: 800 11px/1 Consolas, Monaco, monospace;
-        padding: 9px 10px;
-        text-align: center;
-      }
-
       .egg-effect-status {
         position: absolute;
         width: 1px;
@@ -181,7 +161,6 @@
         .egg-score-row strong { font-size: 16px; }
         .egg-state-row > span { font-size: 10px; padding: 7px 8px; }
         .egg-state-row strong { font-size: 12px; }
-        .egg-touch-zones span { margin: 0 8px 8px; padding: 8px; }
       }
     `;
     document.head.appendChild(style);
@@ -760,7 +739,6 @@
         </div>
         <div class="egg-playfield">
           <canvas class="egg-canvas" width="480" height="640" aria-label="Playable pinball table"></canvas>
-          <div class="egg-touch-zones" aria-hidden="true"><span>LEFT</span><span>RIGHT</span></div>
           <span class="egg-effect-status" aria-live="polite"></span>
         </div>
       </div>
