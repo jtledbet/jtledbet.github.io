@@ -755,7 +755,7 @@
           <span>BALL<strong class="egg-ball-readout">1</strong></span>
           <span>COMBO<strong class="egg-combo-readout">0</strong></span>
           <span class="egg-control-hint">
-            <span aria-hidden="true">FLIPPERS</span><strong class="egg-control-copy">A/D OR ←/→</strong>
+            <span aria-hidden="true">FLIPPERS</span> <strong class="egg-control-copy">A/D OR ←/→</strong>
           </span>
         </div>
         <div class="egg-playfield">
