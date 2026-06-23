@@ -13,6 +13,7 @@
   let pressTimer = null;
   let longPressTriggered = false;
   let currentGame = null;
+  let controlHintObserver = null;
 
   function loadStyles() {
     if (stylesLoaded) return;
@@ -82,7 +83,7 @@
         margin-top: 8px;
       }
 
-      .egg-state-row span {
+      .egg-state-row > span {
         flex: 1 1 0;
         min-width: 0;
         border: 1px solid rgba(249, 244, 208, 0.2);
@@ -98,6 +99,15 @@
         color: #f9f4d0;
         font-size: 13px;
         font-weight: 900;
+      }
+
+      .egg-control-hint {
+        flex: 2 1 190px;
+      }
+
+      .egg-control-copy {
+        color: #72ffab;
+        white-space: nowrap;
       }
 
       .egg-playfield {
@@ -140,12 +150,6 @@
         text-align: center;
       }
 
-      .egg-help {
-        margin: 10px 2px 0;
-        color: rgba(245, 245, 245, 0.72);
-        font: 600 13px/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      }
-
       .egg-effect-status {
         position: absolute;
         width: 1px;
@@ -175,9 +179,8 @@
         .egg-title { font-size: 12px; }
         .egg-score-row { font-size: 11px; padding: 8px 10px; }
         .egg-score-row strong { font-size: 16px; }
-        .egg-state-row span { font-size: 10px; padding: 7px 8px; }
+        .egg-state-row > span { font-size: 10px; padding: 7px 8px; }
         .egg-state-row strong { font-size: 12px; }
-        .egg-help { font-size: 12px; }
         .egg-touch-zones span { margin: 0 8px 8px; padding: 8px; }
       }
     `;
@@ -197,6 +200,11 @@
   }
 
   function removeEgg() {
+    if (controlHintObserver) {
+      controlHintObserver.disconnect();
+      controlHintObserver = null;
+    }
+
     if (currentGame) {
       currentGame.destroy();
       currentGame = null;
@@ -209,6 +217,73 @@
     if (!pressTimer) return;
     window.clearTimeout(pressTimer);
     pressTimer = null;
+  }
+
+  function mediaMatches(query) {
+    return Boolean(window.matchMedia && window.matchMedia(query).matches);
+  }
+
+  function environmentValue(name) {
+    return document.documentElement.getAttribute(`data-env-${name}`) || '';
+  }
+
+  function controlHintCopy() {
+    const pointer = environmentValue('pointer');
+    const touch = environmentValue('touch');
+    const coarsePointer = pointer === 'coarse' || mediaMatches('(pointer: coarse)');
+    const finePointer = pointer === 'fine' || mediaMatches('(pointer: fine)');
+    const touchAvailable = touch === 'available' ||
+      navigator.maxTouchPoints > 0 ||
+      mediaMatches('(any-pointer: coarse)');
+
+    if (coarsePointer && !finePointer) {
+      return {
+        copy: 'TAP LEFT / RIGHT',
+        aria: 'Controls: tap the left or right side to flip.'
+      };
+    }
+
+    if (touchAvailable) {
+      return {
+        copy: 'A/D · ←/→ · TAP SIDES',
+        aria: 'Controls: press A or D, press the left or right arrow key, or tap a side to flip.'
+      };
+    }
+
+    return {
+      copy: 'A/D OR ←/→',
+      aria: 'Controls: press A or D, or press the left or right arrow key to flip.'
+    };
+  }
+
+  function updateControlHint(controlHintNode) {
+    if (!controlHintNode) return;
+    const copyNode = controlHintNode.querySelector('.egg-control-copy');
+    const hint = controlHintCopy();
+    if (copyNode) copyNode.textContent = hint.copy;
+    controlHintNode.setAttribute('aria-label', hint.aria);
+  }
+
+  function watchControlHint(controlHintNode) {
+    updateControlHint(controlHintNode);
+
+    if (controlHintObserver) {
+      controlHintObserver.disconnect();
+      controlHintObserver = null;
+    }
+
+    if (!window.MutationObserver || !controlHintNode) return;
+
+    controlHintObserver = new MutationObserver(() => updateControlHint(controlHintNode));
+    controlHintObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: [
+        'data-env-hover',
+        'data-env-pointer',
+        'data-env-touch',
+        'data-env-viewport'
+      ]
+    });
   }
 
   function isDirectPinballLink() {
@@ -679,13 +754,15 @@
         <div class="egg-state-row" aria-live="polite">
           <span>BALL<strong class="egg-ball-readout">1</strong></span>
           <span>COMBO<strong class="egg-combo-readout">0</strong></span>
+          <span class="egg-control-hint">
+            <span aria-hidden="true">FLIPPERS</span><strong class="egg-control-copy">A/D OR ←/→</strong>
+          </span>
         </div>
         <div class="egg-playfield">
           <canvas class="egg-canvas" width="480" height="640" aria-label="Playable pinball table"></canvas>
           <div class="egg-touch-zones" aria-hidden="true"><span>LEFT</span><span>RIGHT</span></div>
           <span class="egg-effect-status" aria-live="polite"></span>
         </div>
-        <div class="egg-help">Controls: A/D, arrow keys, or tap either side to flip.</div>
       </div>
     `;
 
@@ -698,7 +775,9 @@
     const comboNode = overlay.querySelector('.egg-combo-readout');
     const highScoreNode = overlay.querySelector('.egg-highscore-value');
     const effectNode = overlay.querySelector('.egg-effect-status');
+    const controlHintNode = overlay.querySelector('.egg-control-hint');
     currentGame = createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode, effectNode);
+    watchControlHint(controlHintNode);
 
     function pointerSide(event) {
       const rect = canvas.getBoundingClientRect();
