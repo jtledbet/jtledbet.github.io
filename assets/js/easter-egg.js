@@ -4,9 +4,10 @@
   const highScoreKey = 'pinball.highScore.v1';
   const tableWidth = 480;
   const tableHeight = 640;
-  const serveHoldSeconds = 1.7;
+  const minLaunchPower = 0.42;
   const leftKeys = new Set(['a', 'A', 'ArrowLeft']);
   const rightKeys = new Set(['d', 'D', 'ArrowRight']);
+  const launchKeys = new Set([' ', 'Spacebar', 'Enter', 'ArrowDown', 's', 'S']);
 
   let typed = '';
   let active = false;
@@ -311,7 +312,10 @@
       lastTime: 0,
       animationId: 0,
       tableFlipTimer: 0,
-      serveTimer: 0,
+      launchReady: false,
+      launchCharging: false,
+      launchCharge: 0,
+      launchPulse: 0,
       particles: [],
       pet: {
         mood: 'idle',
@@ -353,19 +357,18 @@
     };
 
     function resetBall(served) {
-      const releaseVx = served ? -210 : -80;
-      const releaseVy = served ? -80 : -420;
       state.ballState = {
-        x: served ? 392 : 385,
-        y: served ? 110 : 560,
-        vx: served ? 0 : releaseVx,
-        vy: served ? 0 : releaseVy,
-        releaseVx,
-        releaseVy,
+        x: served ? 412 : 385,
+        y: served ? 526 : 560,
+        vx: served ? 0 : -80,
+        vy: served ? 0 : -420,
         r: 9,
         spin: 0
       };
-      state.serveTimer = served ? serveHoldSeconds : 0;
+      state.launchReady = served;
+      state.launchCharging = false;
+      state.launchCharge = 0;
+      state.launchPulse = 0;
       state.combo = 0;
       updateScore();
     }
@@ -433,7 +436,24 @@
       state.tableFlipTimer = 1.15;
       cuePet('drain', 1.15);
       if (effectNode) {
-        effectNode.textContent = `Table flip. Ball ${state.ball} served.`;
+        effectNode.textContent = `Table flip. Ball ${state.ball} ready.`;
+      }
+    }
+
+    function launchBall() {
+      if (!state.launchReady) return;
+
+      const ball = state.ballState;
+      const power = Math.max(minLaunchPower, state.launchCharge);
+      state.launchReady = false;
+      state.launchCharging = false;
+      state.launchCharge = 0;
+      ball.vx = -110 - power * 160;
+      ball.vy = -430 - power * 310;
+      addParticles(ball.x, ball.y, '#72ffab');
+      cuePet('lane', 0.42);
+      if (effectNode) {
+        effectNode.textContent = `Ball ${state.ball} launched.`;
       }
     }
 
@@ -541,20 +561,20 @@
       state.lastTime = time;
 
       const ball = state.ballState;
-      if (state.serveTimer > 0) {
-        state.serveTimer = Math.max(0, state.serveTimer - dt);
-        ball.spin += dt * 0.8;
-        if (state.serveTimer <= 0) {
-          ball.vx = ball.releaseVx;
-          ball.vy = ball.releaseVy;
+      if (state.launchReady) {
+        state.launchPulse += dt;
+        if (state.launchCharging) {
+          state.launchCharge = Math.min(1, state.launchCharge + dt * 0.72);
         } else {
-          state.tableFlipTimer = Math.max(0, state.tableFlipTimer - dt);
-          updatePet(dt);
-          updateParticles(dt);
-          draw();
-          state.animationId = window.requestAnimationFrame(update);
-          return;
+          state.launchCharge = Math.max(0, state.launchCharge - dt * 0.38);
         }
+        ball.spin += dt * (0.5 + state.launchCharge * 1.4);
+        state.tableFlipTimer = Math.max(0, state.tableFlipTimer - dt);
+        updatePet(dt);
+        updateParticles(dt);
+        draw();
+        state.animationId = window.requestAnimationFrame(update);
+        return;
       }
 
       ball.vy += 300 * dt;
@@ -708,7 +728,7 @@
 
     function drawLaneMessage() {
       const tiltActive = state.tableFlipTimer > 0;
-      const serveActive = state.serveTimer > 0;
+      const launchActive = state.launchReady;
       const pulse = Math.sin(state.tableFlipTimer * 28);
 
       ctx.save();
@@ -728,15 +748,14 @@
         ctx.strokeStyle = '#d16a8a';
         ctx.lineWidth = 2;
         ctx.strokeText('TILT', tableWidth / 2, 122);
-      } else if (serveActive) {
-        const count = Math.max(1, Math.ceil(state.serveTimer));
-        const alpha = 0.72 + Math.sin(state.serveTimer * 11) * 0.16;
+      } else if (launchActive) {
+        const alpha = 0.72 + Math.sin(state.launchPulse * 7) * 0.16;
         ctx.globalAlpha = alpha;
-        ctx.fillStyle = '#72ffab';
-        ctx.shadowColor = 'rgba(114, 255, 171, 0.72)';
-        ctx.shadowBlur = 14;
-        ctx.font = '900 24px Consolas, Monaco, monospace';
-        ctx.fillText(`BALL ${state.ball} IN ${count}`, tableWidth / 2, 122);
+        ctx.fillStyle = state.launchCharging ? '#f9f4d0' : '#72ffab';
+        ctx.shadowColor = state.launchCharging ? 'rgba(249, 244, 208, 0.72)' : 'rgba(114, 255, 171, 0.72)';
+        ctx.shadowBlur = state.launchCharging ? 18 : 14;
+        ctx.font = '900 23px Consolas, Monaco, monospace';
+        ctx.fillText(state.launchCharging ? 'RELEASE' : 'PULL TO LAUNCH', tableWidth / 2, 122);
       } else {
         ctx.globalAlpha = 0.24;
         ctx.fillStyle = '#f5f5f5';
@@ -747,21 +766,22 @@
       ctx.restore();
     }
 
-    function drawServeHoldCue(ball) {
-      if (state.serveTimer <= 0) return;
+    function drawLaunchCue(ball) {
+      if (!state.launchReady) return;
 
-      const elapsed = serveHoldSeconds - state.serveTimer;
-      const pulse = 0.5 + Math.sin(elapsed * 9) * 0.5;
-      const radius = ball.r + 12 + pulse * 5;
+      const pulse = 0.5 + Math.sin(state.launchPulse * 9) * 0.5;
+      const charge = state.launchCharge;
+      const radius = ball.r + 12 + pulse * 5 + charge * 8;
+      const color = state.launchCharging ? '#f9f4d0' : '#72ffab';
 
       ctx.save();
       ctx.translate(ball.x, ball.y);
-      ctx.rotate(elapsed * 1.6);
-      ctx.globalAlpha = 0.44 + pulse * 0.2;
-      ctx.strokeStyle = '#72ffab';
+      ctx.rotate(state.launchPulse * 1.6);
+      ctx.globalAlpha = 0.44 + pulse * 0.2 + charge * 0.2;
+      ctx.strokeStyle = color;
       ctx.lineWidth = 2;
-      ctx.shadowColor = 'rgba(114, 255, 171, 0.72)';
-      ctx.shadowBlur = 16;
+      ctx.shadowColor = state.launchCharging ? 'rgba(249, 244, 208, 0.82)' : 'rgba(114, 255, 171, 0.72)';
+      ctx.shadowBlur = 16 + charge * 10;
       ctx.beginPath();
       ctx.arc(0, 0, radius, -0.35, Math.PI * 1.55);
       ctx.stroke();
@@ -774,9 +794,25 @@
       ctx.stroke();
       ctx.setLineDash([]);
 
+      ctx.rotate(-state.launchPulse * 1.6);
+      ctx.globalAlpha = 0.42 + charge * 0.4;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, ball.r + 14 + charge * 18);
+      ctx.lineTo(0, ball.r + 54);
+      ctx.stroke();
+      for (let i = 0; i < 4; i += 1) {
+        const y = ball.r + 21 + i * 8 + charge * 12;
+        ctx.beginPath();
+        ctx.moveTo(-6, y);
+        ctx.lineTo(6, y + 3);
+        ctx.stroke();
+      }
+
       ctx.fillStyle = '#f9f4d0';
       [0, 2.1, 4.2].forEach((angle, index) => {
-        const dotPulse = index === Math.floor(elapsed * 5) % 3 ? 1 : 0.42;
+        const dotPulse = index === Math.floor(state.launchPulse * 5) % 3 ? 1 : 0.42;
         ctx.globalAlpha = dotPulse;
         ctx.beginPath();
         ctx.arc(Math.cos(angle) * (ball.r + 24), Math.sin(angle) * (ball.r + 24), 2.4, 0, Math.PI * 2);
@@ -865,7 +901,7 @@
         ctx.globalAlpha = 1;
       });
 
-      drawServeHoldCue(ball);
+      drawLaunchCue(ball);
 
       ctx.save();
       ctx.translate(ball.x, ball.y);
@@ -901,11 +937,26 @@
       }
     }
 
+    function setLauncher(pressed) {
+      if (!state.launchReady) return false;
+
+      if (pressed) {
+        state.launchCharging = true;
+        state.launchCharge = Math.max(state.launchCharge, 0.08);
+        cuePet('lane', 0.28);
+      } else if (state.launchCharging) {
+        launchBall();
+      }
+
+      return true;
+    }
+
     resetBall(true);
     state.animationId = window.requestAnimationFrame(update);
 
     return {
       setFlipper,
+      setLauncher,
       destroy() {
         state.running = false;
         window.cancelAnimationFrame(state.animationId);
@@ -964,11 +1015,13 @@
     canvas.addEventListener('pointerdown', (event) => {
       event.preventDefault();
       canvas.setPointerCapture?.(event.pointerId);
+      if (currentGame?.setLauncher(true)) return;
       currentGame?.setFlipper(pointerSide(event), true);
     });
 
     ['pointerup', 'pointercancel', 'pointerleave'].forEach((eventName) => {
       canvas.addEventListener(eventName, () => {
+        if (currentGame?.setLauncher(false)) return;
         currentGame?.setFlipper('left', false);
         currentGame?.setFlipper('right', false);
       });
@@ -998,6 +1051,12 @@
       return;
     }
 
+    if (active && launchKeys.has(event.key)) {
+      event.preventDefault();
+      currentGame?.setLauncher(true);
+      return;
+    }
+
     if (shouldIgnore(event) || event.key.length !== 1) return;
     typed = (typed + event.key.toLowerCase()).replace(/[^a-z]/g, '').slice(-32);
     if (triggers.some((trigger) => typed.endsWith(trigger))) {
@@ -1013,6 +1072,10 @@
 
     if (rightKeys.has(event.key)) {
       currentGame?.setFlipper('right', false);
+    }
+
+    if (launchKeys.has(event.key)) {
+      currentGame?.setLauncher(false);
     }
   }
 
