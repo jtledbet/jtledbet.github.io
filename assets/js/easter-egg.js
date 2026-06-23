@@ -4,6 +4,7 @@
   const highScoreKey = 'pinball.highScore.v1';
   const tableWidth = 480;
   const tableHeight = 640;
+  const serveHoldSeconds = 1.7;
   const leftKeys = new Set(['a', 'A', 'ArrowLeft']);
   const rightKeys = new Set(['d', 'D', 'ArrowRight']);
 
@@ -310,6 +311,7 @@
       lastTime: 0,
       animationId: 0,
       tableFlipTimer: 0,
+      serveTimer: 0,
       particles: [],
       pet: {
         mood: 'idle',
@@ -351,14 +353,19 @@
     };
 
     function resetBall(served) {
+      const releaseVx = served ? -210 : -80;
+      const releaseVy = served ? -80 : -420;
       state.ballState = {
         x: served ? 392 : 385,
         y: served ? 110 : 560,
-        vx: served ? -210 : -80,
-        vy: served ? -80 : -420,
+        vx: served ? 0 : releaseVx,
+        vy: served ? 0 : releaseVy,
+        releaseVx,
+        releaseVy,
         r: 9,
         spin: 0
       };
+      state.serveTimer = served ? serveHoldSeconds : 0;
       state.combo = 0;
       updateScore();
     }
@@ -534,6 +541,22 @@
       state.lastTime = time;
 
       const ball = state.ballState;
+      if (state.serveTimer > 0) {
+        state.serveTimer = Math.max(0, state.serveTimer - dt);
+        ball.spin += dt * 0.8;
+        if (state.serveTimer <= 0) {
+          ball.vx = ball.releaseVx;
+          ball.vy = ball.releaseVy;
+        } else {
+          state.tableFlipTimer = Math.max(0, state.tableFlipTimer - dt);
+          updatePet(dt);
+          updateParticles(dt);
+          draw();
+          state.animationId = window.requestAnimationFrame(update);
+          return;
+        }
+      }
+
       ball.vy += 300 * dt;
       ball.x += ball.vx * dt;
       ball.y += ball.vy * dt;
@@ -685,6 +708,7 @@
 
     function drawLaneMessage() {
       const tiltActive = state.tableFlipTimer > 0;
+      const serveActive = state.serveTimer > 0;
       const pulse = Math.sin(state.tableFlipTimer * 28);
 
       ctx.save();
@@ -704,6 +728,15 @@
         ctx.strokeStyle = '#d16a8a';
         ctx.lineWidth = 2;
         ctx.strokeText('TILT', tableWidth / 2, 122);
+      } else if (serveActive) {
+        const count = Math.max(1, Math.ceil(state.serveTimer));
+        const alpha = 0.72 + Math.sin(state.serveTimer * 11) * 0.16;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = '#72ffab';
+        ctx.shadowColor = 'rgba(114, 255, 171, 0.72)';
+        ctx.shadowBlur = 14;
+        ctx.font = '900 24px Consolas, Monaco, monospace';
+        ctx.fillText(`BALL ${state.ball} IN ${count}`, tableWidth / 2, 122);
       } else {
         ctx.globalAlpha = 0.24;
         ctx.fillStyle = '#f5f5f5';
