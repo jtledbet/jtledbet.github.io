@@ -747,6 +747,44 @@
       ctx.restore();
     }
 
+    function drawServeHoldCue(ball) {
+      if (state.serveTimer <= 0) return;
+
+      const elapsed = serveHoldSeconds - state.serveTimer;
+      const pulse = 0.5 + Math.sin(elapsed * 9) * 0.5;
+      const radius = ball.r + 12 + pulse * 5;
+
+      ctx.save();
+      ctx.translate(ball.x, ball.y);
+      ctx.rotate(elapsed * 1.6);
+      ctx.globalAlpha = 0.44 + pulse * 0.2;
+      ctx.strokeStyle = '#72ffab';
+      ctx.lineWidth = 2;
+      ctx.shadowColor = 'rgba(114, 255, 171, 0.72)';
+      ctx.shadowBlur = 16;
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, -0.35, Math.PI * 1.55);
+      ctx.stroke();
+
+      ctx.globalAlpha = 0.34;
+      ctx.setLineDash([3, 7]);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(0, 0, ball.r + 24, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#f9f4d0';
+      [0, 2.1, 4.2].forEach((angle, index) => {
+        const dotPulse = index === Math.floor(elapsed * 5) % 3 ? 1 : 0.42;
+        ctx.globalAlpha = dotPulse;
+        ctx.beginPath();
+        ctx.arc(Math.cos(angle) * (ball.r + 24), Math.sin(angle) * (ball.r + 24), 2.4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+
     function draw() {
       const ball = state.ballState;
       ctx.clearRect(0, 0, tableWidth, tableHeight);
@@ -826,6 +864,8 @@
         ctx.fill();
         ctx.globalAlpha = 1;
       });
+
+      drawServeHoldCue(ball);
 
       ctx.save();
       ctx.translate(ball.x, ball.y);
