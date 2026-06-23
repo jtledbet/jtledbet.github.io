@@ -311,6 +311,11 @@
       animationId: 0,
       tableFlipTimer: 0,
       particles: [],
+      pet: {
+        mood: 'idle',
+        timer: 0,
+        idleTime: 0
+      },
       bumpers: [
         { x: 236, y: 190, r: 32, value: 50, flash: 0, label: '50' },
         { x: 154, y: 310, r: 34, value: 75, flash: 0, label: '75' },
@@ -323,6 +328,26 @@
         { x: 364, y1: 88, y2: 168, lit: 0 }
       ],
       ballState: null
+    };
+    const petPriority = {
+      idle: 0,
+      left: 1,
+      right: 1,
+      flip: 1,
+      lane: 2,
+      bump: 3,
+      combo: 4,
+      drain: 5
+    };
+    const petFaces = {
+      idle: ['=^._.^=', '=^-.-^='],
+      left: ['<^._.^='],
+      right: ['=^._.^>'],
+      flip: ['=^>.<^='],
+      lane: ['=^?.?^='],
+      bump: ['=^o.o^='],
+      combo: ['=^*.*^='],
+      drain: ['=^;.;^=']
     };
 
     function resetBall(served) {
@@ -350,10 +375,37 @@
       highScoreNode.textContent = formatScore(state.highScore);
     }
 
-    function addScore(points) {
+    function cuePet(mood, duration) {
+      const currentPriority = petPriority[state.pet.mood] || 0;
+      const nextPriority = petPriority[mood] || 0;
+      if (state.pet.timer > 0 && currentPriority > nextPriority) return;
+
+      state.pet.mood = mood;
+      state.pet.timer = duration;
+    }
+
+    function updatePet(dt) {
+      state.pet.idleTime += dt;
+      if (state.pet.timer <= 0) {
+        state.pet.mood = 'idle';
+        return;
+      }
+
+      state.pet.timer = Math.max(0, state.pet.timer - dt);
+      if (state.pet.timer <= 0) {
+        state.pet.mood = 'idle';
+      }
+    }
+
+    function addScore(points, reaction) {
       state.combo += 1;
       state.bestCombo = Math.max(state.bestCombo, state.combo);
       state.score += points * state.combo;
+      if (state.combo >= 10 && state.combo % 5 === 0) {
+        cuePet('combo', 0.72);
+      } else if (reaction) {
+        cuePet(reaction, 0.46);
+      }
       updateScore();
     }
 
@@ -372,6 +424,7 @@
 
     function triggerTableFlip() {
       state.tableFlipTimer = 1.15;
+      cuePet('drain', 1.15);
       if (effectNode) {
         effectNode.textContent = `Table flip. Ball ${state.ball} served.`;
       }
@@ -432,7 +485,7 @@
         ball.y = bumper.y + ny * minDistance;
         reflectBall(nx, ny, 280);
         bumper.flash = 1;
-        addScore(bumper.value);
+        addScore(bumper.value, 'bump');
         addParticles(ball.x, ball.y, '#f9f4d0');
       });
     }
@@ -450,7 +503,7 @@
       reflectBall(nx, ny, flipImpulse);
       ball.vx += side === 'left' ? 105 : -105;
       ball.vy -= line.held ? 230 : 80;
-      addScore(line.held ? 25 : 5);
+      addScore(line.held ? 25 : 5, line.held ? 'flip' : '');
     }
 
     function updateLanes(dt) {
@@ -459,7 +512,7 @@
         lane.lit = Math.max(0, lane.lit - dt * 2.4);
         if (lane.lit <= 0 && Math.abs(ball.x - lane.x) < 14 && ball.y > lane.y1 && ball.y < lane.y2) {
           lane.lit = 1;
-          addScore(15);
+          addScore(15, 'lane');
           ball.vx += ball.x < tableWidth / 2 ? 24 : -24;
         }
       });
@@ -522,6 +575,7 @@
       }
 
       state.tableFlipTimer = Math.max(0, state.tableFlipTimer - dt);
+      updatePet(dt);
 
       state.bumpers.forEach((bumper) => {
         bumper.flash = Math.max(0, bumper.flash - dt * 3.6);
@@ -568,6 +622,42 @@
       ctx.font = '700 12px Consolas, Monaco, monospace';
       ctx.textAlign = 'center';
       ctx.fillText(activeSide === 'left' ? 'A' : 'D', line.ax, line.ay + 34);
+    }
+
+    function drawPet() {
+      const mood = state.pet.mood;
+      const faces = petFaces[mood] || petFaces.idle;
+      const idleFrame = Math.floor(state.pet.idleTime * 1.6) % petFaces.idle.length;
+      const activeFrame = Math.floor(state.pet.timer * 16) % faces.length;
+      const face = mood === 'idle' ? petFaces.idle[idleFrame] : faces[activeFrame];
+      const color = mood === 'drain'
+        ? '#d16a8a'
+        : mood === 'combo' || mood === 'bump'
+          ? '#72ffab'
+          : '#f9f4d0';
+      const yNudge = mood === 'idle'
+        ? Math.sin(state.pet.idleTime * 2.4) * 0.8
+        : Math.sin(state.pet.timer * 30) * 1.6;
+
+      ctx.save();
+      ctx.translate(62, 196 + yNudge);
+      ctx.globalAlpha = mood === 'idle' ? 0.74 : 0.94;
+      ctx.fillStyle = 'rgba(5, 7, 10, 0.62)';
+      ctx.strokeStyle = mood === 'idle' ? 'rgba(249, 244, 208, 0.26)' : color;
+      ctx.lineWidth = 2;
+      ctx.shadowColor = mood === 'idle' ? 'rgba(249, 244, 208, 0.16)' : color;
+      ctx.shadowBlur = mood === 'idle' ? 6 : 14;
+      ctx.beginPath();
+      ctx.roundRect(-42, -18, 84, 34, 9);
+      ctx.fill();
+      ctx.stroke();
+      ctx.shadowBlur = mood === 'idle' ? 0 : 8;
+      ctx.fillStyle = color;
+      ctx.font = '900 14px Consolas, Monaco, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(face, 0, 0);
+      ctx.restore();
     }
 
     function drawTableFlip() {
@@ -663,6 +753,8 @@
         ctx.fillText(label, state.lanes[index].x, state.lanes[index].y1 - 12);
       });
 
+      drawPet();
+
       state.bumpers.forEach((bumper) => {
         ctx.save();
         ctx.shadowColor = bumper.flash ? 'rgba(249,244,208,0.96)' : 'rgba(209,106,138,0.55)';
@@ -726,8 +818,14 @@
     }
 
     function setFlipper(side, pressed) {
-      if (side === 'left') state.leftHeld = pressed;
-      if (side === 'right') state.rightHeld = pressed;
+      if (side === 'left') {
+        if (pressed && !state.leftHeld) cuePet('left', 0.24);
+        state.leftHeld = pressed;
+      }
+      if (side === 'right') {
+        if (pressed && !state.rightHeld) cuePet('right', 0.24);
+        state.rightHeld = pressed;
+      }
     }
 
     resetBall(true);
