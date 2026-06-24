@@ -337,7 +337,7 @@
       bumpers: [
         { x: 236, y: 204, r: 37, value: 50, flash: 0, label: '50' },
         { x: 156, y: 318, r: 39, value: 75, flash: 0, label: '75' },
-        { x: 324, y: 318, r: 39, value: 100, flash: 0, label: '100' }
+        { x: 328, y: 306, r: 35, value: 100, flash: 0, label: '100' }
       ],
       lanes: [
         { x: 116, y1: 88, y2: 168, lit: 0 },
@@ -517,8 +517,26 @@
       }
     }
 
-    function flipperLine(side) {
+    function flipperLine(side, tier = 'lower') {
       const held = side === 'left' ? state.leftHeld : state.rightHeld;
+      if (tier === 'upper') {
+        const rest = side === 'left'
+          ? { ax: 168, ay: 382, bx: 222, by: 394 }
+          : { ax: 312, ay: 382, bx: 258, by: 394 };
+        const raised = side === 'left'
+          ? { bx: 214, by: 358 }
+          : { bx: 266, by: 358 };
+
+        return {
+          ax: rest.ax,
+          ay: rest.ay,
+          bx: held ? raised.bx : rest.bx,
+          by: held ? raised.by : rest.by,
+          held,
+          mini: true
+        };
+      }
+
       const rest = side === 'left'
         ? { ax: 148, ay: 550, bx: 222, by: 562 }
         : { ax: 332, ay: 550, bx: 258, by: 562 };
@@ -580,17 +598,18 @@
     function collideFlipper(line, side) {
       const ball = state.ballState;
       const hit = distanceToSegment(ball.x, ball.y, line);
-      if (hit.distance > ball.r + 7 || ball.vy < -760) return;
+      const radius = line.mini ? 4 : 7;
+      if (hit.distance > ball.r + radius || ball.vy < -760) return;
 
       const nx = hit.dx / (hit.distance || 1);
       const ny = hit.dy / (hit.distance || 1);
-      ball.x = hit.x + nx * (ball.r + 7);
-      ball.y = hit.y + ny * (ball.r + 7);
-      const flipImpulse = line.held ? 520 : 160;
+      ball.x = hit.x + nx * (ball.r + radius);
+      ball.y = hit.y + ny * (ball.r + radius);
+      const flipImpulse = line.held ? (line.mini ? 410 : 520) : (line.mini ? 110 : 160);
       reflectBall(nx, ny, flipImpulse);
-      ball.vx += side === 'left' ? 105 : -105;
-      ball.vy -= line.held ? 230 : 80;
-      addScore(line.held ? 25 : 5, line.held ? 'flip' : '');
+      ball.vx += side === 'left' ? (line.mini ? 74 : 105) : (line.mini ? -74 : -105);
+      ball.vy -= line.held ? (line.mini ? 155 : 230) : (line.mini ? 56 : 80);
+      addScore(line.held ? (line.mini ? 18 : 25) : 5, line.held ? 'flip' : '');
     }
 
     function updateLanes(dt) {
@@ -745,6 +764,8 @@
       collideBumpers();
       collideRailBodies(dt);
       updateLanes(dt);
+      collideFlipper(flipperLine('left', 'upper'), 'left');
+      collideFlipper(flipperLine('right', 'upper'), 'right');
       collideFlipper(flipperLine('left'), 'left');
       collideFlipper(flipperLine('right'), 'right');
       updateParticles(dt);
@@ -774,21 +795,24 @@
     }
 
     function drawFlipper(line, activeSide) {
+      const mini = !!line.mini;
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(line.ax, line.ay);
       ctx.lineTo(line.bx, line.by);
-      ctx.lineWidth = 14;
+      ctx.lineWidth = mini ? 8 : 14;
       ctx.lineCap = 'round';
       ctx.strokeStyle = line.held ? '#f9f4d0' : '#72ffab';
       ctx.shadowColor = line.held ? 'rgba(249,244,208,0.78)' : 'rgba(114,255,171,0.46)';
-      ctx.shadowBlur = line.held ? 22 : 12;
+      ctx.shadowBlur = line.held ? (mini ? 14 : 22) : (mini ? 7 : 12);
       ctx.stroke();
       ctx.fillStyle = '#08080f';
       ctx.beginPath();
-      ctx.arc(line.ax, line.ay, 8, 0, Math.PI * 2);
+      ctx.arc(line.ax, line.ay, mini ? 4.5 : 8, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
+      if (mini) return;
+
       ctx.fillStyle = 'rgba(245,245,245,0.48)';
       ctx.font = '700 12px Consolas, Monaco, monospace';
       ctx.textAlign = 'center';
@@ -1108,6 +1132,8 @@
         ctx.restore();
       });
 
+      drawFlipper(flipperLine('left', 'upper'), 'left');
+      drawFlipper(flipperLine('right', 'upper'), 'right');
       drawFlipper(flipperLine('left'), 'left');
       drawFlipper(flipperLine('right'), 'right');
       drawTableFlip();
