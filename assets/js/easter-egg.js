@@ -345,6 +345,28 @@
         { x: 284, y1: 72, y2: 152, lit: 0 },
         { x: 364, y1: 88, y2: 168, lit: 0 }
       ],
+      borderRails: [
+        {
+          points: [{ x: 32, y: 34 }, { x: 32, y: 520 }, { x: 142, y: 602 }],
+          color: 'rgba(255,255,255,0.52)',
+          glow: 'rgba(255,255,255,0.18)',
+          width: 7,
+          impulse: 42,
+          nudge: 10,
+          score: false,
+          cooldown: 0
+        },
+        {
+          points: [{ x: 448, y: 34 }, { x: 448, y: 520 }, { x: 338, y: 602 }],
+          color: 'rgba(255,255,255,0.52)',
+          glow: 'rgba(255,255,255,0.18)',
+          width: 7,
+          impulse: 42,
+          nudge: 10,
+          score: false,
+          cooldown: 0
+        }
+      ],
       railBodies: [
         {
           points: [{ x: 88, y: 212 }, { x: 170, y: 232 }, { x: 208, y: 292 }],
@@ -533,14 +555,15 @@
       return { x, y, dx: px - x, dy: py - y, distance: Math.hypot(px - x, py - y) };
     }
 
-    function reflectBall(nx, ny, impulse) {
+    function reflectBall(nx, ny, impulse, force = impulse >= 1) {
       const ball = state.ballState;
       const dot = ball.vx * nx + ball.vy * ny;
-      if (dot > 0 && impulse < 1) return;
+      if (dot > 0 && !force) return false;
       ball.vx = ball.vx - 2 * dot * nx + nx * impulse;
       ball.vy = ball.vy - 2 * dot * ny + ny * impulse;
       ball.vx *= 0.96;
       ball.vy *= 0.96;
+      return true;
     }
 
     function collideBumpers() {
@@ -591,9 +614,9 @@
       });
     }
 
-    function collideRailBodies(dt) {
+    function collideRails(rails, dt) {
       const ball = state.ballState;
-      state.railBodies.forEach((rail) => {
+      rails.forEach((rail) => {
         rail.cooldown = Math.max(0, rail.cooldown - dt);
 
         for (let i = 0; i < rail.points.length - 1; i += 1) {
@@ -620,14 +643,19 @@
 
           ball.x = hit.x + nx * minDistance;
           ball.y = hit.y + ny * minDistance;
-          reflectBall(nx, ny, rail.impulse);
-          ball.vx += nx * 18;
-          ball.vy += ny * 18;
+          const bounced = reflectBall(nx, ny, rail.impulse);
+          if (bounced) {
+            const nudge = rail.nudge ?? 18;
+            ball.vx += nx * nudge;
+            ball.vy += ny * nudge;
+          }
 
           if (rail.cooldown <= 0) {
             rail.cooldown = 0.16;
-            addScore(8, 'lane');
-            addParticles(ball.x, ball.y, rail.color);
+            if (rail.score !== false) {
+              addScore(8, 'lane');
+              addParticles(ball.x, ball.y, rail.color);
+            }
           }
 
           return;
@@ -674,31 +702,17 @@
       ball.vx *= 0.999;
       ball.vy *= 0.999;
 
-      if (ball.x < 32 + ball.r) {
-        ball.x = 32 + ball.r;
+      if (ball.x < 45) {
+        ball.x = 45;
         reflectBall(1, 0, 18);
       }
-      if (ball.x > tableWidth - 32 - ball.r) {
-        ball.x = tableWidth - 32 - ball.r;
+      if (ball.x > tableWidth - 45) {
+        ball.x = tableWidth - 45;
         reflectBall(-1, 0, 18);
       }
-      if (ball.y < 34 + ball.r) {
-        ball.y = 34 + ball.r;
+      if (ball.y < 47) {
+        ball.y = 47;
         reflectBall(0, 1, 18);
-      }
-
-      if (ball.y > 580 && ball.x < 170) {
-        ball.y = 580;
-        ball.vy = -Math.abs(ball.vy) * 0.74 - 130;
-        ball.vx += 90;
-        state.combo = 0;
-      }
-
-      if (ball.y > 580 && ball.x > 310) {
-        ball.y = 580;
-        ball.vy = -Math.abs(ball.vy) * 0.74 - 130;
-        ball.vx -= 90;
-        state.combo = 0;
       }
 
       if (ball.y > tableHeight + 24) {
@@ -715,7 +729,8 @@
       });
 
       collideBumpers();
-      collideRailBodies(dt);
+      collideRails(state.borderRails, dt);
+      collideRails(state.railBodies, dt);
       updateLanes(dt);
       collideFlipper(flipperLine('left'), 'left');
       collideFlipper(flipperLine('right'), 'right');
@@ -936,17 +951,14 @@
       ctx.roundRect(82, 56, 316, 112, 16);
       ctx.fill();
 
-      drawRail([{ x: 32, y: 34 }, { x: 32, y: 520 }, { x: 142, y: 602 }], {
-        color: 'rgba(255,255,255,0.52)',
-        glow: 'rgba(255,255,255,0.18)',
-        shadowBlur: 9,
-        width: 7
-      });
-      drawRail([{ x: 448, y: 34 }, { x: 448, y: 520 }, { x: 338, y: 602 }], {
-        color: 'rgba(255,255,255,0.52)',
-        glow: 'rgba(255,255,255,0.18)',
-        shadowBlur: 9,
-        width: 7
+      state.borderRails.forEach((rail) => {
+        const hot = rail.cooldown > 0;
+        drawRail(rail.points, {
+          color: hot ? 'rgba(249,244,208,0.62)' : rail.color,
+          glow: hot ? 'rgba(249,244,208,0.32)' : rail.glow,
+          shadowBlur: hot ? 14 : 9,
+          width: hot ? rail.width + 1 : rail.width
+        });
       });
       state.railBodies.forEach((rail) => {
         const hot = rail.cooldown > 0;
