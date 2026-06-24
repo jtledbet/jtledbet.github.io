@@ -132,6 +132,18 @@
         cursor: pointer;
       }
 
+      .egg-playfield,
+      .egg-canvas {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      .egg-canvas:focus {
+        outline: none;
+      }
+
       .egg-effect-status {
         position: absolute;
         width: 1px;
@@ -323,15 +335,49 @@
         idleTime: 0
       },
       bumpers: [
-        { x: 236, y: 190, r: 32, value: 50, flash: 0, label: '50' },
-        { x: 154, y: 310, r: 34, value: 75, flash: 0, label: '75' },
-        { x: 330, y: 386, r: 36, value: 100, flash: 0, label: '100' }
+        { x: 236, y: 190, r: 38, value: 50, flash: 0, label: '50' },
+        { x: 154, y: 310, r: 40, value: 75, flash: 0, label: '75' },
+        { x: 330, y: 386, r: 42, value: 100, flash: 0, label: '100' }
       ],
       lanes: [
         { x: 116, y1: 88, y2: 168, lit: 0 },
         { x: 196, y1: 72, y2: 152, lit: 0 },
         { x: 284, y1: 72, y2: 152, lit: 0 },
         { x: 364, y1: 88, y2: 168, lit: 0 }
+      ],
+      railBodies: [
+        {
+          points: [{ x: 88, y: 212 }, { x: 170, y: 232 }, { x: 208, y: 292 }],
+          color: 'rgba(114,255,171,0.56)',
+          glow: 'rgba(114,255,171,0.34)',
+          width: 7,
+          impulse: 86,
+          cooldown: 0
+        },
+        {
+          points: [{ x: 392, y: 250 }, { x: 310, y: 270 }, { x: 270, y: 340 }],
+          color: 'rgba(114,255,171,0.56)',
+          glow: 'rgba(114,255,171,0.34)',
+          width: 7,
+          impulse: 86,
+          cooldown: 0
+        },
+        {
+          points: [{ x: 114, y: 438 }, { x: 210, y: 408 }],
+          color: 'rgba(249,244,208,0.44)',
+          glow: 'rgba(249,244,208,0.24)',
+          width: 6,
+          impulse: 68,
+          cooldown: 0
+        },
+        {
+          points: [{ x: 370, y: 478 }, { x: 276, y: 444 }],
+          color: 'rgba(249,244,208,0.44)',
+          glow: 'rgba(249,244,208,0.24)',
+          width: 6,
+          impulse: 68,
+          cooldown: 0
+        }
       ],
       ballState: null
     };
@@ -545,6 +591,50 @@
       });
     }
 
+    function collideRailBodies(dt) {
+      const ball = state.ballState;
+      state.railBodies.forEach((rail) => {
+        rail.cooldown = Math.max(0, rail.cooldown - dt);
+
+        for (let i = 0; i < rail.points.length - 1; i += 1) {
+          const start = rail.points[i];
+          const end = rail.points[i + 1];
+          const hit = distanceToSegment(ball.x, ball.y, {
+            ax: start.x,
+            ay: start.y,
+            bx: end.x,
+            by: end.y
+          });
+          const minDistance = ball.r + rail.width * 0.72;
+          if (hit.distance >= minDistance) continue;
+
+          let nx = hit.dx / (hit.distance || 1);
+          let ny = hit.dy / (hit.distance || 1);
+          if (hit.distance < 0.001) {
+            const dx = end.x - start.x;
+            const dy = end.y - start.y;
+            const length = Math.hypot(dx, dy) || 1;
+            nx = -dy / length;
+            ny = dx / length;
+          }
+
+          ball.x = hit.x + nx * minDistance;
+          ball.y = hit.y + ny * minDistance;
+          reflectBall(nx, ny, rail.impulse);
+          ball.vx += nx * 18;
+          ball.vy += ny * 18;
+
+          if (rail.cooldown <= 0) {
+            rail.cooldown = 0.16;
+            addScore(8, 'lane');
+            addParticles(ball.x, ball.y, rail.color);
+          }
+
+          return;
+        }
+      });
+    }
+
     function updateParticles(dt) {
       state.particles = state.particles.filter((particle) => {
         particle.life -= dt;
@@ -625,6 +715,7 @@
       });
 
       collideBumpers();
+      collideRailBodies(dt);
       updateLanes(dt);
       collideFlipper(flipperLine('left'), 'left');
       collideFlipper(flipperLine('right'), 'right');
@@ -633,16 +724,25 @@
       state.animationId = window.requestAnimationFrame(update);
     }
 
-    function drawRail(points, color) {
+    function drawRail(points, options) {
+      const config = typeof options === 'string'
+        ? { color: options }
+        : options;
+
+      ctx.save();
       ctx.beginPath();
       points.forEach((point, index) => {
         if (index === 0) ctx.moveTo(point.x, point.y);
         else ctx.lineTo(point.x, point.y);
       });
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = color;
+      ctx.lineWidth = config.width || 5;
+      ctx.strokeStyle = config.color;
       ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.shadowColor = config.glow || 'transparent';
+      ctx.shadowBlur = config.shadowBlur || 0;
       ctx.stroke();
+      ctx.restore();
     }
 
     function drawFlipper(line, activeSide) {
@@ -729,22 +829,21 @@
     function drawLaneMessage() {
       const tiltActive = state.tableFlipTimer > 0;
       const launchActive = state.launchReady;
-      const pulse = Math.sin(state.tableFlipTimer * 28);
 
       ctx.save();
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      if (tiltActive && pulse > -0.25) {
-        const alpha = 0.62 + Math.max(0, pulse) * 0.38;
+      if (tiltActive) {
+        const alpha = Math.min(0.92, 0.34 + state.tableFlipTimer * 0.52);
         ctx.globalAlpha = alpha;
         ctx.fillStyle = '#f9f4d0';
-        ctx.shadowColor = 'rgba(249, 244, 208, 0.92)';
-        ctx.shadowBlur = 22 + Math.max(0, pulse) * 16;
+        ctx.shadowColor = 'rgba(249, 244, 208, 0.72)';
+        ctx.shadowBlur = 20;
         ctx.font = '900 31px Consolas, Monaco, monospace';
         ctx.fillText('TILT', tableWidth / 2, 122);
 
-        ctx.globalAlpha = alpha * 0.3;
+        ctx.globalAlpha = alpha * 0.28;
         ctx.strokeStyle = '#d16a8a';
         ctx.lineWidth = 2;
         ctx.strokeText('TILT', tableWidth / 2, 122);
@@ -837,12 +936,27 @@
       ctx.roundRect(82, 56, 316, 112, 16);
       ctx.fill();
 
-      drawRail([{ x: 32, y: 34 }, { x: 32, y: 520 }, { x: 142, y: 602 }], 'rgba(255,255,255,0.42)');
-      drawRail([{ x: 448, y: 34 }, { x: 448, y: 520 }, { x: 338, y: 602 }], 'rgba(255,255,255,0.42)');
-      drawRail([{ x: 88, y: 212 }, { x: 170, y: 232 }, { x: 208, y: 292 }], 'rgba(114,255,171,0.42)');
-      drawRail([{ x: 392, y: 250 }, { x: 310, y: 270 }, { x: 270, y: 340 }], 'rgba(114,255,171,0.42)');
-      drawRail([{ x: 114, y: 438 }, { x: 210, y: 408 }], 'rgba(249,244,208,0.34)');
-      drawRail([{ x: 370, y: 478 }, { x: 276, y: 444 }], 'rgba(249,244,208,0.34)');
+      drawRail([{ x: 32, y: 34 }, { x: 32, y: 520 }, { x: 142, y: 602 }], {
+        color: 'rgba(255,255,255,0.52)',
+        glow: 'rgba(255,255,255,0.18)',
+        shadowBlur: 9,
+        width: 7
+      });
+      drawRail([{ x: 448, y: 34 }, { x: 448, y: 520 }, { x: 338, y: 602 }], {
+        color: 'rgba(255,255,255,0.52)',
+        glow: 'rgba(255,255,255,0.18)',
+        shadowBlur: 9,
+        width: 7
+      });
+      state.railBodies.forEach((rail) => {
+        const hot = rail.cooldown > 0;
+        drawRail(rail.points, {
+          color: hot ? 'rgba(249,244,208,0.76)' : rail.color,
+          glow: hot ? 'rgba(249,244,208,0.48)' : rail.glow,
+          shadowBlur: hot ? 16 : 9,
+          width: hot ? rail.width + 2 : rail.width
+        });
+      });
 
       state.lanes.forEach((lane) => {
         const hot = lane.lit > 0;
