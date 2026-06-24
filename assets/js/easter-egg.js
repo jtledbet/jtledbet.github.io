@@ -335,9 +335,9 @@
         idleTime: 0
       },
       bumpers: [
-        { x: 236, y: 190, r: 38, value: 50, flash: 0, label: '50' },
-        { x: 154, y: 310, r: 40, value: 75, flash: 0, label: '75' },
-        { x: 330, y: 386, r: 42, value: 100, flash: 0, label: '100' }
+        { x: 236, y: 204, r: 37, value: 50, flash: 0, label: '50' },
+        { x: 156, y: 318, r: 39, value: 75, flash: 0, label: '75' },
+        { x: 324, y: 318, r: 39, value: 100, flash: 0, label: '100' }
       ],
       lanes: [
         { x: 116, y1: 88, y2: 168, lit: 0 },
@@ -345,37 +345,51 @@
         { x: 284, y1: 72, y2: 152, lit: 0 },
         { x: 364, y1: 88, y2: 168, lit: 0 }
       ],
+      lowerGuides: [
+        {
+          side: 'left',
+          ax: 32,
+          ay: 520,
+          bx: 142,
+          by: 602,
+          nx: 0.598,
+          ny: -0.802,
+          kickX: 112,
+          cooldown: 0
+        },
+        {
+          side: 'right',
+          ax: 448,
+          ay: 520,
+          bx: 338,
+          by: 602,
+          nx: -0.598,
+          ny: -0.802,
+          kickX: -112,
+          cooldown: 0
+        }
+      ],
       railBodies: [
         {
-          points: [{ x: 88, y: 212 }, { x: 170, y: 232 }, { x: 208, y: 292 }],
-          color: 'rgba(114,255,171,0.56)',
-          glow: 'rgba(114,255,171,0.34)',
-          width: 7,
-          impulse: 86,
-          cooldown: 0
-        },
-        {
-          points: [{ x: 392, y: 250 }, { x: 310, y: 270 }, { x: 270, y: 340 }],
-          color: 'rgba(114,255,171,0.56)',
-          glow: 'rgba(114,255,171,0.34)',
-          width: 7,
-          impulse: 86,
-          cooldown: 0
-        },
-        {
-          points: [{ x: 114, y: 438 }, { x: 210, y: 408 }],
-          color: 'rgba(249,244,208,0.44)',
-          glow: 'rgba(249,244,208,0.24)',
+          points: [{ x: 92, y: 448 }, { x: 198, y: 478 }],
+          shape: [{ x: 78, y: 438 }, { x: 210, y: 474 }, { x: 184, y: 508 }, { x: 96, y: 486 }],
+          color: 'rgba(249,244,208,0.68)',
+          fill: 'rgba(209,106,138,0.11)',
+          glow: 'rgba(209,106,138,0.38)',
+          stroke: 'rgba(249,244,208,0.22)',
           width: 6,
-          impulse: 68,
+          impulse: 118,
           cooldown: 0
         },
         {
-          points: [{ x: 370, y: 478 }, { x: 276, y: 444 }],
-          color: 'rgba(249,244,208,0.44)',
-          glow: 'rgba(249,244,208,0.24)',
+          points: [{ x: 388, y: 448 }, { x: 282, y: 478 }],
+          shape: [{ x: 402, y: 438 }, { x: 270, y: 474 }, { x: 296, y: 508 }, { x: 384, y: 486 }],
+          color: 'rgba(249,244,208,0.68)',
+          fill: 'rgba(209,106,138,0.11)',
+          glow: 'rgba(209,106,138,0.38)',
+          stroke: 'rgba(249,244,208,0.22)',
           width: 6,
-          impulse: 68,
+          impulse: 118,
           cooldown: 0
         }
       ],
@@ -591,6 +605,32 @@
       });
     }
 
+    function collideLowerGuides(dt) {
+      const ball = state.ballState;
+      state.lowerGuides.forEach((guide) => {
+        guide.cooldown = Math.max(0, guide.cooldown - dt);
+        if (ball.y < 510 || ball.vy < -120 || guide.cooldown > 0) return;
+
+        const hit = distanceToSegment(ball.x, ball.y, guide);
+        const minDistance = ball.r + 6;
+        if (hit.distance >= minDistance) return;
+
+        ball.x = hit.x + guide.nx * minDistance;
+        ball.y = hit.y + guide.ny * minDistance;
+        ball.vy = -Math.abs(ball.vy) * 0.72 - 145;
+        ball.vx = ball.vx * 0.64 + guide.kickX;
+
+        if (guide.side === 'left') {
+          ball.vx = Math.max(ball.vx, 78);
+        } else {
+          ball.vx = Math.min(ball.vx, -78);
+        }
+
+        guide.cooldown = 0.18;
+        state.combo = 0;
+      });
+    }
+
     function collideRailBodies(dt) {
       const ball = state.ballState;
       state.railBodies.forEach((rail) => {
@@ -687,19 +727,7 @@
         reflectBall(0, 1, 18);
       }
 
-      if (ball.y > 580 && ball.x < 170) {
-        ball.y = 580;
-        ball.vy = -Math.abs(ball.vy) * 0.74 - 130;
-        ball.vx += 90;
-        state.combo = 0;
-      }
-
-      if (ball.y > 580 && ball.x > 310) {
-        ball.y = 580;
-        ball.vy = -Math.abs(ball.vy) * 0.74 - 130;
-        ball.vx -= 90;
-        state.combo = 0;
-      }
+      collideLowerGuides(dt);
 
       if (ball.y > tableHeight + 24) {
         state.ball += 1;
@@ -920,6 +948,48 @@
       ctx.restore();
     }
 
+    function drawLowerApron() {
+      ctx.save();
+      ctx.fillStyle = 'rgba(5, 7, 10, 0.42)';
+      ctx.strokeStyle = 'rgba(249,244,208,0.18)';
+      ctx.lineWidth = 2;
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(142, 602);
+      ctx.lineTo(206, 566);
+      ctx.quadraticCurveTo(240, 586, 274, 566);
+      ctx.lineTo(338, 602);
+      ctx.lineTo(338, 640);
+      ctx.lineTo(142, 640);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      drawRail([{ x: 142, y: 594 }, { x: 198, y: 558 }], {
+        color: 'rgba(249,244,208,0.34)',
+        glow: 'rgba(249,244,208,0.12)',
+        shadowBlur: 6,
+        width: 4
+      });
+      drawRail([{ x: 338, y: 594 }, { x: 282, y: 558 }], {
+        color: 'rgba(249,244,208,0.34)',
+        glow: 'rgba(249,244,208,0.12)',
+        shadowBlur: 6,
+        width: 4
+      });
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(5, 7, 10, 0.8)';
+      ctx.strokeStyle = 'rgba(249,244,208,0.22)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(222, 612, 36, 8, 4);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
     function draw() {
       const ball = state.ballState;
       ctx.clearRect(0, 0, tableWidth, tableHeight);
@@ -936,6 +1006,8 @@
       ctx.roundRect(82, 56, 316, 112, 16);
       ctx.fill();
 
+      drawLowerApron();
+
       drawRail([{ x: 32, y: 34 }, { x: 32, y: 520 }, { x: 142, y: 602 }], {
         color: 'rgba(255,255,255,0.52)',
         glow: 'rgba(255,255,255,0.18)',
@@ -950,6 +1022,24 @@
       });
       state.railBodies.forEach((rail) => {
         const hot = rail.cooldown > 0;
+        if (rail.shape) {
+          ctx.save();
+          ctx.beginPath();
+          rail.shape.forEach((point, index) => {
+            if (index === 0) ctx.moveTo(point.x, point.y);
+            else ctx.lineTo(point.x, point.y);
+          });
+          ctx.closePath();
+          ctx.fillStyle = hot ? 'rgba(249,244,208,0.16)' : rail.fill;
+          ctx.strokeStyle = hot ? 'rgba(249,244,208,0.46)' : rail.stroke;
+          ctx.lineWidth = 2;
+          ctx.lineJoin = 'round';
+          ctx.shadowColor = hot ? 'rgba(249,244,208,0.38)' : rail.glow;
+          ctx.shadowBlur = hot ? 14 : 6;
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
         drawRail(rail.points, {
           color: hot ? 'rgba(249,244,208,0.76)' : rail.color,
           glow: hot ? 'rgba(249,244,208,0.48)' : rail.glow,
