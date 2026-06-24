@@ -2,6 +2,7 @@
   // Sisyphus easter egg: a deliberately unwinnable boulder climb.
   // Triggered by typing a word, or long-pressing the footer (or any .sisyphus-trigger element).
   const triggers = ['sisyphus', 'boulder'];
+  const directHashes = new Set(['#sisyphus', '#boulder', '#rock']);
   const longPressMs = 700;
   let typed = '';
   let active = false;
@@ -343,6 +344,12 @@
     window.removeEventListener('keyup', onGameKeyUp, true);
   }
 
+  function launchFromUrl() {
+    if (directHashes.has(window.location.hash.toLowerCase())) {
+      launchEgg();
+    }
+  }
+
   function onGameKeyDown(e) {
     if (e.key === 'Escape') { removeEgg(); return; }
     if (e.code === 'Space' && current) {
@@ -445,8 +452,14 @@
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bindLongPress);
+    document.addEventListener('DOMContentLoaded', () => {
+      bindLongPress();
+      launchFromUrl();
+    });
   } else {
     bindLongPress();
+    launchFromUrl();
   }
+
+  window.addEventListener('hashchange', launchFromUrl);
 })();
