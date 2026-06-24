@@ -521,11 +521,11 @@
       const held = side === 'left' ? state.leftHeld : state.rightHeld;
       if (tier === 'upper') {
         const rest = side === 'left'
-          ? { ax: 168, ay: 382, bx: 222, by: 394 }
-          : { ax: 312, ay: 382, bx: 258, by: 394 };
+          ? { ax: 72, ay: 342, bx: 116, by: 352 }
+          : { ax: 408, ay: 330, bx: 364, by: 340 };
         const raised = side === 'left'
-          ? { bx: 214, by: 358 }
-          : { bx: 266, by: 358 };
+          ? { bx: 112, by: 318 }
+          : { bx: 368, by: 306 };
 
         return {
           ax: rest.ax,
