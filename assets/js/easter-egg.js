@@ -336,8 +336,8 @@
       },
       bumpers: [
         { x: 236, y: 204, r: 37, value: 50, flash: 0, label: '50' },
-        { x: 170, y: 322, r: 37, value: 75, flash: 0, label: '75' },
-        { x: 318, y: 312, r: 34, value: 100, flash: 0, label: '100' }
+        { x: 156, y: 318, r: 39, value: 75, flash: 0, label: '75' },
+        { x: 324, y: 318, r: 39, value: 100, flash: 0, label: '100' }
       ],
       lanes: [
         { x: 116, y1: 88, y2: 168, lit: 0 },
