@@ -312,6 +312,13 @@
 
   function createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode, effectNode) {
     const ctx = canvas.getContext('2d');
+    const shooterLane = {
+      centerX: 426,
+      innerX: 398,
+      outerX: 448,
+      exitY: 190,
+      bottomY: 612
+    };
     const state = {
       score: 0,
       highScore: loadHighScore(),
@@ -359,7 +366,7 @@
         },
         {
           side: 'right',
-          ax: 448,
+          ax: 398,
           ay: 520,
           bx: 338,
           by: 602,
@@ -393,6 +400,7 @@
           cooldown: 0
         }
       ],
+      inShooterLane: false,
       ballState: null
     };
     const petPriority = {
@@ -418,13 +426,14 @@
 
     function resetBall(served) {
       state.ballState = {
-        x: served ? 412 : 385,
-        y: served ? 526 : 560,
+        x: served ? shooterLane.centerX : 385,
+        y: served ? 558 : 560,
         vx: served ? 0 : -80,
         vy: served ? 0 : -420,
         r: 9,
         spin: 0
       };
+      state.inShooterLane = served;
       state.launchReady = served;
       state.launchCharging = false;
       state.launchCharge = 0;
@@ -508,8 +517,9 @@
       state.launchReady = false;
       state.launchCharging = false;
       state.launchCharge = 0;
-      ball.vx = -110 - power * 160;
-      ball.vy = -430 - power * 310;
+      ball.x = shooterLane.centerX;
+      ball.vx = -8 - power * 18;
+      ball.vy = -520 - power * 300;
       addParticles(ball.x, ball.y, '#72ffab');
       cuePet('lane', 0.42);
       if (effectNode) {
@@ -522,11 +532,11 @@
       if (tier === 'upper') {
         const mirrorX = (x) => tableWidth - x;
         const rest = side === 'left'
-          ? { ax: 68, ay: 398, bx: 136, by: 410 }
-          : { ax: mirrorX(68), ay: 398, bx: mirrorX(136), by: 410 };
+          ? { ax: 94, ay: 418, bx: 158, by: 430 }
+          : { ax: mirrorX(94), ay: 418, bx: mirrorX(158), by: 430 };
         const raised = side === 'left'
-          ? { bx: 132, by: 374 }
-          : { bx: mirrorX(132), by: 374 };
+          ? { bx: 154, by: 392 }
+          : { bx: mirrorX(154), by: 392 };
 
         return {
           ax: rest.ax,
@@ -574,6 +584,45 @@
       ball.vy = ball.vy - 2 * dot * ny + ny * impulse;
       ball.vx *= 0.96;
       ball.vy *= 0.96;
+    }
+
+    function collideShooterLane() {
+      const ball = state.ballState;
+      const minLaneX = shooterLane.innerX + ball.r;
+      const maxLaneX = shooterLane.outerX - ball.r;
+
+      if (state.inShooterLane) {
+        if (ball.x < minLaneX) {
+          ball.x = minLaneX;
+          ball.vx = Math.abs(ball.vx) * 0.32;
+        }
+        if (ball.x > maxLaneX) {
+          ball.x = maxLaneX;
+          ball.vx = -Math.abs(ball.vx) * 0.32;
+        }
+
+        if (ball.y <= shooterLane.exitY && ball.vy < 0) {
+          const upwardSpeed = Math.abs(ball.vy);
+          state.inShooterLane = false;
+          ball.x = shooterLane.innerX - ball.r - 3;
+          ball.y = shooterLane.exitY + 6;
+          ball.vx = -118 - Math.min(70, upwardSpeed * 0.08);
+          ball.vy = -210 - Math.min(95, upwardSpeed * 0.12);
+        }
+        return;
+      }
+
+      const againstInnerWall = ball.y > shooterLane.exitY + ball.r
+        && ball.y < shooterLane.bottomY
+        && ball.x > shooterLane.innerX - ball.r;
+      if (!againstInnerWall) return;
+
+      ball.x = shooterLane.innerX - ball.r;
+      if (ball.vx > 0) {
+        reflectBall(-1, 0, 28);
+      } else {
+        ball.vx = Math.min(ball.vx, -36);
+      }
     }
 
     function collideBumpers() {
@@ -747,6 +796,7 @@
         reflectBall(0, 1, 18);
       }
 
+      collideShooterLane();
       collideLowerGuides(dt);
 
       if (ball.y > tableHeight + 24) {
@@ -973,6 +1023,53 @@
       ctx.restore();
     }
 
+    function drawShooterLane() {
+      ctx.save();
+      ctx.fillStyle = 'rgba(5, 7, 10, 0.36)';
+      ctx.strokeStyle = 'rgba(249,244,208,0.16)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(
+        shooterLane.innerX + 2,
+        shooterLane.exitY,
+        shooterLane.outerX - shooterLane.innerX - 4,
+        shooterLane.bottomY - shooterLane.exitY,
+        14
+      );
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(114,255,171,0.16)';
+      ctx.shadowColor = 'rgba(114,255,171,0.12)';
+      ctx.shadowBlur = 8;
+      ctx.setLineDash([10, 14]);
+      ctx.beginPath();
+      ctx.moveTo(shooterLane.centerX, shooterLane.exitY + 18);
+      ctx.lineTo(shooterLane.centerX, shooterLane.bottomY - 34);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      drawRail([{ x: shooterLane.outerX, y: 34 }, { x: shooterLane.outerX, y: shooterLane.bottomY }], {
+        color: 'rgba(255,255,255,0.52)',
+        glow: 'rgba(255,255,255,0.18)',
+        shadowBlur: 9,
+        width: 7
+      });
+      drawRail([{ x: shooterLane.innerX, y: shooterLane.exitY }, { x: shooterLane.innerX, y: shooterLane.bottomY - 6 }], {
+        color: 'rgba(255,255,255,0.46)',
+        glow: 'rgba(255,255,255,0.14)',
+        shadowBlur: 8,
+        width: 6
+      });
+      drawRail([{ x: shooterLane.innerX, y: shooterLane.exitY }, { x: 370, y: 178 }, { x: 342, y: 170 }], {
+        color: 'rgba(249,244,208,0.38)',
+        glow: 'rgba(249,244,208,0.16)',
+        shadowBlur: 7,
+        width: 4
+      });
+    }
+
     function drawLowerApron() {
       ctx.save();
       ctx.fillStyle = 'rgba(5, 7, 10, 0.42)';
@@ -1031,6 +1128,7 @@
       ctx.roundRect(82, 56, 316, 112, 16);
       ctx.fill();
 
+      drawShooterLane();
       drawLowerApron();
 
       drawRail([{ x: 32, y: 34 }, { x: 32, y: 520 }, { x: 142, y: 602 }], {
@@ -1039,11 +1137,11 @@
         shadowBlur: 9,
         width: 7
       });
-      drawRail([{ x: 448, y: 34 }, { x: 448, y: 520 }, { x: 338, y: 602 }], {
-        color: 'rgba(255,255,255,0.52)',
-        glow: 'rgba(255,255,255,0.18)',
-        shadowBlur: 9,
-        width: 7
+      drawRail([{ x: shooterLane.innerX, y: 520 }, { x: 338, y: 602 }], {
+        color: 'rgba(255,255,255,0.46)',
+        glow: 'rgba(255,255,255,0.14)',
+        shadowBlur: 8,
+        width: 6
       });
       state.railBodies.forEach((rail) => {
         const hot = rail.cooldown > 0;
