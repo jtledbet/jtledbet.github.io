@@ -336,8 +336,8 @@
       },
       bumpers: [
         { x: 236, y: 204, r: 37, value: 50, flash: 0, label: '50' },
-        { x: 156, y: 318, r: 39, value: 75, flash: 0, label: '75' },
-        { x: 328, y: 306, r: 35, value: 100, flash: 0, label: '100' }
+        { x: 170, y: 322, r: 37, value: 75, flash: 0, label: '75' },
+        { x: 318, y: 312, r: 34, value: 100, flash: 0, label: '100' }
       ],
       lanes: [
         { x: 116, y1: 88, y2: 168, lit: 0 },
@@ -521,11 +521,11 @@
       const held = side === 'left' ? state.leftHeld : state.rightHeld;
       if (tier === 'upper') {
         const rest = side === 'left'
-          ? { ax: 72, ay: 342, bx: 116, by: 352 }
-          : { ax: 408, ay: 330, bx: 364, by: 340 };
+          ? { ax: 72, ay: 362, bx: 130, by: 374 }
+          : { ax: 408, ay: 350, bx: 350, by: 362 };
         const raised = side === 'left'
-          ? { bx: 112, by: 318 }
-          : { bx: 368, by: 306 };
+          ? { bx: 126, by: 328 }
+          : { bx: 354, by: 316 };
 
         return {
           ax: rest.ax,
@@ -598,17 +598,17 @@
     function collideFlipper(line, side) {
       const ball = state.ballState;
       const hit = distanceToSegment(ball.x, ball.y, line);
-      const radius = line.mini ? 4 : 7;
+      const radius = line.mini ? 5.5 : 7;
       if (hit.distance > ball.r + radius || ball.vy < -760) return;
 
       const nx = hit.dx / (hit.distance || 1);
       const ny = hit.dy / (hit.distance || 1);
       ball.x = hit.x + nx * (ball.r + radius);
       ball.y = hit.y + ny * (ball.r + radius);
-      const flipImpulse = line.held ? (line.mini ? 410 : 520) : (line.mini ? 110 : 160);
+      const flipImpulse = line.held ? (line.mini ? 440 : 520) : (line.mini ? 120 : 160);
       reflectBall(nx, ny, flipImpulse);
-      ball.vx += side === 'left' ? (line.mini ? 74 : 105) : (line.mini ? -74 : -105);
-      ball.vy -= line.held ? (line.mini ? 155 : 230) : (line.mini ? 56 : 80);
+      ball.vx += side === 'left' ? (line.mini ? 86 : 105) : (line.mini ? -86 : -105);
+      ball.vy -= line.held ? (line.mini ? 170 : 230) : (line.mini ? 62 : 80);
       addScore(line.held ? (line.mini ? 18 : 25) : 5, line.held ? 'flip' : '');
     }
 
@@ -800,15 +800,15 @@
       ctx.beginPath();
       ctx.moveTo(line.ax, line.ay);
       ctx.lineTo(line.bx, line.by);
-      ctx.lineWidth = mini ? 8 : 14;
+      ctx.lineWidth = mini ? 10 : 14;
       ctx.lineCap = 'round';
       ctx.strokeStyle = line.held ? '#f9f4d0' : '#72ffab';
       ctx.shadowColor = line.held ? 'rgba(249,244,208,0.78)' : 'rgba(114,255,171,0.46)';
-      ctx.shadowBlur = line.held ? (mini ? 14 : 22) : (mini ? 7 : 12);
+      ctx.shadowBlur = line.held ? (mini ? 16 : 22) : (mini ? 9 : 12);
       ctx.stroke();
       ctx.fillStyle = '#08080f';
       ctx.beginPath();
-      ctx.arc(line.ax, line.ay, mini ? 4.5 : 8, 0, Math.PI * 2);
+      ctx.arc(line.ax, line.ay, mini ? 5.5 : 8, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
       if (mini) return;
