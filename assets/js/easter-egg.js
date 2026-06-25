@@ -313,8 +313,8 @@
   function createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode, effectNode) {
     const ctx = canvas.getContext('2d');
     const shooterLane = {
-      centerX: 426,
-      innerX: 398,
+      centerX: 427,
+      innerX: 406,
       outerX: 448,
       exitY: 190,
       bottomY: 612
@@ -342,15 +342,15 @@
         idleTime: 0
       },
       bumpers: [
-        { x: 240, y: 206, r: 36, value: 100, flash: 0, label: '100' },
-        { x: 156, y: 318, r: 37, value: 50, flash: 0, label: '50' },
-        { x: 324, y: 318, r: 37, value: 50, flash: 0, label: '50' }
+        { x: 240, y: 204, r: 31, value: 100, flash: 0, label: '100' },
+        { x: 162, y: 316, r: 32, value: 50, flash: 0, label: '50' },
+        { x: 318, y: 316, r: 32, value: 50, flash: 0, label: '50' }
       ],
       lanes: [
-        { x: 116, y1: 88, y2: 168, lit: 0 },
-        { x: 196, y1: 72, y2: 152, lit: 0 },
-        { x: 284, y1: 72, y2: 152, lit: 0 },
-        { x: 364, y1: 88, y2: 168, lit: 0 }
+        { x: 122, y1: 96, y2: 154, lit: 0 },
+        { x: 200, y1: 82, y2: 144, lit: 0 },
+        { x: 280, y1: 82, y2: 144, lit: 0 },
+        { x: 358, y1: 96, y2: 154, lit: 0 }
       ],
       lowerGuides: [
         {
@@ -366,36 +366,36 @@
         },
         {
           side: 'right',
-          ax: 398,
+          ax: 406,
           ay: 520,
           bx: 338,
           by: 602,
-          nx: -0.598,
-          ny: -0.802,
+          nx: -0.77,
+          ny: -0.638,
           kickX: -112,
           cooldown: 0
         }
       ],
       railBodies: [
         {
-          points: [{ x: 92, y: 448 }, { x: 198, y: 478 }],
-          shape: [{ x: 78, y: 438 }, { x: 210, y: 474 }, { x: 184, y: 508 }, { x: 96, y: 486 }],
-          color: 'rgba(249,244,208,0.68)',
-          fill: 'rgba(209,106,138,0.11)',
-          glow: 'rgba(209,106,138,0.38)',
-          stroke: 'rgba(249,244,208,0.22)',
-          width: 6,
+          points: [{ x: 108, y: 450 }, { x: 208, y: 474 }],
+          shape: [{ x: 96, y: 442 }, { x: 220, y: 468 }, { x: 204, y: 492 }, { x: 110, y: 466 }],
+          color: 'rgba(249,244,208,0.52)',
+          fill: 'rgba(209,106,138,0.07)',
+          glow: 'rgba(209,106,138,0.2)',
+          stroke: 'rgba(249,244,208,0.14)',
+          width: 4.5,
           impulse: 118,
           cooldown: 0
         },
         {
-          points: [{ x: 388, y: 448 }, { x: 282, y: 478 }],
-          shape: [{ x: 402, y: 438 }, { x: 270, y: 474 }, { x: 296, y: 508 }, { x: 384, y: 486 }],
-          color: 'rgba(249,244,208,0.68)',
-          fill: 'rgba(209,106,138,0.11)',
-          glow: 'rgba(209,106,138,0.38)',
-          stroke: 'rgba(249,244,208,0.22)',
-          width: 6,
+          points: [{ x: 372, y: 450 }, { x: 272, y: 474 }],
+          shape: [{ x: 384, y: 442 }, { x: 260, y: 468 }, { x: 276, y: 492 }, { x: 370, y: 466 }],
+          color: 'rgba(249,244,208,0.52)',
+          fill: 'rgba(209,106,138,0.07)',
+          glow: 'rgba(209,106,138,0.2)',
+          stroke: 'rgba(249,244,208,0.14)',
+          width: 4.5,
           impulse: 118,
           cooldown: 0
         }
@@ -648,7 +648,7 @@
     function collideFlipper(line, side) {
       const ball = state.ballState;
       const hit = distanceToSegment(ball.x, ball.y, line);
-      const radius = line.mini ? 5.5 : 7;
+      const radius = line.mini ? 4.8 : 6.5;
       if (hit.distance > ball.r + radius || ball.vy < -760) return;
 
       const nx = hit.dx / (hit.distance || 1);
@@ -851,15 +851,15 @@
       ctx.beginPath();
       ctx.moveTo(line.ax, line.ay);
       ctx.lineTo(line.bx, line.by);
-      ctx.lineWidth = mini ? 10 : 14;
+      ctx.lineWidth = mini ? 8 : 13;
       ctx.lineCap = 'round';
       ctx.strokeStyle = line.held ? '#f9f4d0' : '#72ffab';
       ctx.shadowColor = line.held ? 'rgba(249,244,208,0.78)' : 'rgba(114,255,171,0.46)';
-      ctx.shadowBlur = line.held ? (mini ? 16 : 22) : (mini ? 9 : 12);
+      ctx.shadowBlur = line.held ? (mini ? 12 : 20) : (mini ? 6 : 10);
       ctx.stroke();
       ctx.fillStyle = '#08080f';
       ctx.beginPath();
-      ctx.arc(line.ax, line.ay, mini ? 5.5 : 8, 0, Math.PI * 2);
+      ctx.arc(line.ax, line.ay, mini ? 4.5 : 7.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
       if (mini) return;
@@ -1025,24 +1025,24 @@
 
     function drawShooterLane() {
       ctx.save();
-      ctx.fillStyle = 'rgba(5, 7, 10, 0.36)';
-      ctx.strokeStyle = 'rgba(249,244,208,0.16)';
-      ctx.lineWidth = 1.5;
+      ctx.fillStyle = 'rgba(5, 7, 10, 0.28)';
+      ctx.strokeStyle = 'rgba(249,244,208,0.12)';
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.roundRect(
         shooterLane.innerX + 2,
         shooterLane.exitY,
         shooterLane.outerX - shooterLane.innerX - 4,
         shooterLane.bottomY - shooterLane.exitY,
-        14
+        12
       );
       ctx.fill();
       ctx.stroke();
 
-      ctx.strokeStyle = 'rgba(114,255,171,0.16)';
-      ctx.shadowColor = 'rgba(114,255,171,0.12)';
-      ctx.shadowBlur = 8;
-      ctx.setLineDash([10, 14]);
+      ctx.strokeStyle = 'rgba(114,255,171,0.1)';
+      ctx.shadowColor = 'rgba(114,255,171,0.08)';
+      ctx.shadowBlur = 5;
+      ctx.setLineDash([8, 16]);
       ctx.beginPath();
       ctx.moveTo(shooterLane.centerX, shooterLane.exitY + 18);
       ctx.lineTo(shooterLane.centerX, shooterLane.bottomY - 34);
@@ -1051,22 +1051,22 @@
       ctx.restore();
 
       drawRail([{ x: shooterLane.outerX, y: 34 }, { x: shooterLane.outerX, y: shooterLane.bottomY }], {
-        color: 'rgba(255,255,255,0.52)',
-        glow: 'rgba(255,255,255,0.18)',
-        shadowBlur: 9,
-        width: 7
-      });
-      drawRail([{ x: shooterLane.innerX, y: shooterLane.exitY }, { x: shooterLane.innerX, y: shooterLane.bottomY - 6 }], {
         color: 'rgba(255,255,255,0.46)',
-        glow: 'rgba(255,255,255,0.14)',
-        shadowBlur: 8,
+        glow: 'rgba(255,255,255,0.12)',
+        shadowBlur: 7,
         width: 6
       });
+      drawRail([{ x: shooterLane.innerX, y: shooterLane.exitY }, { x: shooterLane.innerX, y: shooterLane.bottomY - 6 }], {
+        color: 'rgba(255,255,255,0.38)',
+        glow: 'rgba(255,255,255,0.1)',
+        shadowBlur: 6,
+        width: 5
+      });
       drawRail([{ x: shooterLane.innerX, y: shooterLane.exitY }, { x: 370, y: 178 }, { x: 342, y: 170 }], {
-        color: 'rgba(249,244,208,0.38)',
-        glow: 'rgba(249,244,208,0.16)',
-        shadowBlur: 7,
-        width: 4
+        color: 'rgba(249,244,208,0.3)',
+        glow: 'rgba(249,244,208,0.1)',
+        shadowBlur: 5,
+        width: 3.5
       });
     }
 
@@ -1123,25 +1123,25 @@
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, tableWidth, tableHeight);
 
-      ctx.fillStyle = 'rgba(139,104,212,0.12)';
+      ctx.fillStyle = 'rgba(139,104,212,0.08)';
       ctx.beginPath();
-      ctx.roundRect(82, 56, 316, 112, 16);
+      ctx.roundRect(104, 62, 272, 94, 14);
       ctx.fill();
 
       drawShooterLane();
       drawLowerApron();
 
       drawRail([{ x: 32, y: 34 }, { x: 32, y: 520 }, { x: 142, y: 602 }], {
-        color: 'rgba(255,255,255,0.52)',
-        glow: 'rgba(255,255,255,0.18)',
-        shadowBlur: 9,
-        width: 7
+        color: 'rgba(255,255,255,0.46)',
+        glow: 'rgba(255,255,255,0.12)',
+        shadowBlur: 7,
+        width: 6
       });
       drawRail([{ x: shooterLane.innerX, y: 520 }, { x: 338, y: 602 }], {
-        color: 'rgba(255,255,255,0.46)',
-        glow: 'rgba(255,255,255,0.14)',
-        shadowBlur: 8,
-        width: 6
+        color: 'rgba(255,255,255,0.38)',
+        glow: 'rgba(255,255,255,0.1)',
+        shadowBlur: 6,
+        width: 5
       });
       state.railBodies.forEach((rail) => {
         const hot = rail.cooldown > 0;
@@ -1153,42 +1153,42 @@
             else ctx.lineTo(point.x, point.y);
           });
           ctx.closePath();
-          ctx.fillStyle = hot ? 'rgba(249,244,208,0.16)' : rail.fill;
-          ctx.strokeStyle = hot ? 'rgba(249,244,208,0.46)' : rail.stroke;
-          ctx.lineWidth = 2;
+          ctx.fillStyle = hot ? 'rgba(249,244,208,0.11)' : rail.fill;
+          ctx.strokeStyle = hot ? 'rgba(249,244,208,0.34)' : rail.stroke;
+          ctx.lineWidth = 1.5;
           ctx.lineJoin = 'round';
-          ctx.shadowColor = hot ? 'rgba(249,244,208,0.38)' : rail.glow;
-          ctx.shadowBlur = hot ? 14 : 6;
+          ctx.shadowColor = hot ? 'rgba(249,244,208,0.22)' : rail.glow;
+          ctx.shadowBlur = hot ? 10 : 5;
           ctx.fill();
           ctx.stroke();
           ctx.restore();
         }
         drawRail(rail.points, {
-          color: hot ? 'rgba(249,244,208,0.76)' : rail.color,
-          glow: hot ? 'rgba(249,244,208,0.48)' : rail.glow,
-          shadowBlur: hot ? 16 : 9,
-          width: hot ? rail.width + 2 : rail.width
+          color: hot ? 'rgba(249,244,208,0.64)' : rail.color,
+          glow: hot ? 'rgba(249,244,208,0.34)' : rail.glow,
+          shadowBlur: hot ? 12 : 7,
+          width: hot ? rail.width + 1 : rail.width
         });
       });
 
       state.lanes.forEach((lane) => {
         const hot = lane.lit > 0;
-        const glow = hot ? 0.5 + lane.lit * 0.45 : 0.34;
+        const glow = hot ? 0.44 + lane.lit * 0.38 : 0.26;
 
         ctx.save();
         ctx.lineCap = 'round';
         ctx.strokeStyle = hot ? `rgba(249,244,208,${glow})` : 'rgba(209,106,138,0.34)';
-        ctx.lineWidth = hot ? 13 : 10;
-        ctx.shadowColor = hot ? 'rgba(249,244,208,0.86)' : 'rgba(209,106,138,0.62)';
-        ctx.shadowBlur = hot ? 24 : 14;
+        ctx.lineWidth = hot ? 9 : 7;
+        ctx.shadowColor = hot ? 'rgba(249,244,208,0.7)' : 'rgba(209,106,138,0.42)';
+        ctx.shadowBlur = hot ? 18 : 9;
         ctx.beginPath();
         ctx.moveTo(lane.x, lane.y1);
         ctx.lineTo(lane.x, lane.y2);
         ctx.stroke();
 
         ctx.strokeStyle = hot ? '#f9f4d0' : '#d16a8a';
-        ctx.lineWidth = hot ? 5 : 4;
-        ctx.shadowBlur = hot ? 14 : 8;
+        ctx.lineWidth = hot ? 4 : 3;
+        ctx.shadowBlur = hot ? 10 : 5;
         ctx.beginPath();
         ctx.moveTo(lane.x, lane.y1);
         ctx.lineTo(lane.x, lane.y2);
@@ -1197,7 +1197,7 @@
         ctx.fillStyle = hot ? 'rgba(249,244,208,0.9)' : 'rgba(209,106,138,0.58)';
         [lane.y1, lane.y2].forEach((capY) => {
           ctx.beginPath();
-          ctx.arc(lane.x, capY, hot ? 4.6 : 3.6, 0, Math.PI * 2);
+          ctx.arc(lane.x, capY, hot ? 3.8 : 2.8, 0, Math.PI * 2);
           ctx.fill();
         });
         ctx.restore();
@@ -1208,32 +1208,32 @@
       state.bumpers.forEach((bumper) => {
         ctx.save();
         const hot = bumper.flash > 0;
-        ctx.shadowColor = hot ? 'rgba(249,244,208,0.92)' : 'rgba(209,106,138,0.44)';
-        ctx.shadowBlur = hot ? 30 : 15;
+        ctx.shadowColor = hot ? 'rgba(249,244,208,0.78)' : 'rgba(209,106,138,0.34)';
+        ctx.shadowBlur = hot ? 24 : 10;
         const bumperGradient = ctx.createRadialGradient(
-          bumper.x - 9, bumper.y - 11, 5,
+          bumper.x - 7, bumper.y - 9, 4,
           bumper.x, bumper.y, bumper.r
         );
         bumperGradient.addColorStop(0, '#f9f4d0');
         bumperGradient.addColorStop(0.34, hot ? '#72ffab' : '#d16a8a');
-        bumperGradient.addColorStop(0.72, '#9f4f9a');
-        bumperGradient.addColorStop(1, '#35245b');
+        bumperGradient.addColorStop(0.72, '#8f438d');
+        bumperGradient.addColorStop(1, '#2e2450');
         ctx.fillStyle = bumperGradient;
         ctx.beginPath();
         ctx.arc(bumper.x, bumper.y, bumper.r, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = hot ? 'rgba(249,244,208,0.9)' : 'rgba(249,244,208,0.64)';
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = hot ? 'rgba(249,244,208,0.82)' : 'rgba(249,244,208,0.56)';
         ctx.stroke();
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.2;
         ctx.strokeStyle = 'rgba(8,8,15,0.5)';
         ctx.beginPath();
-        ctx.arc(bumper.x, bumper.y, bumper.r - 7, 0, Math.PI * 2);
+        ctx.arc(bumper.x, bumper.y, bumper.r - 6, 0, Math.PI * 2);
         ctx.stroke();
 
         ctx.fillStyle = '#08080f';
-        ctx.font = `900 ${bumper.label.length > 2 ? 16 : 18}px Consolas, Monaco, monospace`;
+        ctx.font = `900 ${bumper.label.length > 2 ? 14 : 16}px Consolas, Monaco, monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(bumper.label, bumper.x, bumper.y + 1);
