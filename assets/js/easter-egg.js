@@ -313,10 +313,10 @@
   function createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode, effectNode) {
     const ctx = canvas.getContext('2d');
     const shooterLane = {
-      centerX: 427,
-      innerX: 406,
+      centerX: 432,
+      innerX: 416,
       outerX: 448,
-      exitY: 190,
+      exitY: 166,
       bottomY: 612
     };
     const state = {
@@ -366,12 +366,12 @@
         },
         {
           side: 'right',
-          ax: 406,
+          ax: 416,
           ay: 520,
           bx: 338,
           by: 602,
-          nx: -0.77,
-          ny: -0.638,
+          nx: -0.725,
+          ny: -0.689,
           kickX: -112,
           cooldown: 0
         }
@@ -518,7 +518,7 @@
       state.launchCharging = false;
       state.launchCharge = 0;
       ball.x = shooterLane.centerX;
-      ball.vx = -8 - power * 18;
+      ball.vx = -2 - power * 5;
       ball.vy = -520 - power * 300;
       addParticles(ball.x, ball.y, '#72ffab');
       cuePet('lane', 0.42);
@@ -604,10 +604,10 @@
         if (ball.y <= shooterLane.exitY && ball.vy < 0) {
           const upwardSpeed = Math.abs(ball.vy);
           state.inShooterLane = false;
-          ball.x = shooterLane.innerX - ball.r - 3;
-          ball.y = shooterLane.exitY + 6;
-          ball.vx = -118 - Math.min(70, upwardSpeed * 0.08);
-          ball.vy = -210 - Math.min(95, upwardSpeed * 0.12);
+          ball.x = shooterLane.innerX - ball.r - 2;
+          ball.y = shooterLane.exitY + 8;
+          ball.vx = -108 - Math.min(78, upwardSpeed * 0.075);
+          ball.vy = -218 - Math.min(104, upwardSpeed * 0.12);
         }
         return;
       }
@@ -973,17 +973,17 @@
 
       const pulse = 0.5 + Math.sin(state.launchPulse * 9) * 0.5;
       const charge = state.launchCharge;
-      const radius = ball.r + 12 + pulse * 5 + charge * 8;
+      const radius = ball.r + 9 + pulse * 4 + charge * 6;
       const color = state.launchCharging ? '#f9f4d0' : '#72ffab';
 
       ctx.save();
       ctx.translate(ball.x, ball.y);
       ctx.rotate(state.launchPulse * 1.6);
-      ctx.globalAlpha = 0.44 + pulse * 0.2 + charge * 0.2;
+      ctx.globalAlpha = 0.38 + pulse * 0.16 + charge * 0.18;
       ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1.6;
       ctx.shadowColor = state.launchCharging ? 'rgba(249, 244, 208, 0.82)' : 'rgba(114, 255, 171, 0.72)';
-      ctx.shadowBlur = 16 + charge * 10;
+      ctx.shadowBlur = 12 + charge * 8;
       ctx.beginPath();
       ctx.arc(0, 0, radius, -0.35, Math.PI * 1.55);
       ctx.stroke();
@@ -992,23 +992,23 @@
       ctx.setLineDash([3, 7]);
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(0, 0, ball.r + 24, 0, Math.PI * 2);
+      ctx.arc(0, 0, ball.r + 19, 0, Math.PI * 2);
       ctx.stroke();
       ctx.setLineDash([]);
 
       ctx.rotate(-state.launchPulse * 1.6);
       ctx.globalAlpha = 0.42 + charge * 0.4;
       ctx.strokeStyle = color;
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 2.4;
       ctx.beginPath();
-      ctx.moveTo(0, ball.r + 14 + charge * 18);
-      ctx.lineTo(0, ball.r + 54);
+      ctx.moveTo(0, ball.r + 12 + charge * 16);
+      ctx.lineTo(0, ball.r + 48);
       ctx.stroke();
       for (let i = 0; i < 4; i += 1) {
-        const y = ball.r + 21 + i * 8 + charge * 12;
+        const y = ball.r + 19 + i * 7 + charge * 11;
         ctx.beginPath();
-        ctx.moveTo(-6, y);
-        ctx.lineTo(6, y + 3);
+        ctx.moveTo(-5, y);
+        ctx.lineTo(5, y + 2.5);
         ctx.stroke();
       }
 
@@ -1017,7 +1017,7 @@
         const dotPulse = index === Math.floor(state.launchPulse * 5) % 3 ? 1 : 0.42;
         ctx.globalAlpha = dotPulse;
         ctx.beginPath();
-        ctx.arc(Math.cos(angle) * (ball.r + 24), Math.sin(angle) * (ball.r + 24), 2.4, 0, Math.PI * 2);
+        ctx.arc(Math.cos(angle) * (ball.r + 20), Math.sin(angle) * (ball.r + 20), 2.2, 0, Math.PI * 2);
         ctx.fill();
       });
       ctx.restore();
@@ -1025,48 +1025,48 @@
 
     function drawShooterLane() {
       ctx.save();
-      ctx.fillStyle = 'rgba(5, 7, 10, 0.28)';
-      ctx.strokeStyle = 'rgba(249,244,208,0.12)';
-      ctx.lineWidth = 1.2;
+      ctx.fillStyle = 'rgba(5, 7, 10, 0.22)';
+      ctx.strokeStyle = 'rgba(249,244,208,0.09)';
+      ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.roundRect(
-        shooterLane.innerX + 2,
-        shooterLane.exitY,
-        shooterLane.outerX - shooterLane.innerX - 4,
-        shooterLane.bottomY - shooterLane.exitY,
-        12
+        shooterLane.innerX + 4,
+        shooterLane.exitY + 6,
+        shooterLane.outerX - shooterLane.innerX - 8,
+        shooterLane.bottomY - shooterLane.exitY - 12,
+        9
       );
       ctx.fill();
       ctx.stroke();
 
-      ctx.strokeStyle = 'rgba(114,255,171,0.1)';
-      ctx.shadowColor = 'rgba(114,255,171,0.08)';
-      ctx.shadowBlur = 5;
-      ctx.setLineDash([8, 16]);
+      ctx.strokeStyle = 'rgba(114,255,171,0.07)';
+      ctx.shadowColor = 'rgba(114,255,171,0.06)';
+      ctx.shadowBlur = 4;
+      ctx.setLineDash([6, 18]);
       ctx.beginPath();
-      ctx.moveTo(shooterLane.centerX, shooterLane.exitY + 18);
-      ctx.lineTo(shooterLane.centerX, shooterLane.bottomY - 34);
+      ctx.moveTo(shooterLane.centerX, shooterLane.exitY + 28);
+      ctx.lineTo(shooterLane.centerX, shooterLane.bottomY - 42);
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.restore();
 
       drawRail([{ x: shooterLane.outerX, y: 34 }, { x: shooterLane.outerX, y: shooterLane.bottomY }], {
-        color: 'rgba(255,255,255,0.46)',
-        glow: 'rgba(255,255,255,0.12)',
-        shadowBlur: 7,
-        width: 6
-      });
-      drawRail([{ x: shooterLane.innerX, y: shooterLane.exitY }, { x: shooterLane.innerX, y: shooterLane.bottomY - 6 }], {
-        color: 'rgba(255,255,255,0.38)',
+        color: 'rgba(255,255,255,0.42)',
         glow: 'rgba(255,255,255,0.1)',
         shadowBlur: 6,
-        width: 5
+        width: 5.4
       });
-      drawRail([{ x: shooterLane.innerX, y: shooterLane.exitY }, { x: 370, y: 178 }, { x: 342, y: 170 }], {
-        color: 'rgba(249,244,208,0.3)',
-        glow: 'rgba(249,244,208,0.1)',
+      drawRail([{ x: shooterLane.innerX, y: shooterLane.exitY }, { x: shooterLane.innerX, y: shooterLane.bottomY - 6 }], {
+        color: 'rgba(255,255,255,0.32)',
+        glow: 'rgba(255,255,255,0.075)',
+        shadowBlur: 4,
+        width: 4.2
+      });
+      drawRail([{ x: shooterLane.innerX, y: shooterLane.exitY }, { x: 388, y: 158 }, { x: 358, y: 154 }], {
+        color: 'rgba(249,244,208,0.28)',
+        glow: 'rgba(249,244,208,0.08)',
         shadowBlur: 5,
-        width: 3.5
+        width: 3.2
       });
     }
 
