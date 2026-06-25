@@ -335,9 +335,9 @@
         idleTime: 0
       },
       bumpers: [
-        { x: 236, y: 204, r: 37, value: 50, flash: 0, label: '50' },
-        { x: 156, y: 318, r: 39, value: 75, flash: 0, label: '75' },
-        { x: 324, y: 318, r: 39, value: 100, flash: 0, label: '100' }
+        { x: 240, y: 206, r: 36, value: 100, flash: 0, label: '100' },
+        { x: 156, y: 318, r: 37, value: 50, flash: 0, label: '50' },
+        { x: 324, y: 318, r: 37, value: 50, flash: 0, label: '50' }
       ],
       lanes: [
         { x: 116, y1: 88, y2: 168, lit: 0 },
@@ -520,12 +520,13 @@
     function flipperLine(side, tier = 'lower') {
       const held = side === 'left' ? state.leftHeld : state.rightHeld;
       if (tier === 'upper') {
+        const mirrorX = (x) => tableWidth - x;
         const rest = side === 'left'
-          ? { ax: 72, ay: 362, bx: 130, by: 374 }
-          : { ax: 408, ay: 350, bx: 350, by: 362 };
+          ? { ax: 68, ay: 398, bx: 136, by: 410 }
+          : { ax: mirrorX(68), ay: 398, bx: mirrorX(136), by: 410 };
         const raised = side === 'left'
-          ? { bx: 126, by: 328 }
-          : { bx: 354, by: 316 };
+          ? { bx: 132, by: 374 }
+          : { bx: mirrorX(132), by: 374 };
 
         return {
           ax: rest.ax,
@@ -1108,24 +1109,33 @@
 
       state.bumpers.forEach((bumper) => {
         ctx.save();
-        ctx.shadowColor = bumper.flash ? 'rgba(249,244,208,0.96)' : 'rgba(209,106,138,0.55)';
-        ctx.shadowBlur = bumper.flash ? 34 : 18;
+        const hot = bumper.flash > 0;
+        ctx.shadowColor = hot ? 'rgba(249,244,208,0.92)' : 'rgba(209,106,138,0.44)';
+        ctx.shadowBlur = hot ? 30 : 15;
         const bumperGradient = ctx.createRadialGradient(
-          bumper.x - 8, bumper.y - 10, 6,
+          bumper.x - 9, bumper.y - 11, 5,
           bumper.x, bumper.y, bumper.r
         );
         bumperGradient.addColorStop(0, '#f9f4d0');
-        bumperGradient.addColorStop(0.36, bumper.flash ? '#72ffab' : '#d16a8a');
-        bumperGradient.addColorStop(1, '#532a72');
+        bumperGradient.addColorStop(0.34, hot ? '#72ffab' : '#d16a8a');
+        bumperGradient.addColorStop(0.72, '#9f4f9a');
+        bumperGradient.addColorStop(1, '#35245b');
         ctx.fillStyle = bumperGradient;
         ctx.beginPath();
         ctx.arc(bumper.x, bumper.y, bumper.r, 0, Math.PI * 2);
         ctx.fill();
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = 'rgba(255,255,255,0.72)';
+
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = hot ? 'rgba(249,244,208,0.9)' : 'rgba(249,244,208,0.64)';
         ctx.stroke();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(8,8,15,0.5)';
+        ctx.beginPath();
+        ctx.arc(bumper.x, bumper.y, bumper.r - 7, 0, Math.PI * 2);
+        ctx.stroke();
+
         ctx.fillStyle = '#08080f';
-        ctx.font = '900 18px Consolas, Monaco, monospace';
+        ctx.font = `900 ${bumper.label.length > 2 ? 16 : 18}px Consolas, Monaco, monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(bumper.label, bumper.x, bumper.y + 1);
