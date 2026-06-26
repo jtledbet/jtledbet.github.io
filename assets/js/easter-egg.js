@@ -1324,6 +1324,66 @@
       });
     }
 
+    function drawSideGutters() {
+      const gutters = [
+        {
+          fill: [
+            { x: 48, y: 390 },
+            { x: 72, y: 420 },
+            { x: 78, y: 522 },
+            { x: 136, y: 604 },
+            { x: 124, y: 614 },
+            { x: 56, y: 536 },
+            { x: 46, y: 420 }
+          ],
+          rail: [{ x: 58, y: 396 }, { x: 62, y: 518 }, { x: 126, y: 596 }],
+          drain: [{ x: 82, y: 520 }, { x: 138, y: 584 }]
+        },
+        {
+          fill: [
+            { x: 408, y: 390 },
+            { x: 384, y: 420 },
+            { x: 378, y: 522 },
+            { x: 344, y: 604 },
+            { x: 356, y: 614 },
+            { x: 404, y: 536 },
+            { x: 414, y: 420 }
+          ],
+          rail: [{ x: 406, y: 396 }, { x: 400, y: 518 }, { x: 354, y: 596 }],
+          drain: [{ x: 374, y: 520 }, { x: 342, y: 584 }]
+        }
+      ];
+
+      gutters.forEach((gutter) => {
+        ctx.save();
+        ctx.beginPath();
+        gutter.fill.forEach((point, index) => {
+          if (index === 0) ctx.moveTo(point.x, point.y);
+          else ctx.lineTo(point.x, point.y);
+        });
+        ctx.closePath();
+        ctx.fillStyle = colorWithAlpha(theme.bg, 0.18, theme.bg);
+        ctx.strokeStyle = colorWithAlpha(theme.accentLight, 0.11, theme.accentLight);
+        ctx.lineWidth = 1;
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        drawRail(gutter.rail, {
+          color: colorWithAlpha(theme.textStrong, 0.2, theme.textStrong),
+          glow: theme.railGlowDim,
+          shadowBlur: 4,
+          width: 2.6
+        });
+        drawRail(gutter.drain, {
+          color: colorWithAlpha(theme.textStrong, 0.16, theme.textStrong),
+          glow: theme.railGlowDim,
+          shadowBlur: 3,
+          width: 2
+        });
+      });
+    }
+
     function drawLowerApron() {
       ctx.save();
       ctx.fillStyle = colorWithAlpha(theme.bg, 0.42, theme.bg);
@@ -1383,6 +1443,7 @@
       ctx.fill();
 
       drawShooterLane();
+      drawSideGutters();
       drawLowerApron();
 
       drawRail([{ x: 32, y: 34 }, { x: 32, y: 520 }, { x: 142, y: 602 }], {
