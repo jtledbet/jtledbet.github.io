@@ -200,4 +200,11 @@
   if (connection && connection.addEventListener) {
     connection.addEventListener('change', scheduleUpdate);
   }
+
+  if (!document.getElementById('site-telemetry-script')) {
+    const telemetry = document.createElement('script');
+    telemetry.id = 'site-telemetry-script';
+    telemetry.src = '/assets/js/site-telemetry.js?v=visitor-log';
+    document.head.appendChild(telemetry);
+  }
 })();
