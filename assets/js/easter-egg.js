@@ -395,8 +395,8 @@
       },
       bumpers: [
         { x: 240, y: 204, r: 31, value: 100, flash: 0, cooldown: 0, label: '100' },
-        { x: 162, y: 316, r: 32, value: 50, flash: 0, cooldown: 0, label: '50' },
-        { x: 318, y: 316, r: 32, value: 50, flash: 0, cooldown: 0, label: '50' }
+        { x: 154, y: 316, r: 32, value: 50, flash: 0, cooldown: 0, label: '50' },
+        { x: 326, y: 316, r: 32, value: 50, flash: 0, cooldown: 0, label: '50' }
       ],
       lanes: [
         { x: 122, y1: 96, y2: 154, lit: 0 },
