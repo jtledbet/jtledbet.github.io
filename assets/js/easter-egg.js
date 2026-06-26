@@ -1203,12 +1203,16 @@
         ctx.strokeText('TILT', tableWidth / 2, 122);
       } else if (launchActive) {
         const alpha = 0.72 + Math.sin(state.launchPulse * 7) * 0.16;
+        const label = state.launchCharging ? 'RELEASE' : 'PULL TO LAUNCH';
         ctx.globalAlpha = alpha;
-        ctx.fillStyle = state.launchCharging ? theme.textStrong : theme.accentLight;
+        ctx.fillStyle = theme.textStrong;
+        ctx.strokeStyle = state.launchCharging ? theme.accentLight : theme.accent;
         ctx.shadowColor = state.launchCharging ? theme.textGlow : theme.lightGlow;
         ctx.shadowBlur = state.launchCharging ? 18 : 14;
-        ctx.font = '900 23px Consolas, Monaco, monospace';
-        ctx.fillText(state.launchCharging ? 'RELEASE' : 'PULL TO LAUNCH', tableWidth / 2, 122);
+        ctx.font = '900 25px Consolas, Monaco, monospace';
+        ctx.lineWidth = state.launchCharging ? 2.6 : 2;
+        ctx.strokeText(label, tableWidth / 2, 122);
+        ctx.fillText(label, tableWidth / 2, 122);
       } else {
         ctx.globalAlpha = 0.1;
         ctx.strokeStyle = theme.textDim;
@@ -1232,6 +1236,15 @@
 
       ctx.save();
       ctx.translate(ball.x, ball.y);
+      ctx.globalAlpha = 0.32 + pulse * 0.22 + charge * 0.2;
+      ctx.strokeStyle = theme.textStrong;
+      ctx.lineWidth = 2.8;
+      ctx.shadowColor = theme.textGlow;
+      ctx.shadowBlur = 14 + charge * 8;
+      ctx.beginPath();
+      ctx.arc(0, 0, radius + 7, 0, Math.PI * 2);
+      ctx.stroke();
+
       ctx.rotate(state.launchPulse * 1.6);
       ctx.globalAlpha = 0.38 + pulse * 0.16 + charge * 0.18;
       ctx.strokeStyle = color;
