@@ -807,14 +807,21 @@
       return true;
     }
 
-    function collideShooterLane() {
+    function collideShooterLane(dt) {
       const ball = state.ballState;
       const minLaneX = shooterLane.innerX + ball.r;
       const maxLaneX = shooterLane.outerX - ball.r;
+      const gateStartY = shooterLane.exitY + 72;
       const exitGateY = shooterLane.exitY + ball.r;
 
       if (state.inShooterLane) {
-        if (ball.x < minLaneX) {
+        const inExitFeed = ball.vy < 0 && ball.y <= gateStartY;
+        if (inExitFeed) {
+          const progress = Math.max(0, Math.min(1, (gateStartY - ball.y) / (gateStartY - shooterLane.exitY)));
+          ball.vx = Math.max(-220, ball.vx - (105 + 175 * progress) * dt);
+        }
+
+        if (!inExitFeed && ball.x < minLaneX) {
           ball.x = minLaneX;
           ball.vx = Math.abs(ball.vx) * 0.32;
         }
@@ -824,10 +831,10 @@
         }
 
         if (ball.y <= exitGateY && ball.vy < 0) {
-          const upwardSpeed = Math.abs(ball.vy);
           state.inShooterLane = false;
-          ball.vx = -118 - Math.min(82, upwardSpeed * 0.085);
-          ball.vy = -238 - Math.min(96, upwardSpeed * 0.105);
+          ball.vx = Math.min(ball.vx, -118);
+          ball.vy = Math.min(ball.vy, -360);
+          limitBallSpeed();
         }
         return;
       }
@@ -1039,7 +1046,7 @@
         reflectBall(0, 1, 18);
       }
 
-      collideShooterLane();
+      collideShooterLane(dt);
       collideLowerGuides(dt);
 
       if (ball.y > tableHeight + 24) {
