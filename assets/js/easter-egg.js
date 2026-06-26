@@ -1158,16 +1158,16 @@
       ctx.strokeStyle = theme.borderSoft;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.roundRect(78, 454, 324, 52, 10);
+      ctx.roundRect(126, 240, 228, 42, 10);
       ctx.fill();
       ctx.stroke();
       ctx.fillStyle = theme.textStrong;
       ctx.shadowColor = theme.textGlowSoft;
       ctx.shadowBlur = 12;
-      ctx.font = '900 20px Consolas, Monaco, monospace';
+      ctx.font = '900 18px Consolas, Monaco, monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('(╯°□°)╯︵ ┻━┻', tableWidth / 2, 480);
+      ctx.fillText('(╯°□°)╯︵ ┻━┻', tableWidth / 2, 262);
       ctx.restore();
     }
 
