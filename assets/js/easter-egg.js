@@ -602,11 +602,11 @@
       if (tier === 'upper') {
         const mirrorX = (x) => tableWidth - x;
         const rest = side === 'left'
-          ? { ax: 94, ay: 418, bx: 158, by: 430 }
-          : { ax: mirrorX(94), ay: 418, bx: mirrorX(158), by: 430 };
+          ? { ax: 82, ay: 404, bx: 146, by: 416 }
+          : { ax: mirrorX(82), ay: 404, bx: mirrorX(146), by: 416 };
         const raised = side === 'left'
-          ? { bx: 154, by: 392 }
-          : { bx: mirrorX(154), by: 392 };
+          ? { bx: 142, by: 380 }
+          : { bx: mirrorX(142), by: 380 };
 
         return {
           ax: rest.ax,
