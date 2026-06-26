@@ -116,6 +116,10 @@
 
       .egg-control-hint {
         flex: 2 1 190px;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 0 0.5rem;
+        align-items: baseline;
       }
 
       .egg-control-copy {
@@ -195,8 +199,10 @@
         .egg-title { font-size: 12px; }
         .egg-score-row { font-size: 11px; padding: 8px 10px; }
         .egg-score-row strong { font-size: 16px; }
+        .egg-state-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
         .egg-state-row > span { font-size: 10px; padding: 7px 8px; }
         .egg-state-row strong { font-size: 12px; }
+        .egg-control-hint { grid-column: 1 / -1; }
       }
     `;
     document.head.appendChild(style);
