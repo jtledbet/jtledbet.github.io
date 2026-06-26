@@ -123,6 +123,14 @@
           linear-gradient(150deg, #1a2030, #0a0a12 65%);
       }
 
+      .egg-overlay,
+      .egg-machine,
+      .egg-playfield,
+      .egg-canvas {
+        -webkit-tap-highlight-color: transparent;
+        overscroll-behavior: contain;
+      }
+
       .egg-canvas {
         display: block;
         width: 100%;
@@ -134,7 +142,6 @@
 
       .egg-playfield,
       .egg-canvas {
-        -webkit-tap-highlight-color: transparent;
         -webkit-touch-callout: none;
         -webkit-user-select: none;
         user-select: none;
@@ -387,9 +394,9 @@
         idleTime: 0
       },
       bumpers: [
-        { x: 240, y: 204, r: 31, value: 100, flash: 0, label: '100' },
-        { x: 162, y: 316, r: 32, value: 50, flash: 0, label: '50' },
-        { x: 318, y: 316, r: 32, value: 50, flash: 0, label: '50' }
+        { x: 240, y: 204, r: 31, value: 100, flash: 0, cooldown: 0, label: '100' },
+        { x: 162, y: 316, r: 32, value: 50, flash: 0, cooldown: 0, label: '50' },
+        { x: 318, y: 316, r: 32, value: 50, flash: 0, cooldown: 0, label: '50' }
       ],
       lanes: [
         { x: 122, y1: 96, y2: 154, lit: 0 },
@@ -639,14 +646,37 @@
       return { x, y, dx: px - x, dy: py - y, distance: Math.hypot(px - x, py - y) };
     }
 
+    function limitBallSpeed(maxSpeed = 980) {
+      const ball = state.ballState;
+      const speed = Math.hypot(ball.vx, ball.vy);
+      if (speed <= maxSpeed) return;
+
+      const scale = maxSpeed / speed;
+      ball.vx *= scale;
+      ball.vy *= scale;
+    }
+
     function reflectBall(nx, ny, impulse) {
       const ball = state.ballState;
+      const normalLength = Math.hypot(nx, ny) || 1;
+      nx /= normalLength;
+      ny /= normalLength;
       const dot = ball.vx * nx + ball.vy * ny;
-      if (dot > 0 && impulse < 1) return;
-      ball.vx = ball.vx - 2 * dot * nx + nx * impulse;
-      ball.vy = ball.vy - 2 * dot * ny + ny * impulse;
+
+      if (dot < 0) {
+        ball.vx = ball.vx - 2 * dot * nx + nx * impulse;
+        ball.vy = ball.vy - 2 * dot * ny + ny * impulse;
+      } else if (impulse > 0) {
+        ball.vx += nx * impulse * 0.42;
+        ball.vy += ny * impulse * 0.42;
+      } else {
+        return false;
+      }
+
       ball.vx *= 0.96;
       ball.vy *= 0.96;
+      limitBallSpeed();
+      return true;
     }
 
     function collideShooterLane() {
@@ -701,10 +731,15 @@
         const ny = dy / (distance || 1);
         ball.x = bumper.x + nx * minDistance;
         ball.y = bumper.y + ny * minDistance;
-        reflectBall(nx, ny, 280);
-        bumper.flash = 1;
-        addScore(bumper.value, 'bump');
-        addParticles(ball.x, ball.y, '#f9f4d0');
+        const active = bumper.cooldown <= 0;
+        reflectBall(nx, ny, active ? 280 : 110);
+
+        if (active) {
+          bumper.cooldown = 0.1;
+          bumper.flash = 1;
+          addScore(bumper.value, 'bump');
+          addParticles(ball.x, ball.y, '#f9f4d0');
+        }
       });
     }
 
@@ -712,16 +747,21 @@
       const ball = state.ballState;
       const hit = distanceToSegment(ball.x, ball.y, line);
       const radius = line.mini ? 4.8 : 6.5;
-      if (hit.distance > ball.r + radius || ball.vy < -760) return;
+      if (hit.distance > ball.r + radius) return;
 
-      const nx = hit.dx / (hit.distance || 1);
-      const ny = hit.dy / (hit.distance || 1);
+      const fallbackX = side === 'left' ? -0.18 : 0.18;
+      const nx = hit.distance > 0.001 ? hit.dx / hit.distance : fallbackX;
+      const ny = hit.distance > 0.001 ? hit.dy / hit.distance : -0.98;
+      const approach = ball.vx * nx + ball.vy * ny;
+      if (approach > 24 && !line.held) return;
+
       ball.x = hit.x + nx * (ball.r + radius);
       ball.y = hit.y + ny * (ball.r + radius);
       const flipImpulse = line.held ? (line.mini ? 440 : 520) : (line.mini ? 120 : 160);
       reflectBall(nx, ny, flipImpulse);
       ball.vx += side === 'left' ? (line.mini ? 86 : 105) : (line.mini ? -86 : -105);
       ball.vy -= line.held ? (line.mini ? 170 : 230) : (line.mini ? 62 : 80);
+      limitBallSpeed(line.mini ? 900 : 960);
       addScore(line.held ? (line.mini ? 18 : 25) : 5, line.held ? 'flip' : '');
     }
 
@@ -747,6 +787,9 @@
         const minDistance = ball.r + 6;
         if (hit.distance >= minDistance) return;
 
+        const approach = ball.vx * guide.nx + ball.vy * guide.ny;
+        if (approach > 80) return;
+
         ball.x = hit.x + guide.nx * minDistance;
         ball.y = hit.y + guide.ny * minDistance;
         ball.vy = -Math.abs(ball.vy) * 0.72 - 145;
@@ -760,6 +803,7 @@
 
         guide.cooldown = 0.18;
         state.combo = 0;
+        limitBallSpeed(850);
       });
     }
 
@@ -790,11 +834,15 @@
             ny = dx / length;
           }
 
+          const approach = ball.vx * nx + ball.vy * ny;
+          if (approach > 70 && rail.cooldown > 0) continue;
+
           ball.x = hit.x + nx * minDistance;
           ball.y = hit.y + ny * minDistance;
           reflectBall(nx, ny, rail.impulse);
           ball.vx += nx * 18;
           ball.vy += ny * 18;
+          limitBallSpeed(900);
 
           if (rail.cooldown <= 0) {
             rail.cooldown = 0.16;
@@ -874,6 +922,9 @@
           triggerTableFlip();
         }
         resetBall(true);
+        draw();
+        state.animationId = window.requestAnimationFrame(update);
+        return;
       }
 
       state.tableFlipTimer = Math.max(0, state.tableFlipTimer - dt);
@@ -881,6 +932,7 @@
 
       state.bumpers.forEach((bumper) => {
         bumper.flash = Math.max(0, bumper.flash - dt * 3.6);
+        bumper.cooldown = Math.max(0, bumper.cooldown - dt);
       });
 
       collideBumpers();
@@ -1459,6 +1511,11 @@
         currentGame?.setFlipper('left', false);
         currentGame?.setFlipper('right', false);
       });
+    });
+
+    canvas.addEventListener('contextmenu', (event) => event.preventDefault());
+    ['touchstart', 'touchmove'].forEach((eventName) => {
+      canvas.addEventListener(eventName, (event) => event.preventDefault(), { passive: false });
     });
 
     overlay.querySelector('.egg-close').addEventListener('click', removeEgg);
