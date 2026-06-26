@@ -1328,16 +1328,20 @@
       const gutters = [
         {
           fill: [
-            { x: 48, y: 390 },
-            { x: 72, y: 420 },
-            { x: 78, y: 522 },
+            { x: 50, y: 438 },
+            { x: 72, y: 462 },
+            { x: 78, y: 528 },
             { x: 136, y: 604 },
             { x: 124, y: 614 },
             { x: 56, y: 536 },
-            { x: 46, y: 420 }
+            { x: 48, y: 462 }
           ],
-          rail: [{ x: 58, y: 396 }, { x: 62, y: 518 }, { x: 126, y: 596 }],
-          drain: [{ x: 82, y: 520 }, { x: 138, y: 584 }]
+          rail: [{ x: 60, y: 444 }, { x: 64, y: 524 }, { x: 126, y: 596 }],
+          drain: [{ x: 82, y: 526 }, { x: 138, y: 584 }],
+          fillAlpha: 0.1,
+          strokeAlpha: 0.06,
+          railAlpha: 0.13,
+          drainAlpha: 0.1
         },
         {
           fill: [
@@ -1350,7 +1354,11 @@
             { x: 414, y: 420 }
           ],
           rail: [{ x: 406, y: 396 }, { x: 400, y: 518 }, { x: 354, y: 596 }],
-          drain: [{ x: 374, y: 520 }, { x: 342, y: 584 }]
+          drain: [{ x: 374, y: 520 }, { x: 342, y: 584 }],
+          fillAlpha: 0.18,
+          strokeAlpha: 0.11,
+          railAlpha: 0.2,
+          drainAlpha: 0.16
         }
       ];
 
@@ -1362,21 +1370,21 @@
           else ctx.lineTo(point.x, point.y);
         });
         ctx.closePath();
-        ctx.fillStyle = colorWithAlpha(theme.bg, 0.18, theme.bg);
-        ctx.strokeStyle = colorWithAlpha(theme.accentLight, 0.11, theme.accentLight);
+        ctx.fillStyle = colorWithAlpha(theme.bg, gutter.fillAlpha, theme.bg);
+        ctx.strokeStyle = colorWithAlpha(theme.accentLight, gutter.strokeAlpha, theme.accentLight);
         ctx.lineWidth = 1;
         ctx.fill();
         ctx.stroke();
         ctx.restore();
 
         drawRail(gutter.rail, {
-          color: colorWithAlpha(theme.textStrong, 0.2, theme.textStrong),
+          color: colorWithAlpha(theme.textStrong, gutter.railAlpha, theme.textStrong),
           glow: theme.railGlowDim,
           shadowBlur: 4,
           width: 2.6
         });
         drawRail(gutter.drain, {
-          color: colorWithAlpha(theme.textStrong, 0.16, theme.textStrong),
+          color: colorWithAlpha(theme.textStrong, gutter.drainAlpha, theme.textStrong),
           glow: theme.railGlowDim,
           shadowBlur: 3,
           width: 2
