@@ -34,7 +34,7 @@
       }
 
       .egg-machine {
-        width: min(560px, 94vw);
+        width: min(520px, 94vw);
         padding: 16px;
         border: 1px solid rgba(255, 255, 255, 0.22);
         border-radius: 8px;
@@ -115,6 +115,9 @@
       .egg-playfield {
         position: relative;
         margin-top: 14px;
+        width: min(100%, calc((100vh - 286px) * 0.75));
+        margin-left: auto;
+        margin-right: auto;
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.16);
         border-radius: 8px;
@@ -135,7 +138,7 @@
         display: block;
         width: 100%;
         aspect-ratio: 3 / 4;
-        max-height: min(70vh, 680px);
+        height: auto;
         touch-action: none;
         cursor: pointer;
       }
@@ -1091,10 +1094,13 @@
         ctx.font = '900 23px Consolas, Monaco, monospace';
         ctx.fillText(state.launchCharging ? 'RELEASE' : 'PULL TO LAUNCH', tableWidth / 2, 122);
       } else {
-        ctx.globalAlpha = 0.24;
-        ctx.fillStyle = '#f5f5f5';
-        ctx.font = '900 24px Consolas, Monaco, monospace';
-        ctx.fillText('FREE PLAY', tableWidth / 2, 122);
+        ctx.globalAlpha = 0.1;
+        ctx.strokeStyle = 'rgba(245,245,245,0.34)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(184, 86);
+        ctx.lineTo(296, 86);
+        ctx.stroke();
       }
 
       ctx.restore();
