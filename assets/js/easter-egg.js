@@ -500,6 +500,7 @@
       lastTime: 0,
       animationId: 0,
       tableFlipTimer: 0,
+      readyFlashTimer: 0,
       launchReady: false,
       launchCharging: false,
       launchCharge: 0,
@@ -680,9 +681,10 @@
 
     function triggerTableFlip() {
       state.tableFlipTimer = 1.15;
+      state.readyFlashTimer = 2.4;
       cuePet('drain', 1.15);
       if (effectNode) {
-        effectNode.textContent = `Table flip. Ball ${state.ball} ready.`;
+        effectNode.textContent = `Ball lost. Ball ${state.ball} ready.`;
       }
     }
 
@@ -703,6 +705,7 @@
       state.launchReady = false;
       state.launchCharging = false;
       state.launchCharge = 0;
+      state.readyFlashTimer = 0;
       state.ballSaveTimer = 6.5;
       state.ballSaveFlash = 0;
       ball.x = shooterLane.centerX;
@@ -993,6 +996,7 @@
       if (state.launchReady) {
         state.launchPulse += dt;
         state.ballSaveFlash = Math.max(0, state.ballSaveFlash - dt);
+        state.readyFlashTimer = Math.max(0, state.readyFlashTimer - dt);
         if (state.launchCharging) {
           state.launchCharge = Math.min(1, state.launchCharge + dt * 0.72);
         } else {
@@ -1158,16 +1162,18 @@
       ctx.strokeStyle = theme.borderSoft;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.roundRect(126, 240, 228, 42, 10);
+      ctx.roundRect(126, 236, 228, 48, 10);
       ctx.fill();
       ctx.stroke();
       ctx.fillStyle = theme.textStrong;
       ctx.shadowColor = theme.textGlowSoft;
       ctx.shadowBlur = 12;
-      ctx.font = '900 18px Consolas, Monaco, monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('(╯°□°)╯︵ ┻━┻', tableWidth / 2, 262);
+      ctx.font = '900 11px Consolas, Monaco, monospace';
+      ctx.fillText('BALL LOST', tableWidth / 2, 249);
+      ctx.font = '900 17px Consolas, Monaco, monospace';
+      ctx.fillText('(╯°□°)╯︵ ┻━┻', tableWidth / 2, 271);
       ctx.restore();
     }
 
@@ -1175,6 +1181,7 @@
       const tiltActive = state.tableFlipTimer > 0;
       const saveActive = state.ballSaveFlash > 0;
       const launchActive = state.launchReady;
+      const readyActive = launchActive && state.readyFlashTimer > 0;
 
       ctx.save();
       ctx.textAlign = 'center';
@@ -1195,12 +1202,24 @@
         ctx.shadowColor = theme.textGlow;
         ctx.shadowBlur = 20;
         ctx.font = '900 31px Consolas, Monaco, monospace';
-        ctx.fillText('TILT', tableWidth / 2, 122);
+        ctx.fillText('BALL LOST', tableWidth / 2, 122);
 
         ctx.globalAlpha = alpha * 0.28;
         ctx.strokeStyle = theme.accent;
         ctx.lineWidth = 2;
-        ctx.strokeText('TILT', tableWidth / 2, 122);
+        ctx.strokeText('BALL LOST', tableWidth / 2, 122);
+      } else if (readyActive) {
+        const alpha = Math.min(0.9, 0.42 + state.readyFlashTimer * 0.2);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = theme.textStrong;
+        ctx.strokeStyle = theme.accentLight;
+        ctx.shadowColor = theme.textGlow;
+        ctx.shadowBlur = 18;
+        ctx.font = '900 25px Consolas, Monaco, monospace';
+        ctx.lineWidth = 2.2;
+        const label = `BALL ${state.ball} READY`;
+        ctx.strokeText(label, tableWidth / 2, 122);
+        ctx.fillText(label, tableWidth / 2, 122);
       } else if (launchActive) {
         const alpha = 0.72 + Math.sin(state.launchPulse * 7) * 0.16;
         const label = state.launchCharging ? 'RELEASE' : 'PULL TO LAUNCH';
