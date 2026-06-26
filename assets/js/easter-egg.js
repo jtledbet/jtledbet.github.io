@@ -811,6 +811,7 @@
       const ball = state.ballState;
       const minLaneX = shooterLane.innerX + ball.r;
       const maxLaneX = shooterLane.outerX - ball.r;
+      const exitGateY = shooterLane.exitY + ball.r;
 
       if (state.inShooterLane) {
         if (ball.x < minLaneX) {
@@ -822,13 +823,11 @@
           ball.vx = -Math.abs(ball.vx) * 0.32;
         }
 
-        if (ball.y <= shooterLane.exitY && ball.vy < 0) {
+        if (ball.y <= exitGateY && ball.vy < 0) {
           const upwardSpeed = Math.abs(ball.vy);
           state.inShooterLane = false;
-          ball.x = shooterLane.innerX - ball.r - 2;
-          ball.y = shooterLane.exitY + 8;
-          ball.vx = -108 - Math.min(78, upwardSpeed * 0.075);
-          ball.vy = -218 - Math.min(104, upwardSpeed * 0.12);
+          ball.vx = -118 - Math.min(82, upwardSpeed * 0.085);
+          ball.vy = -238 - Math.min(96, upwardSpeed * 0.105);
         }
         return;
       }
