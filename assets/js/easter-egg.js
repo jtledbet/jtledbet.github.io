@@ -622,11 +622,11 @@
       }
 
       const rest = side === 'left'
-        ? { ax: 148, ay: 550, bx: 222, by: 562 }
-        : { ax: 332, ay: 550, bx: 258, by: 562 };
+        ? { ax: 140, ay: 550, bx: 218, by: 562 }
+        : { ax: 340, ay: 550, bx: 262, by: 562 };
       const raised = side === 'left'
-        ? { bx: 216, by: 514 }
-        : { bx: 264, by: 514 };
+        ? { bx: 212, by: 514 }
+        : { bx: 268, by: 514 };
 
       return {
         ax: rest.ax,
