@@ -220,7 +220,7 @@
     return document.documentElement.getAttribute(`data-env-${name}`) || '';
   }
 
-  function controlHintCopy() {
+  function flipperHintCopy() {
     const pointer = environmentValue('pointer');
     const touch = environmentValue('touch');
     const coarsePointer = pointer === 'coarse' || mediaMatches('(pointer: coarse)');
@@ -231,6 +231,7 @@
 
     if (coarsePointer && !finePointer) {
       return {
+        label: 'FLIPPERS',
         copy: 'TAP LEFT / RIGHT',
         aria: 'Controls: tap the left or right side to flip.'
       };
@@ -238,21 +239,63 @@
 
     if (touchAvailable) {
       return {
+        label: 'FLIPPERS',
         copy: 'A/D · ←/→ · TAP SIDES',
         aria: 'Controls: press A or D, press the left or right arrow key, or tap a side to flip.'
       };
     }
 
     return {
+      label: 'FLIPPERS',
       copy: 'A/D OR ←/→',
       aria: 'Controls: press A or D, or press the left or right arrow key to flip.'
     };
   }
 
-  function updateControlHint(controlHintNode) {
+  function launchHintCopy() {
+    const pointer = environmentValue('pointer');
+    const touch = environmentValue('touch');
+    const coarsePointer = pointer === 'coarse' || mediaMatches('(pointer: coarse)');
+    const finePointer = pointer === 'fine' || mediaMatches('(pointer: fine)');
+    const touchAvailable = touch === 'available' ||
+      navigator.maxTouchPoints > 0 ||
+      mediaMatches('(any-pointer: coarse)');
+
+    if (coarsePointer && !finePointer) {
+      return {
+        label: 'LAUNCH',
+        copy: 'HOLD + RELEASE',
+        aria: 'Controls: hold and release on the table to launch.'
+      };
+    }
+
+    if (touchAvailable) {
+      return {
+        label: 'LAUNCH',
+        copy: 'HOLD OR SPACE',
+        aria: 'Controls: hold and release on the table, or press and release Space or Enter to launch.'
+      };
+    }
+
+    return {
+      label: 'LAUNCH',
+      copy: 'HOLD CLICK / SPACE',
+      aria: 'Controls: hold and release the mouse, or hold Space or Enter, then release to launch.'
+    };
+  }
+
+  function controlHintCopy(mode) {
+    return mode === 'launch' ? launchHintCopy() : flipperHintCopy();
+  }
+
+  function updateControlHint(controlHintNode, mode) {
     if (!controlHintNode) return;
+    const nextMode = mode || controlHintNode.dataset.pinballMode || 'flip';
+    controlHintNode.dataset.pinballMode = nextMode;
+    const labelNode = controlHintNode.querySelector('.egg-control-label');
     const copyNode = controlHintNode.querySelector('.egg-control-copy');
-    const hint = controlHintCopy();
+    const hint = controlHintCopy(nextMode);
+    if (labelNode) labelNode.textContent = hint.label;
     if (copyNode) copyNode.textContent = hint.copy;
     controlHintNode.setAttribute('aria-label', hint.aria);
   }
@@ -310,7 +353,7 @@
     return String(score).padStart(6, '0');
   }
 
-  function createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode, effectNode) {
+  function createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode, effectNode, controlHintNode) {
     const ctx = canvas.getContext('2d');
     const shooterLane = {
       centerX: 432,
@@ -335,6 +378,8 @@
       launchCharging: false,
       launchCharge: 0,
       launchPulse: 0,
+      ballSaveTimer: 0,
+      ballSaveFlash: 0,
       particles: [],
       pet: {
         mood: 'idle',
@@ -424,6 +469,10 @@
       drain: ['=^;.;^=']
     };
 
+    function setControlMode(mode) {
+      updateControlHint(controlHintNode, mode);
+    }
+
     function resetBall(served) {
       state.ballState = {
         x: served ? shooterLane.centerX : 385,
@@ -438,7 +487,9 @@
       state.launchCharging = false;
       state.launchCharge = 0;
       state.launchPulse = 0;
+      state.ballSaveTimer = 0;
       state.combo = 0;
+      setControlMode(served ? 'launch' : 'flip');
       updateScore();
     }
 
@@ -509,6 +560,15 @@
       }
     }
 
+    function triggerBallSave() {
+      state.ballSaveFlash = 1.05;
+      cuePet('lane', 0.7);
+      addParticles(state.ballState.x, Math.min(state.ballState.y, tableHeight - 28), '#72ffab');
+      if (effectNode) {
+        effectNode.textContent = `Ball ${state.ball} saved. Pull again.`;
+      }
+    }
+
     function launchBall() {
       if (!state.launchReady) return;
 
@@ -517,9 +577,12 @@
       state.launchReady = false;
       state.launchCharging = false;
       state.launchCharge = 0;
+      state.ballSaveTimer = 6.5;
+      state.ballSaveFlash = 0;
       ball.x = shooterLane.centerX;
       ball.vx = -2 - power * 5;
       ball.vy = -520 - power * 300;
+      setControlMode('flip');
       addParticles(ball.x, ball.y, '#72ffab');
       cuePet('lane', 0.42);
       if (effectNode) {
@@ -762,6 +825,7 @@
       const ball = state.ballState;
       if (state.launchReady) {
         state.launchPulse += dt;
+        state.ballSaveFlash = Math.max(0, state.ballSaveFlash - dt);
         if (state.launchCharging) {
           state.launchCharge = Math.min(1, state.launchCharge + dt * 0.72);
         } else {
@@ -775,6 +839,9 @@
         state.animationId = window.requestAnimationFrame(update);
         return;
       }
+
+      state.ballSaveTimer = Math.max(0, state.ballSaveTimer - dt);
+      state.ballSaveFlash = Math.max(0, state.ballSaveFlash - dt);
 
       ball.vy += 300 * dt;
       ball.x += ball.vx * dt;
@@ -800,8 +867,12 @@
       collideLowerGuides(dt);
 
       if (ball.y > tableHeight + 24) {
-        state.ball += 1;
-        triggerTableFlip();
+        if (state.ballSaveTimer > 0) {
+          triggerBallSave();
+        } else {
+          state.ball += 1;
+          triggerTableFlip();
+        }
         resetBall(true);
       }
 
@@ -931,13 +1002,22 @@
 
     function drawLaneMessage() {
       const tiltActive = state.tableFlipTimer > 0;
+      const saveActive = state.ballSaveFlash > 0;
       const launchActive = state.launchReady;
 
       ctx.save();
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      if (tiltActive) {
+      if (saveActive) {
+        const alpha = Math.min(0.9, 0.38 + state.ballSaveFlash * 0.48);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = '#72ffab';
+        ctx.shadowColor = 'rgba(114, 255, 171, 0.58)';
+        ctx.shadowBlur = 16;
+        ctx.font = '900 27px Consolas, Monaco, monospace';
+        ctx.fillText('BALL SAVE', tableWidth / 2, 122);
+      } else if (tiltActive) {
         const alpha = Math.min(0.92, 0.34 + state.tableFlipTimer * 0.52);
         ctx.globalAlpha = alpha;
         ctx.fillStyle = '#f9f4d0';
@@ -1338,7 +1418,7 @@
           <span>BALL<strong class="egg-ball-readout">1</strong></span>
           <span>COMBO<strong class="egg-combo-readout">0</strong></span>
           <span class="egg-control-hint">
-            <span aria-hidden="true">FLIPPERS</span> <strong class="egg-control-copy">A/D OR ←/→</strong>
+            <span class="egg-control-label" aria-hidden="true">FLIPPERS</span> <strong class="egg-control-copy">A/D OR ←/→</strong>
           </span>
         </div>
         <div class="egg-playfield">
@@ -1358,7 +1438,7 @@
     const highScoreNode = overlay.querySelector('.egg-highscore-value');
     const effectNode = overlay.querySelector('.egg-effect-status');
     const controlHintNode = overlay.querySelector('.egg-control-hint');
-    currentGame = createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode, effectNode);
+    currentGame = createPinballGame(canvas, scoreNode, ballNode, comboNode, highScoreNode, effectNode, controlHintNode);
     watchControlHint(controlHintNode);
 
     function pointerSide(event) {
