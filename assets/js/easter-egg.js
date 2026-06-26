@@ -23,31 +23,40 @@
     const style = document.createElement('style');
     style.textContent = `
       .egg-overlay {
+        --egg-bg: var(--bg, #0d0d1a);
+        --egg-card: var(--card, #1a1a30);
+        --egg-border: var(--border, rgba(124, 92, 191, 0.2));
+        --egg-accent: var(--purple, #8b68d4);
+        --egg-accent-light: var(--purple-light, #a884f0);
+        --egg-accent-dim: var(--purple-dim, rgba(139, 104, 212, 0.12));
+        --egg-text: var(--text, #e2e8f0);
+        --egg-muted: var(--muted, #8892a4);
         position: fixed;
         inset: 0;
         z-index: 9999;
         display: grid;
         place-items: center;
         padding: 24px;
-        background: rgba(5, 5, 12, 0.76);
+        background: rgba(13, 13, 26, 0.78);
+        background: color-mix(in srgb, var(--egg-bg) 78%, transparent);
         backdrop-filter: blur(8px);
       }
 
       .egg-machine {
         width: min(520px, 94vw);
         padding: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.22);
+        border: 1px solid var(--egg-border);
         border-radius: 8px;
-        background: linear-gradient(180deg, #171727, #07070f);
+        background: linear-gradient(180deg, var(--egg-card), var(--egg-bg));
         box-shadow: 0 24px 90px rgba(0, 0, 0, 0.48);
       }
 
       .egg-title {
         padding: 12px;
-        border: 1px solid rgba(114, 255, 171, 0.35);
+        border: 1px solid var(--egg-border);
         border-radius: 6px;
-        color: #72ffab;
-        background: #05070a;
+        color: var(--egg-accent-light);
+        background: var(--egg-bg);
         font: 700 14px/1.2 Consolas, Monaco, monospace;
         letter-spacing: 0;
         text-align: center;
@@ -64,16 +73,17 @@
         grid-template-columns: minmax(0, 1fr) auto;
         gap: 12px;
         align-items: baseline;
-        border: 1px solid rgba(249, 244, 208, 0.2);
+        border: 1px solid var(--egg-border);
         border-radius: 6px;
-        color: rgba(249, 244, 208, 0.82);
-        background: rgba(5, 7, 10, 0.54);
+        color: var(--egg-muted);
+        background: rgba(13, 13, 26, 0.72);
+        background: color-mix(in srgb, var(--egg-bg) 72%, transparent);
         font: 800 12px/1.2 Consolas, Monaco, monospace;
         padding: 9px 12px;
       }
 
       .egg-score-row strong {
-        color: #f9f4d0;
+        color: var(--egg-text);
         font-size: 20px;
         font-weight: 900;
       }
@@ -88,17 +98,18 @@
       .egg-state-row > span {
         flex: 1 1 0;
         min-width: 0;
-        border: 1px solid rgba(249, 244, 208, 0.2);
+        border: 1px solid var(--egg-border);
         border-radius: 6px;
-        color: rgba(249, 244, 208, 0.82);
-        background: rgba(5, 7, 10, 0.54);
+        color: var(--egg-muted);
+        background: rgba(13, 13, 26, 0.72);
+        background: color-mix(in srgb, var(--egg-bg) 72%, transparent);
         font: 800 11px/1.2 Consolas, Monaco, monospace;
         padding: 8px 10px;
       }
 
       .egg-state-row strong {
         margin-left: 0.4rem;
-        color: #f9f4d0;
+        color: var(--egg-text);
         font-size: 13px;
         font-weight: 900;
       }
@@ -108,7 +119,7 @@
       }
 
       .egg-control-copy {
-        color: #72ffab;
+        color: var(--egg-accent-light);
         white-space: nowrap;
       }
 
@@ -119,11 +130,11 @@
         margin-left: auto;
         margin-right: auto;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.16);
+        border: 1px solid var(--egg-border);
         border-radius: 8px;
         background:
-          radial-gradient(circle at 50% 18%, rgba(139, 104, 212, 0.24), transparent 25%),
-          linear-gradient(150deg, #1a2030, #0a0a12 65%);
+          radial-gradient(circle at 50% 18%, var(--egg-accent-dim), transparent 25%),
+          linear-gradient(150deg, var(--egg-card), var(--egg-bg) 65%);
       }
 
       .egg-overlay,
@@ -169,10 +180,11 @@
         right: 18px;
         width: 40px;
         height: 40px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid var(--egg-border);
         border-radius: 50%;
-        color: #f5f5f5;
-        background: rgba(5, 5, 12, 0.78);
+        color: var(--egg-text);
+        background: rgba(13, 13, 26, 0.82);
+        background: color-mix(in srgb, var(--egg-bg) 82%, transparent);
         font: 700 22px/1 Arial, sans-serif;
         cursor: pointer;
       }
@@ -228,6 +240,109 @@
 
   function environmentValue(name) {
     return document.documentElement.getAttribute(`data-env-${name}`) || '';
+  }
+
+  function parseRgb(color, fallback = { r: 226, g: 232, b: 240 }) {
+    const value = String(color || '').trim();
+    const hex = value.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+    if (hex) {
+      const raw = hex[1];
+      const full = raw.length === 3
+        ? raw.split('').map((part) => part + part).join('')
+        : raw;
+      return {
+        r: parseInt(full.slice(0, 2), 16),
+        g: parseInt(full.slice(2, 4), 16),
+        b: parseInt(full.slice(4, 6), 16)
+      };
+    }
+
+    const channels = value.match(/[\d.]+/g);
+    if (channels && channels.length >= 3) {
+      return {
+        r: Math.max(0, Math.min(255, Number(channels[0]))),
+        g: Math.max(0, Math.min(255, Number(channels[1]))),
+        b: Math.max(0, Math.min(255, Number(channels[2])))
+      };
+    }
+
+    return fallback;
+  }
+
+  function colorWithAlpha(color, alpha, fallback) {
+    const rgb = parseRgb(color, parseRgb(fallback));
+    return `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`;
+  }
+
+  function mixColors(from, to, amount = 0.5) {
+    const a = parseRgb(from);
+    const b = parseRgb(to);
+    const mix = (left, right) => Math.round(left + (right - left) * amount);
+    return `rgb(${mix(a.r, b.r)},${mix(a.g, b.g)},${mix(a.b, b.b)})`;
+  }
+
+  function resolvePinballTheme() {
+    const styles = window.getComputedStyle
+      ? window.getComputedStyle(document.documentElement)
+      : null;
+    const css = (name, fallback) => {
+      const value = styles?.getPropertyValue(name).trim();
+      return value || fallback;
+    };
+    const bg = css('--bg', '#0d0d1a');
+    const card = css('--card', '#1a1a30');
+    const border = css('--border', 'rgba(124, 92, 191, 0.2)');
+    const accent = css('--purple', '#8b68d4');
+    const accentLight = css('--purple-light', '#a884f0');
+    const accentDim = css('--purple-dim', 'rgba(139, 104, 212, 0.12)');
+    const text = css('--text', '#e2e8f0');
+    const muted = css('--muted', '#8892a4');
+    const alpha = (color, opacity, fallback = text) => colorWithAlpha(color, opacity, fallback);
+
+    return {
+      bg,
+      card,
+      border,
+      accent,
+      accentLight,
+      accentDim,
+      text,
+      muted,
+      tableTop: mixColors(card, accent, 0.14),
+      tableMid: mixColors(bg, card, 0.42),
+      tableBottom: mixColors(bg, '#000000', 0.34),
+      panelBg: alpha(bg, 0.68, bg),
+      panelDeep: alpha(bg, 0.82, bg),
+      fieldGhost: alpha(accent, 0.08, accent),
+      textStrong: text,
+      textSoft: alpha(text, 0.46, text),
+      textDim: alpha(text, 0.28, text),
+      textFaint: alpha(text, 0.1, text),
+      mutedSoft: alpha(muted, 0.42, muted),
+      borderSoft: alpha(accentLight, 0.2, accentLight),
+      rail: alpha(text, 0.44, text),
+      railDim: alpha(text, 0.32, text),
+      railGlow: alpha(accentLight, 0.12, accentLight),
+      railGlowDim: alpha(accentLight, 0.075, accentLight),
+      accentSoft: alpha(accent, 0.34, accent),
+      accentMid: alpha(accent, 0.58, accent),
+      accentFill: alpha(accent, 0.07, accent),
+      accentGlow: alpha(accentLight, 0.42, accentLight),
+      accentGlowSoft: alpha(accentLight, 0.2, accentLight),
+      accentTrace: alpha(accentLight, 0.07, accentLight),
+      accentTraceGlow: alpha(accentLight, 0.06, accentLight),
+      lightGlow: alpha(accentLight, 0.72, accentLight),
+      textGlow: alpha(text, 0.72, text),
+      textGlowSoft: alpha(text, 0.34, text),
+      hotFill: alpha(text, 0.11, text),
+      darkStroke: alpha(bg, 0.5, bg),
+      bumperInner: text,
+      bumperLive: accentLight,
+      bumperBody: accent,
+      bumperDeep: mixColors(bg, accent, 0.26),
+      ballMid: mixColors(text, muted, 0.32),
+      ballOuter: muted
+    };
   }
 
   function flipperHintCopy() {
@@ -372,6 +487,7 @@
       exitY: 166,
       bottomY: 612
     };
+    const theme = resolvePinballTheme();
     const state = {
       score: 0,
       highScore: loadHighScore(),
@@ -435,10 +551,10 @@
         {
           points: [{ x: 108, y: 450 }, { x: 208, y: 474 }],
           shape: [{ x: 96, y: 442 }, { x: 220, y: 468 }, { x: 204, y: 492 }, { x: 110, y: 466 }],
-          color: 'rgba(249,244,208,0.52)',
-          fill: 'rgba(209,106,138,0.07)',
-          glow: 'rgba(209,106,138,0.2)',
-          stroke: 'rgba(249,244,208,0.14)',
+          color: theme.textSoft,
+          fill: theme.accentFill,
+          glow: theme.accentGlowSoft,
+          stroke: theme.borderSoft,
           width: 4.5,
           impulse: 118,
           cooldown: 0
@@ -446,10 +562,10 @@
         {
           points: [{ x: 372, y: 450 }, { x: 272, y: 474 }],
           shape: [{ x: 384, y: 442 }, { x: 260, y: 468 }, { x: 276, y: 492 }, { x: 370, y: 466 }],
-          color: 'rgba(249,244,208,0.52)',
-          fill: 'rgba(209,106,138,0.07)',
-          glow: 'rgba(209,106,138,0.2)',
-          stroke: 'rgba(249,244,208,0.14)',
+          color: theme.textSoft,
+          fill: theme.accentFill,
+          glow: theme.accentGlowSoft,
+          stroke: theme.borderSoft,
           width: 4.5,
           impulse: 118,
           cooldown: 0
@@ -573,7 +689,7 @@
     function triggerBallSave() {
       state.ballSaveFlash = 1.05;
       cuePet('lane', 0.7);
-      addParticles(state.ballState.x, Math.min(state.ballState.y, tableHeight - 28), '#72ffab');
+      addParticles(state.ballState.x, Math.min(state.ballState.y, tableHeight - 28), theme.accentLight);
       if (effectNode) {
         effectNode.textContent = `Ball ${state.ball} saved. Pull again.`;
       }
@@ -593,7 +709,7 @@
       ball.vx = -2 - power * 5;
       ball.vy = -520 - power * 300;
       setControlMode('flip');
-      addParticles(ball.x, ball.y, '#72ffab');
+      addParticles(ball.x, ball.y, theme.accentLight);
       cuePet('lane', 0.42);
       if (effectNode) {
         effectNode.textContent = `Ball ${state.ball} launched.`;
@@ -741,7 +857,7 @@
           bumper.cooldown = 0.1;
           bumper.flash = 1;
           addScore(bumper.value, 'bump');
-          addParticles(ball.x, ball.y, '#f9f4d0');
+          addParticles(ball.x, ball.y, theme.textStrong);
         }
       });
     }
@@ -979,18 +1095,18 @@
       ctx.lineTo(line.bx, line.by);
       ctx.lineWidth = mini ? 8 : 13;
       ctx.lineCap = 'round';
-      ctx.strokeStyle = line.held ? '#f9f4d0' : '#72ffab';
-      ctx.shadowColor = line.held ? 'rgba(249,244,208,0.78)' : 'rgba(114,255,171,0.46)';
+      ctx.strokeStyle = line.held ? theme.textStrong : theme.accentLight;
+      ctx.shadowColor = line.held ? theme.textGlow : theme.accentGlow;
       ctx.shadowBlur = line.held ? (mini ? 12 : 20) : (mini ? 6 : 10);
       ctx.stroke();
-      ctx.fillStyle = '#08080f';
+      ctx.fillStyle = theme.bg;
       ctx.beginPath();
       ctx.arc(line.ax, line.ay, mini ? 4.5 : 7.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
       if (mini) return;
 
-      ctx.fillStyle = 'rgba(245,245,245,0.48)';
+      ctx.fillStyle = theme.textSoft;
       ctx.font = '700 12px Consolas, Monaco, monospace';
       ctx.textAlign = 'center';
       ctx.fillText(activeSide === 'left' ? 'A' : 'D', line.ax, line.ay + 34);
@@ -1003,10 +1119,10 @@
       const activeFrame = Math.floor(state.pet.timer * 16) % faces.length;
       const face = mood === 'idle' ? petFaces.idle[idleFrame] : faces[activeFrame];
       const color = mood === 'drain'
-        ? '#d16a8a'
+        ? theme.accent
         : mood === 'combo' || mood === 'bump'
-          ? '#72ffab'
-          : '#f9f4d0';
+          ? theme.accentLight
+          : theme.textStrong;
       const yNudge = mood === 'idle'
         ? Math.sin(state.pet.idleTime * 2.4) * 0.8
         : Math.sin(state.pet.timer * 30) * 1.6;
@@ -1014,10 +1130,10 @@
       ctx.save();
       ctx.translate(62, 196 + yNudge);
       ctx.globalAlpha = mood === 'idle' ? 0.74 : 0.94;
-      ctx.fillStyle = 'rgba(5, 7, 10, 0.62)';
-      ctx.strokeStyle = mood === 'idle' ? 'rgba(249, 244, 208, 0.26)' : color;
+      ctx.fillStyle = theme.panelBg;
+      ctx.strokeStyle = mood === 'idle' ? theme.borderSoft : color;
       ctx.lineWidth = 2;
-      ctx.shadowColor = mood === 'idle' ? 'rgba(249, 244, 208, 0.16)' : color;
+      ctx.shadowColor = mood === 'idle' ? theme.railGlowDim : color;
       ctx.shadowBlur = mood === 'idle' ? 6 : 14;
       ctx.beginPath();
       ctx.roundRect(-42, -18, 84, 34, 9);
@@ -1038,15 +1154,15 @@
       const alpha = Math.min(1, state.tableFlipTimer * 2.2);
       ctx.save();
       ctx.globalAlpha = alpha;
-      ctx.fillStyle = 'rgba(5, 7, 10, 0.68)';
-      ctx.strokeStyle = 'rgba(249, 244, 208, 0.38)';
+      ctx.fillStyle = theme.panelBg;
+      ctx.strokeStyle = theme.borderSoft;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.roundRect(78, 454, 324, 52, 10);
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = '#f9f4d0';
-      ctx.shadowColor = 'rgba(249, 244, 208, 0.44)';
+      ctx.fillStyle = theme.textStrong;
+      ctx.shadowColor = theme.textGlowSoft;
       ctx.shadowBlur = 12;
       ctx.font = '900 20px Consolas, Monaco, monospace';
       ctx.textAlign = 'center';
@@ -1067,35 +1183,35 @@
       if (saveActive) {
         const alpha = Math.min(0.9, 0.38 + state.ballSaveFlash * 0.48);
         ctx.globalAlpha = alpha;
-        ctx.fillStyle = '#72ffab';
-        ctx.shadowColor = 'rgba(114, 255, 171, 0.58)';
+        ctx.fillStyle = theme.accentLight;
+        ctx.shadowColor = theme.lightGlow;
         ctx.shadowBlur = 16;
         ctx.font = '900 27px Consolas, Monaco, monospace';
         ctx.fillText('BALL SAVE', tableWidth / 2, 122);
       } else if (tiltActive) {
         const alpha = Math.min(0.92, 0.34 + state.tableFlipTimer * 0.52);
         ctx.globalAlpha = alpha;
-        ctx.fillStyle = '#f9f4d0';
-        ctx.shadowColor = 'rgba(249, 244, 208, 0.72)';
+        ctx.fillStyle = theme.textStrong;
+        ctx.shadowColor = theme.textGlow;
         ctx.shadowBlur = 20;
         ctx.font = '900 31px Consolas, Monaco, monospace';
         ctx.fillText('TILT', tableWidth / 2, 122);
 
         ctx.globalAlpha = alpha * 0.28;
-        ctx.strokeStyle = '#d16a8a';
+        ctx.strokeStyle = theme.accent;
         ctx.lineWidth = 2;
         ctx.strokeText('TILT', tableWidth / 2, 122);
       } else if (launchActive) {
         const alpha = 0.72 + Math.sin(state.launchPulse * 7) * 0.16;
         ctx.globalAlpha = alpha;
-        ctx.fillStyle = state.launchCharging ? '#f9f4d0' : '#72ffab';
-        ctx.shadowColor = state.launchCharging ? 'rgba(249, 244, 208, 0.72)' : 'rgba(114, 255, 171, 0.72)';
+        ctx.fillStyle = state.launchCharging ? theme.textStrong : theme.accentLight;
+        ctx.shadowColor = state.launchCharging ? theme.textGlow : theme.lightGlow;
         ctx.shadowBlur = state.launchCharging ? 18 : 14;
         ctx.font = '900 23px Consolas, Monaco, monospace';
         ctx.fillText(state.launchCharging ? 'RELEASE' : 'PULL TO LAUNCH', tableWidth / 2, 122);
       } else {
         ctx.globalAlpha = 0.1;
-        ctx.strokeStyle = 'rgba(245,245,245,0.34)';
+        ctx.strokeStyle = theme.textDim;
         ctx.lineWidth = 1.2;
         ctx.beginPath();
         ctx.moveTo(184, 86);
@@ -1112,7 +1228,7 @@
       const pulse = 0.5 + Math.sin(state.launchPulse * 9) * 0.5;
       const charge = state.launchCharge;
       const radius = ball.r + 9 + pulse * 4 + charge * 6;
-      const color = state.launchCharging ? '#f9f4d0' : '#72ffab';
+      const color = state.launchCharging ? theme.textStrong : theme.accentLight;
 
       ctx.save();
       ctx.translate(ball.x, ball.y);
@@ -1120,7 +1236,7 @@
       ctx.globalAlpha = 0.38 + pulse * 0.16 + charge * 0.18;
       ctx.strokeStyle = color;
       ctx.lineWidth = 1.6;
-      ctx.shadowColor = state.launchCharging ? 'rgba(249, 244, 208, 0.82)' : 'rgba(114, 255, 171, 0.72)';
+      ctx.shadowColor = state.launchCharging ? theme.textGlow : theme.lightGlow;
       ctx.shadowBlur = 12 + charge * 8;
       ctx.beginPath();
       ctx.arc(0, 0, radius, -0.35, Math.PI * 1.55);
@@ -1150,7 +1266,7 @@
         ctx.stroke();
       }
 
-      ctx.fillStyle = '#f9f4d0';
+      ctx.fillStyle = theme.textStrong;
       [0, 2.1, 4.2].forEach((angle, index) => {
         const dotPulse = index === Math.floor(state.launchPulse * 5) % 3 ? 1 : 0.42;
         ctx.globalAlpha = dotPulse;
@@ -1163,8 +1279,8 @@
 
     function drawShooterLane() {
       ctx.save();
-      ctx.fillStyle = 'rgba(5, 7, 10, 0.22)';
-      ctx.strokeStyle = 'rgba(249,244,208,0.09)';
+      ctx.fillStyle = colorWithAlpha(theme.bg, 0.22, theme.bg);
+      ctx.strokeStyle = theme.textFaint;
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.roundRect(
@@ -1177,8 +1293,8 @@
       ctx.fill();
       ctx.stroke();
 
-      ctx.strokeStyle = 'rgba(114,255,171,0.07)';
-      ctx.shadowColor = 'rgba(114,255,171,0.06)';
+      ctx.strokeStyle = theme.accentTrace;
+      ctx.shadowColor = theme.accentTraceGlow;
       ctx.shadowBlur = 4;
       ctx.setLineDash([6, 18]);
       ctx.beginPath();
@@ -1189,20 +1305,20 @@
       ctx.restore();
 
       drawRail([{ x: shooterLane.outerX, y: 34 }, { x: shooterLane.outerX, y: shooterLane.bottomY }], {
-        color: 'rgba(255,255,255,0.42)',
-        glow: 'rgba(255,255,255,0.1)',
+        color: theme.rail,
+        glow: theme.railGlow,
         shadowBlur: 6,
         width: 5.4
       });
       drawRail([{ x: shooterLane.innerX, y: shooterLane.exitY }, { x: shooterLane.innerX, y: shooterLane.bottomY - 6 }], {
-        color: 'rgba(255,255,255,0.32)',
-        glow: 'rgba(255,255,255,0.075)',
+        color: theme.railDim,
+        glow: theme.railGlowDim,
         shadowBlur: 4,
         width: 4.2
       });
       drawRail([{ x: shooterLane.innerX, y: shooterLane.exitY }, { x: 388, y: 158 }, { x: 358, y: 154 }], {
-        color: 'rgba(249,244,208,0.28)',
-        glow: 'rgba(249,244,208,0.08)',
+        color: theme.textDim,
+        glow: theme.railGlowDim,
         shadowBlur: 5,
         width: 3.2
       });
@@ -1210,8 +1326,8 @@
 
     function drawLowerApron() {
       ctx.save();
-      ctx.fillStyle = 'rgba(5, 7, 10, 0.42)';
-      ctx.strokeStyle = 'rgba(249,244,208,0.18)';
+      ctx.fillStyle = colorWithAlpha(theme.bg, 0.42, theme.bg);
+      ctx.strokeStyle = theme.borderSoft;
       ctx.lineWidth = 2;
       ctx.lineJoin = 'round';
       ctx.beginPath();
@@ -1227,21 +1343,21 @@
       ctx.restore();
 
       drawRail([{ x: 142, y: 594 }, { x: 198, y: 558 }], {
-        color: 'rgba(249,244,208,0.34)',
-        glow: 'rgba(249,244,208,0.12)',
+        color: theme.textDim,
+        glow: theme.railGlow,
         shadowBlur: 6,
         width: 4
       });
       drawRail([{ x: 338, y: 594 }, { x: 282, y: 558 }], {
-        color: 'rgba(249,244,208,0.34)',
-        glow: 'rgba(249,244,208,0.12)',
+        color: theme.textDim,
+        glow: theme.railGlow,
         shadowBlur: 6,
         width: 4
       });
 
       ctx.save();
-      ctx.fillStyle = 'rgba(5, 7, 10, 0.8)';
-      ctx.strokeStyle = 'rgba(249,244,208,0.22)';
+      ctx.fillStyle = theme.panelDeep;
+      ctx.strokeStyle = theme.borderSoft;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.roundRect(222, 612, 36, 8, 4);
@@ -1255,13 +1371,13 @@
       ctx.clearRect(0, 0, tableWidth, tableHeight);
 
       const gradient = ctx.createLinearGradient(0, 0, tableWidth, tableHeight);
-      gradient.addColorStop(0, '#202942');
-      gradient.addColorStop(0.58, '#0c0d19');
-      gradient.addColorStop(1, '#05050a');
+      gradient.addColorStop(0, theme.tableTop);
+      gradient.addColorStop(0.58, theme.tableMid);
+      gradient.addColorStop(1, theme.tableBottom);
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, tableWidth, tableHeight);
 
-      ctx.fillStyle = 'rgba(139,104,212,0.08)';
+      ctx.fillStyle = theme.fieldGhost;
       ctx.beginPath();
       ctx.roundRect(104, 62, 272, 94, 14);
       ctx.fill();
@@ -1270,14 +1386,14 @@
       drawLowerApron();
 
       drawRail([{ x: 32, y: 34 }, { x: 32, y: 520 }, { x: 142, y: 602 }], {
-        color: 'rgba(255,255,255,0.46)',
-        glow: 'rgba(255,255,255,0.12)',
+        color: theme.rail,
+        glow: theme.railGlow,
         shadowBlur: 7,
         width: 6
       });
       drawRail([{ x: shooterLane.innerX, y: 520 }, { x: 338, y: 602 }], {
-        color: 'rgba(255,255,255,0.38)',
-        glow: 'rgba(255,255,255,0.1)',
+        color: theme.railDim,
+        glow: theme.railGlow,
         shadowBlur: 6,
         width: 5
       });
@@ -1291,19 +1407,19 @@
             else ctx.lineTo(point.x, point.y);
           });
           ctx.closePath();
-          ctx.fillStyle = hot ? 'rgba(249,244,208,0.11)' : rail.fill;
-          ctx.strokeStyle = hot ? 'rgba(249,244,208,0.34)' : rail.stroke;
+          ctx.fillStyle = hot ? theme.hotFill : rail.fill;
+          ctx.strokeStyle = hot ? theme.textDim : rail.stroke;
           ctx.lineWidth = 1.5;
           ctx.lineJoin = 'round';
-          ctx.shadowColor = hot ? 'rgba(249,244,208,0.22)' : rail.glow;
+          ctx.shadowColor = hot ? theme.textGlowSoft : rail.glow;
           ctx.shadowBlur = hot ? 10 : 5;
           ctx.fill();
           ctx.stroke();
           ctx.restore();
         }
         drawRail(rail.points, {
-          color: hot ? 'rgba(249,244,208,0.64)' : rail.color,
-          glow: hot ? 'rgba(249,244,208,0.34)' : rail.glow,
+          color: hot ? colorWithAlpha(theme.textStrong, 0.64, theme.textStrong) : rail.color,
+          glow: hot ? theme.textGlowSoft : rail.glow,
           shadowBlur: hot ? 12 : 7,
           width: hot ? rail.width + 1 : rail.width
         });
@@ -1315,16 +1431,16 @@
 
         ctx.save();
         ctx.lineCap = 'round';
-        ctx.strokeStyle = hot ? `rgba(249,244,208,${glow})` : 'rgba(209,106,138,0.34)';
+        ctx.strokeStyle = hot ? colorWithAlpha(theme.textStrong, glow, theme.textStrong) : theme.accentSoft;
         ctx.lineWidth = hot ? 9 : 7;
-        ctx.shadowColor = hot ? 'rgba(249,244,208,0.7)' : 'rgba(209,106,138,0.42)';
+        ctx.shadowColor = hot ? theme.textGlow : theme.accentGlow;
         ctx.shadowBlur = hot ? 18 : 9;
         ctx.beginPath();
         ctx.moveTo(lane.x, lane.y1);
         ctx.lineTo(lane.x, lane.y2);
         ctx.stroke();
 
-        ctx.strokeStyle = hot ? '#f9f4d0' : '#d16a8a';
+        ctx.strokeStyle = hot ? theme.textStrong : theme.accent;
         ctx.lineWidth = hot ? 4 : 3;
         ctx.shadowBlur = hot ? 10 : 5;
         ctx.beginPath();
@@ -1332,7 +1448,7 @@
         ctx.lineTo(lane.x, lane.y2);
         ctx.stroke();
 
-        ctx.fillStyle = hot ? 'rgba(249,244,208,0.9)' : 'rgba(209,106,138,0.58)';
+        ctx.fillStyle = hot ? colorWithAlpha(theme.textStrong, 0.9, theme.textStrong) : theme.accentMid;
         [lane.y1, lane.y2].forEach((capY) => {
           ctx.beginPath();
           ctx.arc(lane.x, capY, hot ? 3.8 : 2.8, 0, Math.PI * 2);
@@ -1346,31 +1462,31 @@
       state.bumpers.forEach((bumper) => {
         ctx.save();
         const hot = bumper.flash > 0;
-        ctx.shadowColor = hot ? 'rgba(249,244,208,0.78)' : 'rgba(209,106,138,0.34)';
+        ctx.shadowColor = hot ? theme.textGlow : theme.accentGlow;
         ctx.shadowBlur = hot ? 24 : 10;
         const bumperGradient = ctx.createRadialGradient(
           bumper.x - 7, bumper.y - 9, 4,
           bumper.x, bumper.y, bumper.r
         );
-        bumperGradient.addColorStop(0, '#f9f4d0');
-        bumperGradient.addColorStop(0.34, hot ? '#72ffab' : '#d16a8a');
-        bumperGradient.addColorStop(0.72, '#8f438d');
-        bumperGradient.addColorStop(1, '#2e2450');
+        bumperGradient.addColorStop(0, theme.bumperInner);
+        bumperGradient.addColorStop(0.34, hot ? theme.bumperLive : theme.bumperBody);
+        bumperGradient.addColorStop(0.72, theme.accent);
+        bumperGradient.addColorStop(1, theme.bumperDeep);
         ctx.fillStyle = bumperGradient;
         ctx.beginPath();
         ctx.arc(bumper.x, bumper.y, bumper.r, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.lineWidth = 4;
-        ctx.strokeStyle = hot ? 'rgba(249,244,208,0.82)' : 'rgba(249,244,208,0.56)';
+        ctx.strokeStyle = hot ? colorWithAlpha(theme.textStrong, 0.82, theme.textStrong) : colorWithAlpha(theme.textStrong, 0.56, theme.textStrong);
         ctx.stroke();
         ctx.lineWidth = 1.2;
-        ctx.strokeStyle = 'rgba(8,8,15,0.5)';
+        ctx.strokeStyle = theme.darkStroke;
         ctx.beginPath();
         ctx.arc(bumper.x, bumper.y, bumper.r - 6, 0, Math.PI * 2);
         ctx.stroke();
 
-        ctx.fillStyle = '#08080f';
+        ctx.fillStyle = theme.bg;
         ctx.font = `900 ${bumper.label.length > 2 ? 14 : 16}px Consolas, Monaco, monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -1399,16 +1515,16 @@
       ctx.translate(ball.x, ball.y);
       ctx.rotate(ball.spin);
       const ballGradient = ctx.createRadialGradient(-3, -5, 2, 0, 0, ball.r);
-      ballGradient.addColorStop(0, '#ffffff');
-      ballGradient.addColorStop(0.52, '#dfe7eb');
-      ballGradient.addColorStop(1, '#7f8b92');
+      ballGradient.addColorStop(0, theme.textStrong);
+      ballGradient.addColorStop(0.52, theme.ballMid);
+      ballGradient.addColorStop(1, theme.ballOuter);
       ctx.fillStyle = ballGradient;
-      ctx.shadowColor = 'rgba(255,255,255,0.76)';
+      ctx.shadowColor = colorWithAlpha(theme.textStrong, 0.76, theme.textStrong);
       ctx.shadowBlur = 12;
       ctx.beginPath();
       ctx.arc(0, 0, ball.r, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(5,5,12,0.42)';
+      ctx.strokeStyle = colorWithAlpha(theme.bg, 0.42, theme.bg);
       ctx.beginPath();
       ctx.moveTo(-ball.r + 3, 0);
       ctx.lineTo(ball.r - 3, 0);
