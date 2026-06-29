@@ -17,15 +17,6 @@
   let currentGame = null;
   let controlHintObserver = null;
 
-  function trackPinball(name, data) {
-    if (window.siteTelemetry?.track) {
-      window.siteTelemetry.track(name, data || {}, 'pinball');
-      return;
-    }
-    window.__ledsecTelemetryQueue = window.__ledsecTelemetryQueue || [];
-    window.__ledsecTelemetryQueue.push({ name, data: data || {}, category: 'pinball' });
-  }
-
   function loadStyles() {
     if (stylesLoaded) return;
     stylesLoaded = true;
@@ -236,7 +227,6 @@
     }
 
     if (currentGame) {
-      trackPinball('pinball_close', currentGame.snapshot?.());
       currentGame.destroy();
       currentGame = null;
     }
@@ -469,7 +459,7 @@
 
   function launchFromUrl() {
     if (isDirectPinballLink()) {
-      launchEgg('direct_link');
+      launchEgg();
     }
   }
 
@@ -702,11 +692,6 @@
       if (effectNode) {
         effectNode.textContent = `Ball lost. Ball ${state.ball} ready.`;
       }
-      trackPinball('pinball_drain', {
-        ball: Math.max(1, state.ball - 1),
-        score: state.score,
-        bestCombo: state.bestCombo
-      });
     }
 
     function triggerBallSave() {
@@ -716,7 +701,6 @@
       if (effectNode) {
         effectNode.textContent = `Ball ${state.ball} saved. Pull again.`;
       }
-      trackPinball('pinball_ball_save', { ball: state.ball, score: state.score });
     }
 
     function launchBall() {
@@ -739,11 +723,6 @@
       if (effectNode) {
         effectNode.textContent = `Ball ${state.ball} launched.`;
       }
-      trackPinball('pinball_launch', {
-        ball: state.ball,
-        power: Number(power.toFixed(2)),
-        score: state.score
-      });
     }
 
     function flipperLine(side, tier = 'lower') {
@@ -894,11 +873,6 @@
           bumper.flash = 1;
           addScore(bumper.value, 'bump');
           addParticles(ball.x, ball.y, theme.textStrong);
-          trackPinball('pinball_bumper', {
-            value: bumper.value,
-            score: state.score,
-            combo: state.combo
-          });
         }
       });
     }
@@ -933,7 +907,6 @@
           lane.lit = 1;
           addScore(15, 'lane');
           ball.vx += ball.x < tableWidth / 2 ? 24 : -24;
-          trackPinball('pinball_lane', { score: state.score, combo: state.combo });
         }
       });
     }
@@ -1676,17 +1649,11 @@
 
     function setFlipper(side, pressed) {
       if (side === 'left') {
-        if (pressed && !state.leftHeld) {
-          cuePet('left', 0.24);
-          trackPinball('pinball_flip', { side: 'left', ball: state.ball, score: state.score });
-        }
+        if (pressed && !state.leftHeld) cuePet('left', 0.24);
         state.leftHeld = pressed;
       }
       if (side === 'right') {
-        if (pressed && !state.rightHeld) {
-          cuePet('right', 0.24);
-          trackPinball('pinball_flip', { side: 'right', ball: state.ball, score: state.score });
-        }
+        if (pressed && !state.rightHeld) cuePet('right', 0.24);
         state.rightHeld = pressed;
       }
     }
@@ -1711,13 +1678,6 @@
     return {
       setFlipper,
       setLauncher,
-      snapshot() {
-        return {
-          ball: state.ball,
-          score: state.score,
-          bestCombo: state.bestCombo
-        };
-      },
       destroy() {
         state.running = false;
         window.cancelAnimationFrame(state.animationId);
@@ -1725,10 +1685,9 @@
     };
   }
 
-  function launchEgg(source = 'trigger') {
+  function launchEgg() {
     if (active) return;
     active = true;
-    trackPinball('pinball_open', { source });
 
     const overlay = document.createElement('div');
     overlay.className = 'egg-overlay';
@@ -1828,7 +1787,7 @@
     typed = (typed + event.key.toLowerCase()).replace(/[^a-z]/g, '').slice(-32);
     if (triggers.some((trigger) => typed.endsWith(trigger))) {
       typed = '';
-      launchEgg('typed');
+      launchEgg();
     }
   }
 
@@ -1866,7 +1825,7 @@
         pressTimer = window.setTimeout(() => {
           pressTimer = null;
           longPressTriggered = true;
-          launchEgg('long_press');
+          launchEgg();
         }, longPressMs);
       });
 
