@@ -334,6 +334,102 @@
       margin-top: 0.2rem;
     }
 
+    /* PUBLIC METRICS */
+    .metrics-panel {
+      position: relative;
+      min-height: 190px;
+      margin-bottom: 1rem;
+      padding: 1.5rem;
+      overflow: hidden;
+      visibility: hidden;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(139, 104, 212, 0.16), transparent 42%),
+        var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .metrics-panel[data-state="ready"] {
+      visibility: visible;
+    }
+
+    .metrics-panel[hidden] {
+      display: none;
+    }
+
+    .metrics-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .metrics-heading h2 {
+      font-size: 1rem;
+      font-weight: 650;
+    }
+
+    .metrics-period,
+    .metrics-preview {
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .metric {
+      min-width: 0;
+    }
+
+    .metric-value {
+      display: block;
+      color: var(--text);
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .metric-label {
+      display: block;
+      margin-top: 0.3rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .metrics-countries {
+      display: flex;
+      align-items: baseline;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .metrics-countries-label {
+      color: var(--purple-light);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .metrics-country-list {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .metrics-preview {
+      margin-top: 0.75rem;
+    }
+
     /* FOOTER */
     footer {
       text-align: center;
@@ -376,6 +472,24 @@
 
       .credentials {
         grid-template-columns: 1fr;
+      }
+
+      .metrics-panel {
+        padding: 1.25rem;
+      }
+
+      .metrics-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .metrics-grid {
+        gap: 0.75rem;
+      }
+
+      .metric-value {
+        font-size: 1.3rem;
       }
 
       main { padding: 2.5rem 1rem 4rem; }
@@ -484,11 +598,39 @@
 
   </div>
 
+  <div class="section-label">Site traffic</div>
+  <section id="public-metrics" class="metrics-panel" data-state="loading" aria-labelledby="metrics-title" aria-busy="true">
+    <div class="metrics-heading">
+      <h2 id="metrics-title">Seen around here</h2>
+      <span class="metrics-period">Last 30 days</span>
+    </div>
+    <div class="metrics-grid" aria-label="Aggregate site traffic">
+      <div class="metric">
+        <span class="metric-value" data-metric="visits">&mdash;</span>
+        <span class="metric-label">Visits</span>
+      </div>
+      <div class="metric">
+        <span class="metric-value" data-metric="pageViews">&mdash;</span>
+        <span class="metric-label">Page views</span>
+      </div>
+      <div class="metric">
+        <span class="metric-value" data-metric="countryCount">&mdash;</span>
+        <span class="metric-label">Countries</span>
+      </div>
+    </div>
+    <div class="metrics-countries">
+      <span class="metrics-countries-label">Recently seen from</span>
+      <span class="metrics-country-list" data-metric="recentCountries">&mdash;</span>
+    </div>
+    <p class="metrics-preview" data-metric="preview" hidden>Local preview data</p>
+  </section>
+
 </main>
 
 <footer>Copyright &copy; Jon Ledbetter</footer>
 
 <script src="/assets/js/adaptive-experience.js" defer></script>
+<script src="/assets/js/public-metrics.js" data-endpoint="https://metrics.ledsec.dev/v1/public-summary" defer></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"660980ea912a4d8cb965bf6b192283aa"}'></script>
 <script src="/assets/js/easter-egg.js?v=shooter-exit-feed" defer></script>
 <script src="/assets/js/sisyphus-egg.js?v=direct-link" defer></script>
