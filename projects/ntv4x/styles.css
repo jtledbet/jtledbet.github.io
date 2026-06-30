@@ -71,6 +71,15 @@ select {
   font-size: 44px;
 }
 
+.menu-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 32 / 21;
+  border: 1px solid rgba(127, 140, 128, 0.42);
+  border-radius: 8px;
+  background: #171b19;
+}
+
 .start-controls {
   display: grid;
   gap: 12px;

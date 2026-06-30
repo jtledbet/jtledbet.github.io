@@ -74,6 +74,8 @@ const startScreen = document.getElementById("startScreen");
 const startButton = document.getElementById("startButton");
 const startDifficulty = document.getElementById("startDifficulty");
 const startMusic = document.getElementById("startMusic");
+const menuArtCanvas = document.getElementById("menuArt");
+const menuArtCtx = menuArtCanvas.getContext("2d");
 
 const state = {
   board: [],
@@ -129,6 +131,7 @@ const boardGesture = {
 };
 
 let previewFrameTime = 0;
+let menuArtFrameTime = 0;
 
 const MUSIC = window.NTV4X_MUSIC?.tracks;
 if (!MUSIC) throw new Error("NTv4x music data did not load.");
@@ -277,6 +280,8 @@ function showMenu() {
   startScreen.classList.remove("is-hidden");
   pauseButton.textContent = "Pause";
   mobilePauseButton.textContent = "Pause";
+  drawMenuArt();
+  if (state.audio.enabled && startMusic.value === "menu") setCurrentMusicTrack("menu");
 }
 
 function startDemo() {
@@ -305,21 +310,21 @@ function startDemo() {
   cutscene.classList.add("is-hidden");
   seedViruses();
   spawn();
-  restoreGameplayMusic();
+  if (startScreen.classList.contains("is-hidden")) restoreGameplayMusic();
   updateHud();
   draw();
 }
 
 function startFromMenu() {
   difficultyEl.value = startDifficulty.value;
-  musicTrack.value = startMusic.value === "off" ? musicTrack.value : startMusic.value;
-  setGameplayTrack(musicTrack.value);
-  startGame(true);
-  if (startMusic.value === "off") {
-    setMusicEnabled(false);
+  if (startMusic.value === "cool" || startMusic.value === "heat") {
+    musicTrack.value = startMusic.value;
+    setGameplayTrack(startMusic.value);
   } else {
-    setMusicEnabled(true);
+    setGameplayTrack(musicTrack.value || "cool");
   }
+  startGame(true);
+  setMusicEnabled(startMusic.value !== "off");
 }
 
 function lockPiece() {
@@ -809,7 +814,7 @@ function setCurrentMusicTrack(trackName, resetBeat = true) {
 }
 
 function setGameplayTrack(trackName) {
-  if (!MUSIC[trackName] || trackName === "win" || trackName === "loss") return;
+  if (!MUSIC[trackName] || trackName === "win" || trackName === "loss" || trackName === "menu") return;
   state.audio.gameTrack = trackName;
   state.audio.cueEndTime = 0;
   setCurrentMusicTrack(trackName);
@@ -890,17 +895,21 @@ function scheduleBeat(time) {
   const isHeat = state.audio.track === "heat";
   const isWin = state.audio.track === "win";
   const isLoss = state.audio.track === "loss";
+  const isMenu = state.audio.track === "menu";
   const section = track.sections?.[Math.floor((step % 64) / 16)];
 
-  playTone(bassNote, time, beatLength * (isLoss ? 1.05 : 0.72), "triangle", isLoss ? 0.095 : isCool ? 0.07 : 0.085);
+  playTone(bassNote, time, beatLength * (isLoss ? 1.05 : isMenu ? 0.58 : 0.72), "triangle", isLoss ? 0.095 : isMenu ? 0.09 : isCool ? 0.07 : 0.085);
   if (step % (isLoss || isCool ? 2 : 1) === 0) {
     playTone(
       leadNote,
       time + beatLength * 0.04,
       beatLength * (isLoss ? 0.72 : isWin ? 0.56 : 0.46),
       isLoss ? "triangle" : "square",
-      isLoss ? 0.05 : isCool ? 0.045 : isWin ? 0.07 : 0.06
+      isLoss ? 0.05 : isMenu ? 0.052 : isCool ? 0.045 : isWin ? 0.07 : 0.06
     );
+  }
+  if (isMenu && section && step % 8 === 4) {
+    playTone(section.accent, time + beatLength * 0.2, beatLength * 0.2, "square", 0.035);
   }
   if (isHeat && section && step % 8 === 6) {
     playTone(section.accent, time + beatLength * 0.25, beatLength * 0.24, "square", 0.04);
@@ -909,15 +918,15 @@ function scheduleBeat(time) {
     playTone(section.chord[2], time + beatLength * 0.16, beatLength * 1.4, "triangle", 0.024);
   }
   if (!isLoss && (!isCool || step % 4 === 2)) {
-    playTone(arpNote, time + beatLength * 0.52, beatLength * 0.26, "square", isCool ? 0.025 : isWin ? 0.045 : 0.035);
+    playTone(arpNote, time + beatLength * (isMenu ? 0.38 : 0.52), beatLength * 0.26, "square", isMenu ? 0.026 : isCool ? 0.025 : isWin ? 0.045 : 0.035);
   }
   if (isCool && section && step % 16 === 0) {
     for (const note of section.chord) {
       playTone(note, time + beatLength * 0.08, beatLength * 2.8, "triangle", 0.012);
     }
   }
-  if (step % 4 === 0) playNoise(time, isLoss ? 0.06 : isCool ? 0.018 : 0.035, isLoss ? 0.014 : isCool ? 0.008 : 0.028);
-  if (!isCool && !isLoss && step % 4 === 2) playNoise(time + beatLength * 0.5, 0.025, isWin ? 0.024 : 0.018);
+  if (step % 4 === 0) playNoise(time, isLoss ? 0.06 : isMenu ? 0.03 : isCool ? 0.018 : 0.035, isLoss ? 0.014 : isMenu ? 0.022 : isCool ? 0.008 : 0.028);
+  if (!isCool && !isLoss && step % 4 === 2) playNoise(time + beatLength * 0.5, isMenu ? 0.018 : 0.025, isWin ? 0.024 : isMenu ? 0.011 : 0.018);
 
   state.audio.beat = (state.audio.beat + 1) % 64;
 }
@@ -1217,6 +1226,244 @@ function drawMessage() {
   ctx.textAlign = "center";
   ctx.fillText(state.message.toUpperCase(), 160, 278);
   ctx.restore();
+}
+
+function drawMenuCapsule(targetCtx, x, y, width, height, leftColor, rightColor, rotation = 0, alpha = 1) {
+  const radius = height / 2;
+  targetCtx.save();
+  targetCtx.globalAlpha = alpha;
+  targetCtx.translate(x + width / 2, y + height / 2);
+  targetCtx.rotate(rotation);
+  targetCtx.fillStyle = "rgba(0,0,0,0.24)";
+  targetCtx.beginPath();
+  targetCtx.ellipse(2, height / 2 + 3, width * 0.44, height * 0.18, 0, 0, Math.PI * 2);
+  targetCtx.fill();
+  targetCtx.translate(-width / 2, -height / 2);
+  targetCtx.fillStyle = "#121514";
+  targetCtx.beginPath();
+  targetCtx.roundRect(0, 0, width, height, radius);
+  targetCtx.fill();
+  targetCtx.save();
+  targetCtx.beginPath();
+  targetCtx.roundRect(2, 2, width - 4, height - 4, Math.max(3, radius - 2));
+  targetCtx.clip();
+  targetCtx.fillStyle = COLOR_HEX[leftColor];
+  targetCtx.fillRect(2, 2, width / 2 - 2, height - 4);
+  targetCtx.fillStyle = COLOR_HEX[rightColor];
+  targetCtx.fillRect(width / 2, 2, width / 2 - 2, height - 4);
+  targetCtx.restore();
+  targetCtx.strokeStyle = "rgba(17, 20, 19, 0.42)";
+  targetCtx.lineWidth = 1.5;
+  targetCtx.beginPath();
+  targetCtx.moveTo(width / 2, 4);
+  targetCtx.lineTo(width / 2, height - 4);
+  targetCtx.stroke();
+  targetCtx.fillStyle = "rgba(255,255,255,0.34)";
+  targetCtx.fillRect(width * 0.18, height * 0.24, width * 0.17, 2);
+  targetCtx.fillRect(width * 0.64, height * 0.24, width * 0.17, 2);
+  targetCtx.restore();
+}
+
+function drawMenuJar(targetCtx, x, y, width, height, time) {
+  const wobble = Math.sin(time * 0.0017) * 1.4;
+  targetCtx.save();
+  targetCtx.translate(0, wobble);
+
+  targetCtx.fillStyle = "rgba(7, 10, 9, 0.32)";
+  targetCtx.beginPath();
+  targetCtx.ellipse(x + width / 2, y + height + 6, width * 0.42, 7, 0, 0, Math.PI * 2);
+  targetCtx.fill();
+
+  targetCtx.fillStyle = "#3c4740";
+  targetCtx.fillRect(x + width * 0.27, y + 8, width * 0.46, 10);
+  targetCtx.fillStyle = "#232a26";
+  targetCtx.fillRect(x + width * 0.31, y + 1, width * 0.38, 9);
+
+  targetCtx.save();
+  targetCtx.beginPath();
+  targetCtx.roundRect(x + 9, y + 16, width - 18, height - 20, 17);
+  targetCtx.clip();
+  targetCtx.fillStyle = "rgba(79, 142, 219, 0.1)";
+  targetCtx.fillRect(x + 9, y + 16, width - 18, height - 20);
+  targetCtx.fillStyle = "rgba(242, 202, 82, 0.05)";
+  targetCtx.fillRect(x + 9, y + height * 0.57, width - 18, height * 0.26);
+
+  const pills = [
+    [18, 41, "red", "yellow", -0.48],
+    [47, 38, "blue", "red", 0.2],
+    [23, 66, "yellow", "blue", 0.52],
+    [58, 70, "red", "red", -0.18],
+    [35, 93, "blue", "yellow", -0.82],
+    [65, 101, "yellow", "red", 0.62],
+    [18, 119, "blue", "red", 0.14],
+    [49, 124, "yellow", "blue", -0.28]
+  ];
+  pills.forEach((pill, index) => {
+    const bob = Math.sin(time * 0.002 + index * 1.7) * 1.3;
+    drawMenuCapsule(targetCtx, x + pill[0], y + pill[1] + bob, 38, 16, pill[2], pill[3], pill[4], 0.9);
+  });
+  targetCtx.restore();
+
+  targetCtx.strokeStyle = "rgba(244, 240, 223, 0.5)";
+  targetCtx.lineWidth = 2;
+  targetCtx.beginPath();
+  targetCtx.roundRect(x + 9, y + 16, width - 18, height - 20, 17);
+  targetCtx.stroke();
+  targetCtx.strokeStyle = "rgba(244, 240, 223, 0.2)";
+  targetCtx.lineWidth = 5;
+  targetCtx.beginPath();
+  targetCtx.moveTo(x + 24, y + 28);
+  targetCtx.lineTo(x + 24, y + height - 27);
+  targetCtx.stroke();
+  targetCtx.restore();
+}
+
+function drawMenuGoblin(targetCtx, x, y, time) {
+  const blink = Math.sin(time * 0.004) > 0.96;
+  const brow = Math.sin(time * 0.002) * 2;
+  const handY = Math.sin(time * 0.003) * 2;
+
+  targetCtx.save();
+  targetCtx.translate(x, y);
+  targetCtx.fillStyle = "rgba(0,0,0,0.28)";
+  targetCtx.beginPath();
+  targetCtx.ellipse(42, 77, 42, 8, 0, 0, Math.PI * 2);
+  targetCtx.fill();
+
+  targetCtx.fillStyle = "#f4f0df";
+  targetCtx.beginPath();
+  targetCtx.moveTo(24, 55);
+  targetCtx.lineTo(7, 128);
+  targetCtx.lineTo(78, 128);
+  targetCtx.lineTo(62, 55);
+  targetCtx.closePath();
+  targetCtx.fill();
+  targetCtx.fillStyle = "#d9d5c6";
+  targetCtx.beginPath();
+  targetCtx.moveTo(43, 64);
+  targetCtx.lineTo(31, 128);
+  targetCtx.lineTo(54, 128);
+  targetCtx.closePath();
+  targetCtx.fill();
+  targetCtx.fillStyle = "#e45353";
+  targetCtx.fillRect(55, 79, 12, 12);
+  targetCtx.fillStyle = "#f4f0df";
+  targetCtx.fillRect(59, 81, 4, 8);
+  targetCtx.fillRect(57, 83, 8, 4);
+
+  targetCtx.strokeStyle = "#c4c0b2";
+  targetCtx.lineWidth = 7;
+  targetCtx.lineCap = "round";
+  targetCtx.beginPath();
+  targetCtx.moveTo(64, 77);
+  targetCtx.quadraticCurveTo(91, 75, 105, 58 + handY);
+  targetCtx.stroke();
+  targetCtx.fillStyle = "#78a66a";
+  targetCtx.beginPath();
+  targetCtx.arc(107, 57 + handY, 6, 0, Math.PI * 2);
+  targetCtx.fill();
+
+  targetCtx.strokeStyle = "#c4c0b2";
+  targetCtx.beginPath();
+  targetCtx.moveTo(22, 77);
+  targetCtx.quadraticCurveTo(10, 85, 19, 99 + handY);
+  targetCtx.stroke();
+  targetCtx.fillStyle = "#78a66a";
+  targetCtx.beginPath();
+  targetCtx.arc(20, 100 + handY, 6, 0, Math.PI * 2);
+  targetCtx.fill();
+
+  targetCtx.fillStyle = "#547f50";
+  targetCtx.beginPath();
+  targetCtx.moveTo(16, 39);
+  targetCtx.lineTo(-4, 28);
+  targetCtx.lineTo(13, 52);
+  targetCtx.closePath();
+  targetCtx.fill();
+  targetCtx.beginPath();
+  targetCtx.moveTo(70, 39);
+  targetCtx.lineTo(95, 25);
+  targetCtx.lineTo(74, 52);
+  targetCtx.closePath();
+  targetCtx.fill();
+
+  targetCtx.fillStyle = "#78a66a";
+  targetCtx.beginPath();
+  targetCtx.roundRect(13, 23, 62, 45, 18);
+  targetCtx.fill();
+  targetCtx.fillStyle = "#5d8a56";
+  targetCtx.beginPath();
+  targetCtx.roundRect(24, 9, 39, 24, 11);
+  targetCtx.fill();
+  targetCtx.fillStyle = "#252b28";
+  targetCtx.fillRect(21, 20, 49, 5);
+  targetCtx.fillStyle = "#f4f0df";
+  targetCtx.fillRect(28, 6, 32, 6);
+
+  targetCtx.strokeStyle = "#253128";
+  targetCtx.lineWidth = 3;
+  targetCtx.lineCap = "round";
+  targetCtx.beginPath();
+  targetCtx.moveTo(26, 35 + brow);
+  targetCtx.lineTo(37, 32);
+  targetCtx.moveTo(50, 32);
+  targetCtx.lineTo(62, 37 + brow);
+  targetCtx.stroke();
+
+  targetCtx.fillStyle = "#121514";
+  if (blink) {
+    targetCtx.fillRect(29, 41, 8, 2);
+    targetCtx.fillRect(52, 41, 8, 2);
+  } else {
+    targetCtx.fillRect(30, 39, 6, 7);
+    targetCtx.fillRect(53, 39, 6, 7);
+  }
+  targetCtx.strokeStyle = "#121514";
+  targetCtx.lineWidth = 2;
+  targetCtx.beginPath();
+  targetCtx.arc(45, 55, 7, 0.18, Math.PI - 0.22);
+  targetCtx.stroke();
+  targetCtx.fillStyle = "#121514";
+  targetCtx.font = "700 24px Segoe UI, sans-serif";
+  targetCtx.fillText("?", 80, 17 + Math.sin(time * 0.003) * 2);
+  targetCtx.restore();
+}
+
+function drawMenuArt(time = performance.now()) {
+  if (!menuArtCtx) return;
+  const width = menuArtCanvas.width;
+  const height = menuArtCanvas.height;
+  menuArtCtx.clearRect(0, 0, width, height);
+  menuArtCtx.fillStyle = "#171b19";
+  menuArtCtx.fillRect(0, 0, width, height);
+
+  menuArtCtx.strokeStyle = "rgba(244, 240, 223, 0.07)";
+  menuArtCtx.lineWidth = 1;
+  for (let x = 16; x < width; x += 24) {
+    menuArtCtx.beginPath();
+    menuArtCtx.moveTo(x, 0);
+    menuArtCtx.lineTo(x, height);
+    menuArtCtx.stroke();
+  }
+  for (let y = 18; y < height; y += 24) {
+    menuArtCtx.beginPath();
+    menuArtCtx.moveTo(0, y);
+    menuArtCtx.lineTo(width, y);
+    menuArtCtx.stroke();
+  }
+
+  menuArtCtx.fillStyle = "rgba(242, 202, 82, 0.07)";
+  menuArtCtx.fillRect(0, height - 44, width, 44);
+  menuArtCtx.fillStyle = "#252b28";
+  menuArtCtx.fillRect(0, height - 32, width, 6);
+  drawMenuJar(menuArtCtx, 179, 35, 96, 145, time);
+  drawMenuGoblin(menuArtCtx, 37, 55, time);
+  drawMenuCapsule(menuArtCtx, 132, 159 + Math.sin(time * 0.003) * 1.4, 42, 17, "red", "blue", -0.12, 0.88);
+  drawMenuCapsule(menuArtCtx, 111, 175, 34, 14, "yellow", "red", 0.28, 0.7);
+
+  menuArtCtx.fillStyle = "rgba(244, 240, 223, 0.62)";
+  menuArtCtx.font = "700 9px Segoe UI, sans-serif";
+  menuArtCtx.fillText("RX?", 202, 56);
 }
 
 function drawNext(time = performance.now()) {
@@ -1553,6 +1800,10 @@ function gameLoop(time) {
   const delta = time - state.lastTime;
   state.lastTime = time;
   scheduleMusic();
+  if (!startScreen.classList.contains("is-hidden") && time - menuArtFrameTime >= 80) {
+    menuArtFrameTime = time;
+    drawMenuArt(time);
+  }
   if (time - previewFrameTime >= 50) {
     previewFrameTime = time;
     drawNext(time);
@@ -1660,10 +1911,18 @@ startDifficulty.addEventListener("change", () => {
   difficultyEl.value = startDifficulty.value;
 });
 startMusic.addEventListener("change", () => {
-  if (startMusic.value !== "off") {
-    musicTrack.value = startMusic.value;
-    setGameplayTrack(startMusic.value);
+  if (startMusic.value === "off") {
+    setMusicEnabled(false);
+    return;
   }
+  if (startMusic.value === "menu") {
+    setMusicEnabled(true);
+    setCurrentMusicTrack("menu");
+    return;
+  }
+  musicTrack.value = startMusic.value;
+  setGameplayTrack(startMusic.value);
+  setMusicEnabled(true);
 });
 musicToggle.addEventListener("click", () => setMusicEnabled(!state.audio.enabled));
 musicTrack.addEventListener("change", () => {

@@ -25,6 +25,18 @@
     ],
     coolTurn: [
       [0, 62], [6, 64], [10, 67], [14, 64]
+    ],
+    menuA: [
+      [0, 60], [2, 63], [4, 62], [6, 60], [8, 58], [11, 60], [14, 55]
+    ],
+    menuB: [
+      [0, 55], [2, 58], [4, 60], [6, 62], [8, 63], [10, 62], [12, 58], [14, 55]
+    ],
+    menuC: [
+      [0, 67], [3, 65], [5, 63], [8, 62], [10, 60], [12, 58], [14, 60]
+    ],
+    menuTurn: [
+      [0, 55], [2, 60], [5, 63], [7, 60], [9, 58], [11, 55], [13, 51], [15, 55]
     ]
   };
 
@@ -50,8 +62,32 @@
 
   const heatEvents = concatEvents(motif.heatA, motif.heatB, motif.heatC, motif.heatTurn);
   const coolEvents = concatEvents(motif.coolA, motif.coolB, motif.coolC, motif.coolTurn);
+  const menuEvents = concatEvents(motif.menuA, motif.menuB, motif.menuC, motif.menuTurn);
 
   const tracks = {
+    menu: {
+      bpm: 144,
+      arrangement: "menu",
+      lead: makeSparseSequence(64, menuEvents),
+      bass: [
+        36, null, 36, null, 43, null, 36, null, 34, null, 34, null, 41, null, 34, null,
+        31, null, 31, null, 38, null, 31, null, 36, null, 36, null, 43, null, 36, null,
+        39, null, 39, null, 46, null, 39, null, 38, null, 38, null, 45, null, 38, null,
+        36, null, 43, null, 36, null, 43, null, 34, null, 41, null, 31, null, 36, null
+      ],
+      arp: [
+        55, 60, 63, null, 58, 62, 65, null,
+        53, 58, 62, null, 55, 60, 63, null,
+        51, 55, 60, null, 55, 58, 62, null,
+        48, 55, 60, null, 51, 55, 60, null
+      ],
+      sections: [
+        { root: 36, chord: [55, 60, 63], accent: 67 },
+        { root: 34, chord: [53, 58, 62], accent: 65 },
+        { root: 31, chord: [51, 55, 60], accent: 63 },
+        { root: 36, chord: [48, 55, 60], accent: 67 }
+      ]
+    },
     heat: {
       bpm: 156,
       arrangement: "heat",
@@ -113,6 +149,7 @@
   };
 
   const exportBeats = {
+    menu: 64,
     heat: 64,
     cool: 64,
     win: 32,

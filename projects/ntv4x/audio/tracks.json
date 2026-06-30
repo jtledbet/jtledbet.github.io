@@ -1,6 +1,11 @@
 {
   "version": "v04",
   "tracks": {
+    "menu": {
+      "codename": "quizzical-jar",
+      "current": "ntv4x-menu-current.mp3",
+      "versioned": "ntv4x-menu-v04-quizzical-jar.mp3"
+    },
     "cool": {
       "codename": "blue-bop",
       "current": "ntv4x-cool-current.mp3",
