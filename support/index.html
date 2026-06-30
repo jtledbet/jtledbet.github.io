@@ -6,7 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Support | Jon Ledbetter</title>
   <meta name="description" content="Coffee, tips, payment links, and paid technical help for Jon Ledbetter." />
+  <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+  <meta name="x-clacks-overhead" content="GNU Terry Pratchett" />
   <link rel="canonical" href="https://ledsec.dev/support/" />
+  <link rel="help" href="http://www.gnuterrypratchett.com/" title="GNU Terry Pratchett" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -209,7 +212,7 @@
     .support-card .label {
       font-size: 0.7rem;
       font-weight: 600;
-      letter-spacing: 0.08em;
+      letter-spacing: 0;
       text-transform: uppercase;
       color: var(--purple-light);
       margin-bottom: 0.45rem;
@@ -242,11 +245,37 @@
     }
 
     footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem 0.75rem;
       text-align: center;
       padding: 2rem;
       color: var(--muted);
       font-size: 0.85rem;
       border-top: 1px solid var(--border);
+    }
+
+    .clacks-tribute {
+      color: inherit;
+      font-size: 0.72rem;
+      letter-spacing: 0;
+      text-decoration: none;
+      text-transform: uppercase;
+      opacity: 0.56;
+      transition: color 0.2s, opacity 0.2s;
+    }
+
+    .clacks-tribute::before {
+      content: '// ';
+      opacity: 0.45;
+    }
+
+    .clacks-tribute:hover,
+    .clacks-tribute:focus-visible {
+      color: var(--purple-light);
+      opacity: 1;
     }
 
     @media (max-width: 680px) {
@@ -339,7 +368,10 @@
 
 </main>
 
-<footer>Copyright &copy; Jon Ledbetter</footer>
+<footer>
+  <span>Copyright &copy; Jon Ledbetter</span>
+  <a class="clacks-tribute" href="http://www.gnuterrypratchett.com/" target="_blank" rel="noopener noreferrer" aria-label="GNU Terry Pratchett: a man is not dead while his name is still spoken">GNU Terry Pratchett</a>
+</footer>
 
 <script src="/assets/js/adaptive-experience.js" defer></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"660980ea912a4d8cb965bf6b192283aa"}'></script>
