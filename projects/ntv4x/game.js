@@ -1189,17 +1189,26 @@ function drawNext(time = performance.now()) {
   const description = state.next
     ? `Next capsule: ${state.next.a} and ${state.next.b}.`
     : "No next capsule.";
-  const virusDescription = `${previewVirusColor(time)} microbe dancing.`;
+  const virusDescription = state.next
+    ? state.next.a === state.next.b
+      ? `${state.next.a} microbe dancing for the next ${state.next.a} capsule.`
+      : `${state.next.a} and ${state.next.b} microbes dancing in next-capsule order.`
+    : "Microbe stage idle.";
   nextCanvas.setAttribute("aria-label", description);
   nextMobileCanvas.setAttribute("aria-label", description);
   virusWindowCanvas.setAttribute("aria-label", virusDescription);
   virusMobileCanvas.setAttribute("aria-label", virusDescription);
 }
 
-function previewVirusColor(time) {
+function previewVirusColor(time = performance.now()) {
   if (!state.next) return "blue";
   if (state.next.a === state.next.b) return state.next.a;
   return Math.floor(time / 1400) % 2 === 0 ? state.next.a : state.next.b;
+}
+
+function previewVirusColors() {
+  if (!state.next) return ["blue"];
+  return state.next.a === state.next.b ? [state.next.a] : [state.next.a, state.next.b];
 }
 
 function previewDance(color, time, excited) {
@@ -1343,14 +1352,28 @@ function drawVirusWindow(targetCtx, width, height, time) {
     targetCtx.lineTo(x, height);
     targetCtx.stroke();
   }
-  const color = previewVirusColor(time);
+  const colors = previewVirusColors();
   const excited = state.messageTimer > 0 || state.audio.track === "win";
-  const scale = Math.min(width / 96, height / 66);
-  targetCtx.save();
-  targetCtx.translate(width / 2, height * 0.62);
-  targetCtx.scale(scale, scale);
-  drawPreviewVirus(targetCtx, 0, 0, color, time, excited);
-  targetCtx.restore();
+  const scale = colors.length === 1 ? Math.min(width / 96, height / 66) : Math.min(width / 122, height / 68);
+  const y = height * 0.64;
+  const spacing = Math.min(34, width * 0.27);
+  colors.forEach((color, index) => {
+    const x = colors.length === 1 ? width / 2 : width / 2 + (index === 0 ? -spacing : spacing);
+    targetCtx.save();
+    targetCtx.translate(x, y);
+    targetCtx.scale(scale, scale);
+    drawPreviewVirus(targetCtx, 0, 0, color, time + index * 180, excited);
+    targetCtx.restore();
+  });
+
+  if (colors.length === 2) {
+    targetCtx.fillStyle = "rgba(244, 240, 223, 0.36)";
+    targetCtx.fillRect(width / 2 - 8, 9, 16, 2);
+    targetCtx.fillStyle = COLOR_HEX[colors[0]];
+    targetCtx.fillRect(width / 2 - 16, 7, 8, 6);
+    targetCtx.fillStyle = COLOR_HEX[colors[1]];
+    targetCtx.fillRect(width / 2 + 8, 7, 8, 6);
+  }
 }
 
 function drawNextCapsule(targetCtx, width, height, time) {
