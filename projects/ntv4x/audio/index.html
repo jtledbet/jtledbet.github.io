@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NTv4x Tracks</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #151817;
+        --panel: #202522;
+        --line: #4a574f;
+        --text: #f4f0df;
+        --muted: #b9b29f;
+        --accent: #f2ca52;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: linear-gradient(180deg, #111412, #20231e);
+        color: var(--text);
+        font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      main {
+        width: min(760px, calc(100vw - 32px));
+        margin: 0 auto;
+        padding: 32px 0;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 34px;
+        line-height: 1;
+      }
+
+      p {
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+
+      .track-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      article {
+        display: grid;
+        gap: 8px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      audio {
+        width: 100%;
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      .links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 16px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>NTv4x Tracks</h1>
+      <p>Stable current links plus versioned permalinks for the present mix.</p>
+      <section class="track-list" aria-label="Current NTv4x music tracks">
+        <article>
+          <h2>COOL / Blue Bop</h2>
+          <audio controls src="ntv4x-cool-current.mp3"></audio>
+          <div class="links">
+            <a href="ntv4x-cool-current.mp3">current MP3</a>
+            <a href="ntv4x-cool-v04-blue-bop.mp3">v04 blue-bop MP3</a>
+          </div>
+        </article>
+        <article>
+          <h2>HEAT / Redline</h2>
+          <audio controls src="ntv4x-heat-current.mp3"></audio>
+          <div class="links">
+            <a href="ntv4x-heat-current.mp3">current MP3</a>
+            <a href="ntv4x-heat-v04-redline.mp3">v04 redline MP3</a>
+          </div>
+        </article>
+        <article>
+          <h2>WIN / Bright Clear</h2>
+          <audio controls src="ntv4x-win-sting-current.mp3"></audio>
+          <div class="links">
+            <a href="ntv4x-win-sting-current.mp3">current MP3</a>
+            <a href="ntv4x-win-sting-v04-bright-clear.mp3">v04 bright-clear MP3</a>
+          </div>
+        </article>
+        <article>
+          <h2>LOSS / Funeral Dirge</h2>
+          <audio controls src="ntv4x-loss-dirge-current.mp3"></audio>
+          <div class="links">
+            <a href="ntv4x-loss-dirge-current.mp3">current MP3</a>
+            <a href="ntv4x-loss-dirge-v04-funeral-dirge.mp3">v04 funeral-dirge MP3</a>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "version": "v04",
+  "tracks": {
+    "cool": {
+      "codename": "blue-bop",
+      "current": "ntv4x-cool-current.mp3",
+      "versioned": "ntv4x-cool-v04-blue-bop.mp3"
+    },
+    "heat": {
+      "codename": "redline",
+      "current": "ntv4x-heat-current.mp3",
+      "versioned": "ntv4x-heat-v04-redline.mp3"
+    },
+    "win": {
+      "codename": "bright-clear",
+      "current": "ntv4x-win-sting-current.mp3",
+      "versioned": "ntv4x-win-sting-v04-bright-clear.mp3"
+    },
+    "loss": {
+      "codename": "funeral-dirge",
+      "current": "ntv4x-loss-dirge-current.mp3",
+      "versioned": "ntv4x-loss-dirge-v04-funeral-dirge.mp3"
+    }
+  }
+}
