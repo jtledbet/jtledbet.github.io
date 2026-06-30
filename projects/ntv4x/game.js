@@ -127,48 +127,8 @@ const boardGesture = {
 
 let previewFrameTime = 0;
 
-const MUSIC = {
-  heat: {
-    bpm: 156,
-    lead: [
-      76, 79, 81, 83, 81, 79, 76, 72, 74, 76, 79, 81, 79, 76, 74, 72,
-      76, 79, 83, 86, 84, 81, 79, 76, 74, 76, 81, 84, 83, 79, 76, 74,
-      72, 76, 79, 81, 83, 81, 79, 76, 74, 79, 81, 83, 86, 83, 81, 79,
-      76, 79, 81, 84, 83, 81, 76, 74, 72, 74, 76, 79, 76, 74, 72, 71
-    ],
-    bass: [
-      40, 40, 47, 40, 43, 43, 50, 43, 45, 45, 52, 45, 43, 43, 47, 43,
-      40, 40, 47, 40, 43, 43, 50, 43, 48, 48, 55, 48, 47, 47, 52, 47
-    ],
-    arp: [64, 67, 71, 76, 67, 71, 76, 79, 65, 69, 72, 77, 64, 67, 71, 74]
-  },
-  cool: {
-    bpm: 104,
-    lead: [
-      69, null, 72, 74, null, 72, 67, null, 65, null, 67, 69, null, 67, 64, null,
-      67, null, 69, 72, null, 69, 65, null, 64, null, 65, 67, null, 64, 62, null,
-      69, null, 72, 76, null, 74, 72, null, 67, null, 69, 72, null, 69, 65, null,
-      64, null, 67, 69, null, 67, 64, null, 62, null, 64, 65, null, 64, 60, null
-    ],
-    bass: [
-      45, null, 52, null, 48, null, 55, null, 43, null, 50, null, 47, null, 52, null,
-      45, null, 52, null, 48, null, 55, null, 41, null, 48, null, 43, null, 50, null
-    ],
-    arp: [57, 60, 64, 67, 60, 64, 67, 72, 55, 59, 62, 67, 52, 57, 60, 64]
-  },
-  win: {
-    bpm: 132,
-    lead: [76, 79, 83, 88, 86, 83, 84, 88, 91, 88, 86, 84, 83, 86, 88, null],
-    bass: [48, 48, 55, 55, 52, 52, 57, 57, 53, 53, 60, 60, 55, 55, 60, 60],
-    arp: [64, 67, 72, 76, 67, 72, 76, 79]
-  },
-  loss: {
-    bpm: 82,
-    lead: [64, null, 63, null, 59, null, 57, null, 55, null, 52, null, 51, null, 52, null],
-    bass: [40, null, null, null, 39, null, null, null, 36, null, null, null, 35, null, 36, null],
-    arp: [52, 55, 59, 63]
-  }
-};
+const MUSIC = window.NTV4X_MUSIC?.tracks;
+if (!MUSIC) throw new Error("NTv4x music data did not load.");
 
 function emptyBoard() {
   return Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -765,9 +725,43 @@ function updateHud() {
   drawNext();
 }
 
+function boardColorCounts() {
+  const virus = Object.fromEntries(COLORS.map((color) => [color, 0]));
+  const occupied = Object.fromEntries(COLORS.map((color) => [color, 0]));
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      const cell = state.board[y][x];
+      if (!cell || !COLORS.includes(cell.color)) continue;
+      occupied[cell.color] += 1;
+      if (cell.type === "virus") virus[cell.color] += 1;
+    }
+  }
+  return { virus, occupied };
+}
+
+function currentDiagnosis() {
+  const counts = boardColorCounts();
+  const ranked = [...COLORS].sort((a, b) => {
+    return (
+      counts.virus[b] - counts.virus[a] ||
+      counts.occupied[b] - counts.occupied[a] ||
+      COLORS.indexOf(a) - COLORS.indexOf(b)
+    );
+  });
+  const color = ranked[0];
+  return {
+    color,
+    count: counts.virus[color],
+    total: COLORS.reduce((sum, current) => sum + counts.virus[current], 0),
+    counts
+  };
+}
+
 function statusSummary() {
   const next = state.next ? `Next capsule ${state.next.a} and ${state.next.b}.` : "No next capsule.";
-  return `Score ${state.score}. Level ${state.level}. Microbes ${state.viruses}. ${next}`;
+  const diagnosis = currentDiagnosis();
+  const dx = diagnosis.total > 0 ? `Diagnosis ${diagnosis.color} microbe leading.` : "Diagnosis clear.";
+  return `Score ${state.score}. Level ${state.level}. Microbes ${state.viruses}. ${next} ${dx}`;
 }
 
 function ensureAudio() {
@@ -871,11 +865,14 @@ function scheduleBeat(time) {
   const step = state.audio.beat;
   const leadNote = track.lead[step % track.lead.length];
   const bassNote = track.bass[step % track.bass.length];
-  const arpNote = track.arp[step % track.arp.length] + (step % 8 >= 4 ? 12 : 0);
+  const arpBase = track.arp[step % track.arp.length];
+  const arpNote = arpBase === null ? null : arpBase + (step % 8 >= 4 ? 12 : 0);
   const beatLength = 60 / track.bpm;
   const isCool = state.audio.track === "cool";
+  const isHeat = state.audio.track === "heat";
   const isWin = state.audio.track === "win";
   const isLoss = state.audio.track === "loss";
+  const section = track.sections?.[Math.floor((step % 64) / 16)];
 
   playTone(bassNote, time, beatLength * (isLoss ? 1.05 : 0.72), "triangle", isLoss ? 0.095 : isCool ? 0.07 : 0.085);
   if (step % (isLoss || isCool ? 2 : 1) === 0) {
@@ -887,10 +884,21 @@ function scheduleBeat(time) {
       isLoss ? 0.05 : isCool ? 0.045 : isWin ? 0.07 : 0.06
     );
   }
-  if (!isLoss && (!isCool || step % 2 === 1)) {
+  if (isHeat && section && step % 8 === 6) {
+    playTone(section.accent, time + beatLength * 0.25, beatLength * 0.24, "square", 0.04);
+  }
+  if (isCool && section && step % 16 === 8) {
+    playTone(section.chord[2], time + beatLength * 0.16, beatLength * 1.4, "triangle", 0.024);
+  }
+  if (!isLoss && (!isCool || step % 4 === 2)) {
     playTone(arpNote, time + beatLength * 0.52, beatLength * 0.26, "square", isCool ? 0.025 : isWin ? 0.045 : 0.035);
   }
-  if (step % 4 === 0) playNoise(time, isLoss ? 0.06 : 0.035, isLoss ? 0.014 : isCool ? 0.018 : 0.028);
+  if (isCool && section && step % 16 === 0) {
+    for (const note of section.chord) {
+      playTone(note, time + beatLength * 0.08, beatLength * 2.8, "triangle", 0.012);
+    }
+  }
+  if (step % 4 === 0) playNoise(time, isLoss ? 0.06 : isCool ? 0.018 : 0.035, isLoss ? 0.014 : isCool ? 0.008 : 0.028);
   if (!isCool && !isLoss && step % 4 === 2) playNoise(time + beatLength * 0.5, 0.025, isWin ? 0.024 : 0.018);
 
   state.audio.beat = (state.audio.beat + 1) % 64;
@@ -1186,29 +1194,22 @@ function drawNext(time = performance.now()) {
   drawNextCapsule(nextMobileCtx, nextMobileCanvas.width, nextMobileCanvas.height, time);
   drawVirusWindow(virusWindowCtx, virusWindowCanvas.width, virusWindowCanvas.height, time);
   drawVirusWindow(virusMobileCtx, virusMobileCanvas.width, virusMobileCanvas.height, time);
+  const diagnosis = currentDiagnosis();
   const description = state.next
     ? `Next capsule: ${state.next.a} and ${state.next.b}.`
     : "No next capsule.";
-  const virusDescription = state.next
-    ? state.next.a === state.next.b
-      ? `${state.next.a} microbe dancing for the next ${state.next.a} capsule.`
-      : `${state.next.a} and ${state.next.b} microbes dancing in next-capsule order.`
-    : "Microbe stage idle.";
+  const virusDescription = diagnosis.total > 0
+    ? `Diagnosis: ${diagnosis.color} microbe leading with ${diagnosis.count}.`
+    : "Diagnosis: clear.";
   nextCanvas.setAttribute("aria-label", description);
   nextMobileCanvas.setAttribute("aria-label", description);
   virusWindowCanvas.setAttribute("aria-label", virusDescription);
   virusMobileCanvas.setAttribute("aria-label", virusDescription);
 }
 
-function previewVirusColor(time = performance.now()) {
-  if (!state.next) return "blue";
-  if (state.next.a === state.next.b) return state.next.a;
-  return Math.floor(time / 1400) % 2 === 0 ? state.next.a : state.next.b;
-}
-
-function previewVirusColors() {
-  if (!state.next) return ["blue"];
-  return state.next.a === state.next.b ? [state.next.a] : [state.next.a, state.next.b];
+function diagnosisVirusColors() {
+  const diagnosis = currentDiagnosis();
+  return [diagnosis.total > 0 ? diagnosis.color : "blue"];
 }
 
 function previewDance(color, time, excited) {
@@ -1352,8 +1353,9 @@ function drawVirusWindow(targetCtx, width, height, time) {
     targetCtx.lineTo(x, height);
     targetCtx.stroke();
   }
-  const colors = previewVirusColors();
-  const excited = state.messageTimer > 0 || state.audio.track === "win";
+  const diagnosis = currentDiagnosis();
+  const colors = diagnosisVirusColors();
+  const excited = state.messageTimer > 0 || state.audio.track === "win" || diagnosis.count >= Math.max(2, Math.ceil(diagnosis.total * 0.45));
   const scale = colors.length === 1 ? Math.min(width / 96, height / 66) : Math.min(width / 122, height / 68);
   const y = height * 0.64;
   const spacing = Math.min(34, width * 0.27);
@@ -1372,8 +1374,12 @@ function drawVirusWindow(targetCtx, width, height, time) {
     targetCtx.fillStyle = COLOR_HEX[colors[0]];
     targetCtx.fillRect(width / 2 - 16, 7, 8, 6);
     targetCtx.fillStyle = COLOR_HEX[colors[1]];
-    targetCtx.fillRect(width / 2 + 8, 7, 8, 6);
+      targetCtx.fillRect(width / 2 + 8, 7, 8, 6);
   }
+
+  targetCtx.font = "700 9px Segoe UI, sans-serif";
+  targetCtx.fillStyle = diagnosis.total > 0 ? COLOR_HEX[diagnosis.color] : "rgba(244, 240, 223, 0.42)";
+  targetCtx.fillText("Dx", 7, 13);
 }
 
 function drawNextCapsule(targetCtx, width, height, time) {

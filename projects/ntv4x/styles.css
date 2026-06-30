@@ -86,11 +86,22 @@ select {
   font-size: 13px;
 }
 
+.start-music-row {
+  padding: 10px;
+  border: 1px solid rgba(242, 202, 82, 0.34);
+  border-radius: 6px;
+  background: rgba(242, 202, 82, 0.06);
+}
+
 .start-hint {
   margin: -4px 0 0;
   color: var(--muted);
   font-size: 15px;
   line-height: 1.35;
+}
+
+.hint-touch {
+  display: none;
 }
 
 .play-area {
@@ -331,6 +342,16 @@ button:focus-visible {
 .cutscene button {
   margin-top: 14px;
   width: min(260px, calc(100vw - 44px));
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .hint-keyboard {
+    display: none;
+  }
+
+  .hint-touch {
+    display: inline;
+  }
 }
 
 @media (max-width: 760px) {

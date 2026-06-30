@@ -15,17 +15,20 @@
       <div class="start-panel">
         <div class="eyebrow">Current build</div>
         <h1>NTv4x</h1>
-        <p class="start-hint">Drag the bottle to move. Tap to rotate. Swipe down to drop.</p>
+        <p class="start-hint">
+          <span class="hint-keyboard">Move with Arrows or A/D. Rotate with W, Z/X, or Up. Drop with S, Down, or Space.</span>
+          <span class="hint-touch">Drag left or right to move. Tap to rotate. Swipe down to drop.</span>
+        </p>
         <div class="start-controls">
           <label for="startDifficulty">
             <span>Difficulty</span>
             <select id="startDifficulty">
-              <option value="easy">Easy</option>
-              <option value="medium" selected>Medium</option>
+              <option value="easy" selected>Easy</option>
+              <option value="medium">Medium</option>
               <option value="high">High</option>
             </select>
           </label>
-          <label for="startMusic">
+          <label class="start-music-row" for="startMusic">
             <span>Music</span>
             <select id="startMusic">
               <option value="off" selected>Off</option>
@@ -97,8 +100,8 @@
         <label class="select-row" for="difficulty">
           <span>Difficulty</span>
           <select id="difficulty">
-            <option value="easy">Easy</option>
-            <option value="medium" selected>Medium</option>
+            <option value="easy" selected>Easy</option>
+            <option value="medium">Medium</option>
             <option value="high">High</option>
           </select>
         </label>
@@ -154,6 +157,7 @@
       <button id="continue" type="button">Continue</button>
     </div>
 
+    <script src="music.js"></script>
     <script src="game.js"></script>
   </body>
 </html>
