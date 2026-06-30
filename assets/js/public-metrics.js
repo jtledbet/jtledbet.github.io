@@ -2,6 +2,7 @@
   const script = document.currentScript;
   const endpoint = script && script.dataset.endpoint;
   const panel = document.getElementById('public-metrics');
+  const label = document.getElementById('public-metrics-label');
   if (!endpoint || !panel) return;
 
   const integer = new Intl.NumberFormat();
@@ -36,6 +37,12 @@
     if (node) node.textContent = integer.format(value);
   }
 
+  function hidePanel() {
+    panel.hidden = true;
+    panel.setAttribute('aria-busy', 'false');
+    if (label) label.hidden = true;
+  }
+
   function render(summary, source) {
     setMetric('visits', summary.visits);
     setMetric('pageViews', summary.pageViews);
@@ -68,14 +75,12 @@
       const summary = await response.json();
       if (!validSummary(summary)) throw new Error('Invalid metrics response');
       if (summary.visits === 0 && summary.pageViews === 0 && summary.countryCount === 0) {
-        panel.hidden = true;
-        panel.setAttribute('aria-busy', 'false');
+        hidePanel();
         return;
       }
       render(summary, response.headers.get('X-Metrics-Source'));
     } catch {
-      panel.hidden = true;
-      panel.setAttribute('aria-busy', 'false');
+      hidePanel();
     } finally {
       window.clearTimeout(timeout);
     }
