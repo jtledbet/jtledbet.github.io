@@ -25,6 +25,8 @@ const LOCK_DELAY = 520;
 const DAS_DELAY = 170;
 const ARR_DELAY = 58;
 const ROTATION_BUFFER = 140;
+const FIRST_CAPSULE_GRACE = 520;
+const LEVEL_CLEAR_PAUSE = 1050;
 const NECK_CELLS = [
   [3, 0],
   [4, 0],
@@ -96,6 +98,7 @@ const state = {
   messageTimer: 0,
   clearFlash: new Map(),
   rotationBuffer: null,
+  openingGraceTimer: 0,
   input: {
     left: false,
     right: false,
@@ -107,8 +110,8 @@ const state = {
     context: null,
     master: null,
     enabled: false,
-    track: "heat",
-    gameTrack: "heat",
+    track: "cool",
+    gameTrack: "cool",
     beat: 0,
     nextNoteTime: 0,
     cueEndTime: 0
@@ -253,9 +256,10 @@ function startGame(resetLevel = true) {
   state.resolving = false;
   state.dropTimer = 0;
   state.lockTimer = 0;
-  state.message = "";
-  state.messageTimer = 0;
+  state.message = "ready";
+  state.messageTimer = FIRST_CAPSULE_GRACE + 260;
   state.rotationBuffer = null;
+  state.openingGraceTimer = FIRST_CAPSULE_GRACE;
   resetHorizontalInput();
   state.clearFlash.clear();
   seedViruses();
@@ -294,6 +298,7 @@ function startDemo() {
   state.demoPlan = null;
   state.message = "";
   state.messageTimer = 0;
+  state.openingGraceTimer = 0;
   state.clearFlash.clear();
   resetHorizontalInput();
   hideOverlay();
@@ -594,7 +599,10 @@ function clearMatches(matches) {
   state.clearFlash.clear();
   for (const [x, y] of matches) {
     if (state.board[y][x]?.type === "virus") virusesCleared++;
-    state.clearFlash.set(`${x},${y}`, state.board[y][x]?.color || "yellow");
+    state.clearFlash.set(`${x},${y}`, {
+      color: state.board[y][x]?.color || "yellow",
+      started: performance.now()
+    });
     state.board[y][x] = null;
   }
   state.viruses -= virusesCleared;
@@ -701,18 +709,28 @@ function finishLevel() {
     return;
   }
   playMusicCue("win", 32);
-  state.score += state.level * 1000;
-  const shouldCutscene = ["medium", "high"].includes(difficultyEl.value) && state.level % 5 === 0 && state.level <= 20;
-  state.level += 1;
+  const completedLevel = state.level;
+  state.score += completedLevel * 1000;
+  const shouldCutscene = ["medium", "high"].includes(difficultyEl.value) && completedLevel % 5 === 0 && completedLevel <= 20;
+  state.resolving = true;
+  state.message = "level clear";
+  state.messageTimer = LEVEL_CLEAR_PAUSE;
   updateHud();
-  if (shouldCutscene) {
-    showCutscene();
-  } else {
+  draw();
+  setTimeout(() => {
+    if (state.demo || state.gameOver || !state.started) return;
+    state.level = completedLevel + 1;
+    state.resolving = false;
+    if (shouldCutscene) {
+      updateHud();
+      showCutscene();
+      return;
+    }
     state.board = emptyBoard();
     seedViruses();
     spawn();
     updateHud();
-  }
+  }, LEVEL_CLEAR_PAUSE);
 }
 
 function updateHud() {
@@ -970,13 +988,18 @@ function drawBottle() {
   }
   ctx.globalAlpha = 1;
   if (isDangerZoneOccupied()) {
-    ctx.fillStyle = "rgba(228, 83, 83, 0.11)";
+    const pulse = 0.5 + Math.sin(performance.now() * 0.008) * 0.5;
+    ctx.fillStyle = `rgba(228, 83, 83, ${0.08 + pulse * 0.09})`;
     ctx.fillRect(0, 0, w, 120);
-    ctx.strokeStyle = "rgba(228, 83, 83, 0.78)";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = `rgba(228, 83, 83, ${0.58 + pulse * 0.34})`;
+    ctx.lineWidth = 2 + pulse;
     ctx.setLineDash([8, 7]);
     ctx.strokeRect(neckLeft + 4, 4, neckRight - neckLeft - 8, 40);
     ctx.setLineDash([]);
+    ctx.fillStyle = `rgba(244, 240, 223, ${0.48 + pulse * 0.28})`;
+    ctx.font = "700 12px Segoe UI, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("NECK", w / 2, 34);
   }
 }
 
@@ -1020,9 +1043,9 @@ function drawCell(x, y, cell, alpha = 1) {
 
 function draw() {
   drawBottle();
-  for (const [key, color] of state.clearFlash) {
+  for (const [key, flash] of state.clearFlash) {
     const [x, y] = key.split(",").map(Number);
-    drawClearFlash(x, y, color);
+    drawClearFlash(x, y, flash);
   }
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
@@ -1159,17 +1182,24 @@ function drawLockMeter() {
   ctx.restore();
 }
 
-function drawClearFlash(x, y, color) {
+function drawClearFlash(x, y, flash) {
+  const color = flash?.color || flash || "yellow";
+  const age = performance.now() - (flash?.started || performance.now());
+  const progress = Math.max(0, Math.min(1, age / 380));
+  const pop = Math.sin(progress * Math.PI);
+  const size = 30 - progress * 18 + pop * 8;
+  const alpha = Math.max(0, 1 - progress);
   const px = x * CELL;
   const py = boardToCanvasY(y);
   ctx.save();
-  ctx.globalAlpha = 0.65;
+  ctx.globalAlpha = 0.7 * alpha;
   ctx.fillStyle = COLOR_HEX[color] || COLOR_HEX.yellow;
   ctx.beginPath();
-  ctx.arc(px + 20, py + 20, 17, 0, Math.PI * 2);
+  ctx.roundRect(px + 20 - size / 2, py + 20 - size / 2, size, size, Math.max(6, size * 0.32));
   ctx.fill();
-  ctx.strokeStyle = "#f4f0df";
-  ctx.lineWidth = 3;
+  ctx.globalAlpha = 0.85 * alpha;
+  ctx.strokeStyle = "rgba(244, 240, 223, 0.92)";
+  ctx.lineWidth = 2;
   ctx.stroke();
   ctx.restore();
 }
@@ -1540,10 +1570,14 @@ function gameLoop(time) {
     } else {
       state.lockTimer = 0;
     }
-    state.dropTimer += delta;
-    if (state.dropTimer >= speedForLevel()) {
-      state.dropTimer = 0;
-      tickDrop();
+    if (state.openingGraceTimer > 0) {
+      state.openingGraceTimer = Math.max(0, state.openingGraceTimer - delta);
+    } else {
+      state.dropTimer += delta;
+      if (state.dropTimer >= speedForLevel()) {
+        state.dropTimer = 0;
+        tickDrop();
+      }
     }
   }
   draw();

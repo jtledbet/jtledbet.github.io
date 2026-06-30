@@ -32,12 +32,19 @@
             <span>Music</span>
             <select id="startMusic">
               <option value="off" selected>Off</option>
-              <option value="heat">HEAT</option>
               <option value="cool">COOL</option>
+              <option value="heat">HEAT</option>
             </select>
           </label>
         </div>
-        <button id="startButton" type="button">Start</button>
+        <details class="controls-help">
+          <summary>Controls</summary>
+          <div>
+            <span>Keyboard: Arrows or A/D, W/Z/X, S/Down/Space.</span>
+            <span>Phone: drag left/right, tap, swipe down.</span>
+          </div>
+        </details>
+        <button id="startButton" type="button">Start Game</button>
       </div>
     </div>
 
@@ -53,7 +60,7 @@
             <strong id="mobileViruses">0</strong>
           </div>
           <div class="mobile-virus">
-            <span>Stage</span>
+            <span>Dx</span>
             <canvas id="virusMobile" width="72" height="56" aria-label="Dancing microbe"></canvas>
           </div>
           <div class="mobile-next">
@@ -108,7 +115,7 @@
 
         <div class="preview-row">
           <div class="virus-window">
-            <span>Stage</span>
+            <span>Dx</span>
             <canvas id="virusWindow" width="112" height="72" aria-label="Dancing microbe"></canvas>
           </div>
           <div class="next">
@@ -127,8 +134,8 @@
           <label for="musicTrack">
             <span>Track</span>
             <select id="musicTrack">
+              <option value="cool" selected>COOL</option>
               <option value="heat">HEAT</option>
-              <option value="cool">COOL</option>
             </select>
           </label>
         </div>
