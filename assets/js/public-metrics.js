@@ -67,6 +67,11 @@
       if (!response.ok) throw new Error('Metrics unavailable');
       const summary = await response.json();
       if (!validSummary(summary)) throw new Error('Invalid metrics response');
+      if (summary.visits === 0 && summary.pageViews === 0 && summary.countryCount === 0) {
+        panel.hidden = true;
+        panel.setAttribute('aria-busy', 'false');
+        return;
+      }
       render(summary, response.headers.get('X-Metrics-Source'));
     } catch {
       panel.hidden = true;
