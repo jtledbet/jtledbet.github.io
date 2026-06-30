@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NTv4x</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23151817'/%3E%3Ccircle cx='6' cy='8' r='4' fill='%23e45353'/%3E%3Ccircle cx='10' cy='8' r='4' fill='%234f8edb'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div id="startScreen" class="start-screen">
+      <div class="start-panel">
+        <div class="eyebrow">Current build</div>
+        <h1>NTv4x</h1>
+        <p class="start-hint">Drag the bottle to move. Tap to rotate. Swipe down to drop.</p>
+        <div class="start-controls">
+          <label for="startDifficulty">
+            <span>Difficulty</span>
+            <select id="startDifficulty">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </label>
+          <label for="startMusic">
+            <span>Music</span>
+            <select id="startMusic">
+              <option value="off" selected>Off</option>
+              <option value="heat">HEAT</option>
+              <option value="cool">COOL</option>
+            </select>
+          </label>
+        </div>
+        <button id="startButton" type="button">Start</button>
+      </div>
+    </div>
+
+    <main class="shell" aria-label="NTv4x game">
+      <section class="play-area">
+        <div class="mobile-play-hud" aria-label="Current game status">
+          <div>
+            <span>Score</span>
+            <strong id="mobileScore">0</strong>
+          </div>
+          <div>
+            <span>Microbes</span>
+            <strong id="mobileViruses">0</strong>
+          </div>
+          <div class="mobile-virus">
+            <span>Stage</span>
+            <canvas id="virusMobile" width="72" height="56" aria-label="Dancing microbe"></canvas>
+          </div>
+          <div class="mobile-next">
+            <span>Next</span>
+            <canvas id="nextMobile" width="112" height="72" aria-label="Next capsule"></canvas>
+          </div>
+          <div class="mobile-pause">
+            <button id="mobilePause" type="button">Pause</button>
+          </div>
+        </div>
+        <div class="board-wrap">
+          <canvas id="game" width="320" height="640" aria-label="Game board"></canvas>
+          <div id="overlay" class="overlay is-hidden">
+            <div id="overlayTitle" class="overlay-title">Paused</div>
+            <div class="overlay-actions">
+              <button id="overlayButton" type="button">Resume</button>
+              <button id="overlayMenuButton" type="button">Menu</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel" aria-label="Game controls and status">
+        <header>
+          <div class="eyebrow">Current build</div>
+          <h1>NTv4x</h1>
+        </header>
+
+        <div class="stats">
+          <div>
+            <span>Score</span>
+            <strong id="score">0</strong>
+          </div>
+          <div>
+            <span>Level</span>
+            <strong id="level">1</strong>
+          </div>
+          <div>
+            <span>Microbes</span>
+            <strong id="viruses">0</strong>
+          </div>
+        </div>
+
+        <label class="select-row" for="difficulty">
+          <span>Difficulty</span>
+          <select id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+
+        <div class="preview-row">
+          <div class="virus-window">
+            <span>Stage</span>
+            <canvas id="virusWindow" width="112" height="72" aria-label="Dancing microbe"></canvas>
+          </div>
+          <div class="next">
+          <span>Next</span>
+          <canvas id="next" width="112" height="72" aria-label="Next capsule"></canvas>
+          </div>
+        </div>
+
+        <div class="buttons">
+          <button id="newGame" type="button">New Game</button>
+          <button id="pause" type="button">Pause</button>
+        </div>
+
+        <div class="audio-row">
+          <button id="musicToggle" type="button" aria-pressed="false">Music: Off</button>
+          <label for="musicTrack">
+            <span>Track</span>
+            <select id="musicTrack">
+              <option value="heat">HEAT</option>
+              <option value="cool">COOL</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="keys">
+          <span>Move: Arrows / A D</span>
+          <span>Rotate: W / Z / X / Up</span>
+          <span>Drop: S / Down / Space</span>
+          <span>Pause: P</span>
+        </div>
+
+        <div class="touch" aria-label="Touch controls">
+          <button data-action="left" type="button">Left</button>
+          <button data-action="rotate-ccw" type="button">Z</button>
+          <button data-action="rotate-cw" type="button">X</button>
+          <button data-action="right" type="button">Right</button>
+          <button data-action="down" type="button">Down</button>
+          <button data-action="drop" type="button">Drop</button>
+        </div>
+        <div id="statusText" class="sr-only" aria-live="polite"></div>
+      </aside>
+    </main>
+
+    <div id="cutscene" class="cutscene is-hidden" role="dialog" aria-modal="true">
+      <canvas id="cutsceneCanvas" width="720" height="360" aria-label="Level intermission"></canvas>
+      <button id="continue" type="button">Continue</button>
+    </div>
+
+    <script src="game.js"></script>
+  </body>
+</html>
