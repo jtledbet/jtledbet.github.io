@@ -762,28 +762,171 @@ function boardColorCounts() {
   return { virus, occupied };
 }
 
-function currentDiagnosis() {
+function boardCellAt(x, y) {
+  if (x < 0 || x >= COLS || y < 0 || y >= ROWS) return { type: "wall" };
+  return state.board[y][x];
+}
+
+function colorInPiece(piece, color) {
+  if (!piece) return 0;
+  return (piece.a === color ? 1 : 0) + (piece.b === color ? 1 : 0);
+}
+
+function blockersAbove(x, y) {
+  let blockers = 0;
+  for (let row = HIDDEN_ROWS; row < y; row++) {
+    if (state.board[row][x]) blockers++;
+  }
+  return blockers;
+}
+
+function sameColorNeighbors(x, y, color) {
+  let same = 0;
+  let crowded = 0;
+  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const cell = boardCellAt(x + dx, y + dy);
+    if (!cell || cell.type === "wall") continue;
+    crowded++;
+    if (cell.color === color) same++;
+  }
+  return { same, crowded };
+}
+
+function lineOpportunity(x, y, color, dx, dy) {
+  let best = 0;
+  for (let offset = -3; offset <= 0; offset++) {
+    let same = 0;
+    let empty = 0;
+    let blocked = false;
+    for (let i = 0; i < 4; i++) {
+      const cx = x + (offset + i) * dx;
+      const cy = y + (offset + i) * dy;
+      const cell = boardCellAt(cx, cy);
+      if (cell?.type === "wall" || !isPlayableCell(cx, cy)) {
+        blocked = true;
+        break;
+      }
+      if (!cell) {
+        empty++;
+      } else if (cell.color === color) {
+        same++;
+      } else {
+        blocked = true;
+        break;
+      }
+    }
+    if (blocked) continue;
+    if (same >= 3 && empty >= 1) best = Math.max(best, 3.4);
+    else if (same === 2 && empty >= 2) best = Math.max(best, 1.45);
+    else if (same === 1 && empty >= 3) best = Math.max(best, 0.25);
+  }
+  return best;
+}
+
+function virusDxContribution(x, y, color) {
+  const highPressure = Math.max(0, (ROWS - y) / ROWS) * 1.8;
+  const buried = Math.min(1.8, blockersAbove(x, y) * 0.22);
+  const { same, crowded } = sameColorNeighbors(x, y, color);
+  const isolated = same === 0 ? 0.38 : 0;
+  const crowdPressure = Math.max(0, crowded - same) * 0.12;
+  const neckPressure = y <= BOTTLE_BODY_START_ROW + 4 ? 0.65 : y <= BOTTLE_BODY_START_ROW + 6 ? 0.25 : 0;
+  const opportunity = Math.max(
+    lineOpportunity(x, y, color, 1, 0),
+    lineOpportunity(x, y, color, 0, 1)
+  );
+  return {
+    pressure: highPressure + buried + isolated + crowdPressure + neckPressure,
+    opportunity,
+    buried,
+    highPressure
+  };
+}
+
+function currentDx() {
   const counts = boardColorCounts();
+  const total = COLORS.reduce((sum, current) => sum + counts.virus[current], 0);
+  const details = Object.fromEntries(COLORS.map((color) => [color, {
+    pressureValues: [],
+    opportunityValues: [],
+    maxBuried: 0,
+    maxHighPressure: 0,
+    score: 0,
+    pressure: 0,
+    opportunity: 0,
+    reason: "clear"
+  }]));
+
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      const cell = state.board[y][x];
+      if (cell?.type !== "virus") continue;
+      const contribution = virusDxContribution(x, y, cell.color);
+      const detail = details[cell.color];
+      detail.pressureValues.push(contribution.pressure);
+      detail.opportunityValues.push(contribution.opportunity);
+      detail.maxBuried = Math.max(detail.maxBuried, contribution.buried);
+      detail.maxHighPressure = Math.max(detail.maxHighPressure, contribution.highPressure);
+    }
+  }
+
+  for (const color of COLORS) {
+    const detail = details[color];
+    const count = counts.virus[color];
+    if (!count) {
+      detail.reason = "clear";
+      continue;
+    }
+    const maxPressure = Math.max(...detail.pressureValues);
+    const avgPressure = detail.pressureValues.reduce((sum, value) => sum + value, 0) / count;
+    const maxOpportunity = Math.max(...detail.opportunityValues);
+    const avgOpportunity = detail.opportunityValues.reduce((sum, value) => sum + value, 0) / count;
+    const pillRelevance = colorInPiece(state.active, color) * 0.42 + colorInPiece(state.next, color) * 0.34;
+    detail.pressure = maxPressure + avgPressure * 0.32 + Math.min(count, 4) * 0.08;
+    detail.opportunity = maxOpportunity + avgOpportunity * 0.22 + pillRelevance;
+    detail.score = detail.pressure + detail.opportunity;
+    if (detail.opportunity >= 2.3 && detail.opportunity >= detail.pressure * 0.72) {
+      detail.reason = "clear chance";
+    } else if (detail.maxBuried >= 1.1) {
+      detail.reason = "buried";
+    } else if (detail.maxHighPressure >= 1.05) {
+      detail.reason = "high pressure";
+    } else if (detail.score >= 2.2) {
+      detail.reason = "pressure rising";
+    } else {
+      detail.reason = "watch";
+    }
+  }
+
   const ranked = [...COLORS].sort((a, b) => {
     return (
-      counts.virus[b] - counts.virus[a] ||
-      counts.occupied[b] - counts.occupied[a] ||
+      details[b].score - details[a].score ||
+      details[b].opportunity - details[a].opportunity ||
+      details[b].pressure - details[a].pressure ||
       COLORS.indexOf(a) - COLORS.indexOf(b)
     );
   });
   const color = ranked[0];
+  const best = details[color];
+  const topScore = best.score || 0;
+  const maxScore = Math.max(3.5, ...COLORS.map((current) => details[current].score));
   return {
     color,
     count: counts.virus[color],
-    total: COLORS.reduce((sum, current) => sum + counts.virus[current], 0),
-    counts
+    total,
+    counts,
+    score: topScore,
+    pressure: best.pressure,
+    opportunity: best.opportunity,
+    reason: total > 0 ? best.reason : "clear",
+    intensity: total > 0 ? Math.max(0, Math.min(1, topScore / maxScore)) : 0,
+    details
   };
 }
 
 function statusSummary() {
   const next = state.next ? `Next capsule ${state.next.a} and ${state.next.b}.` : "No next capsule.";
-  const diagnosis = currentDiagnosis();
-  const dx = diagnosis.total > 0 ? `Diagnosis ${diagnosis.color} microbe leading.` : "Diagnosis clear.";
+  const diagnosis = currentDx();
+  const dx = diagnosis.total > 0 ? `Diagnosis ${diagnosis.color}: ${diagnosis.reason}.` : "Diagnosis clear.";
   return `Score ${state.score}. Level ${state.level}. Microbes ${state.viruses}. ${next} ${dx}`;
 }
 
@@ -1013,7 +1156,7 @@ function drawBottle() {
   }
 }
 
-function drawCell(x, y, cell, alpha = 1) {
+function drawCell(x, y, cell, alpha = 1, diagnosis = null) {
   const px = x * CELL;
   const py = boardToCanvasY(y);
   ctx.save();
@@ -1021,6 +1164,13 @@ function drawCell(x, y, cell, alpha = 1) {
   const color = COLOR_HEX[cell.color];
   const dark = DARK_HEX[cell.color];
   if (cell.type === "virus") {
+    if (diagnosis?.total > 0 && diagnosis.color === cell.color) {
+      const pulse = 0.5 + Math.sin(performance.now() * 0.006) * 0.5;
+      ctx.fillStyle = `rgba(244, 240, 223, ${0.08 + pulse * 0.12})`;
+      ctx.beginPath();
+      ctx.arc(px + 20, py + 20, 18 + pulse * 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.fillStyle = dark;
     ctx.beginPath();
     ctx.roundRect(px + 6, py + 7, 28, 27, 9);
@@ -1053,6 +1203,7 @@ function drawCell(x, y, cell, alpha = 1) {
 
 function draw() {
   drawBottle();
+  const diagnosis = currentDx();
   for (const [key, flash] of state.clearFlash) {
     const [x, y] = key.split(",").map(Number);
     drawClearFlash(x, y, flash);
@@ -1060,7 +1211,7 @@ function draw() {
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
       const cell = state.board[y][x];
-      if (cell && cell.type === "virus") drawCell(x, y, cell);
+      if (cell && cell.type === "virus") drawCell(x, y, cell, 1, diagnosis);
     }
   }
   drawBoardCapsules();
@@ -1472,12 +1623,12 @@ function drawNext(time = performance.now()) {
   drawNextCapsule(nextMobileCtx, nextMobileCanvas.width, nextMobileCanvas.height, time);
   drawVirusWindow(virusWindowCtx, virusWindowCanvas.width, virusWindowCanvas.height, time);
   drawVirusWindow(virusMobileCtx, virusMobileCanvas.width, virusMobileCanvas.height, time);
-  const diagnosis = currentDiagnosis();
+  const diagnosis = currentDx();
   const description = state.next
     ? `Next capsule: ${state.next.a} and ${state.next.b}.`
     : "No next capsule.";
   const virusDescription = diagnosis.total > 0
-    ? `Diagnosis: ${diagnosis.color} microbe leading with ${diagnosis.count}.`
+    ? `Diagnosis: ${diagnosis.color} ${diagnosis.reason}.`
     : "Diagnosis: clear.";
   nextCanvas.setAttribute("aria-label", description);
   nextMobileCanvas.setAttribute("aria-label", description);
@@ -1485,8 +1636,18 @@ function drawNext(time = performance.now()) {
   virusMobileCanvas.setAttribute("aria-label", virusDescription);
 }
 
-function diagnosisVirusColors() {
-  const diagnosis = currentDiagnosis();
+function dxShortReason(reason) {
+  return {
+    "clear chance": "CLEAR",
+    buried: "BURIED",
+    "high pressure": "HIGH",
+    "pressure rising": "RISING",
+    watch: "WATCH",
+    clear: "CLEAR"
+  }[reason] || "WATCH";
+}
+
+function diagnosisVirusColors(diagnosis = currentDx()) {
   return [diagnosis.total > 0 ? diagnosis.color : "blue"];
 }
 
@@ -1631,9 +1792,9 @@ function drawVirusWindow(targetCtx, width, height, time) {
     targetCtx.lineTo(x, height);
     targetCtx.stroke();
   }
-  const diagnosis = currentDiagnosis();
-  const colors = diagnosisVirusColors();
-  const excited = state.messageTimer > 0 || state.audio.track === "win" || diagnosis.count >= Math.max(2, Math.ceil(diagnosis.total * 0.45));
+  const diagnosis = currentDx();
+  const colors = diagnosisVirusColors(diagnosis);
+  const excited = state.messageTimer > 0 || state.audio.track === "win" || diagnosis.intensity >= 0.58;
   const scale = colors.length === 1 ? Math.min(width / 96, height / 66) : Math.min(width / 122, height / 68);
   const y = height * 0.64;
   const spacing = Math.min(34, width * 0.27);
@@ -1658,6 +1819,10 @@ function drawVirusWindow(targetCtx, width, height, time) {
   targetCtx.font = "700 9px Segoe UI, sans-serif";
   targetCtx.fillStyle = diagnosis.total > 0 ? COLOR_HEX[diagnosis.color] : "rgba(244, 240, 223, 0.42)";
   targetCtx.fillText("Dx", 7, 13);
+  if (diagnosis.total > 0) {
+    targetCtx.fillStyle = "rgba(244, 240, 223, 0.48)";
+    targetCtx.fillText(dxShortReason(diagnosis.reason), 7, height - 5);
+  }
 }
 
 function drawNextCapsule(targetCtx, width, height, time) {
