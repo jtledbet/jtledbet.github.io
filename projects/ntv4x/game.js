@@ -281,7 +281,7 @@ function showMenu() {
   pauseButton.textContent = "Pause";
   mobilePauseButton.textContent = "Pause";
   drawMenuArt();
-  if (state.audio.enabled && startMusic.value === "menu") setCurrentMusicTrack("menu");
+  if (state.audio.enabled) setCurrentMusicTrack("menu");
 }
 
 function startDemo() {
@@ -845,6 +845,7 @@ function setMusicEnabled(enabled) {
   if (enabled) {
     state.audio.context.resume();
     state.audio.nextNoteTime = state.audio.context.currentTime + 0.04;
+    if (!startScreen.classList.contains("is-hidden")) setCurrentMusicTrack("menu");
   }
 }
 
@@ -1913,11 +1914,6 @@ startDifficulty.addEventListener("change", () => {
 startMusic.addEventListener("change", () => {
   if (startMusic.value === "off") {
     setMusicEnabled(false);
-    return;
-  }
-  if (startMusic.value === "menu") {
-    setMusicEnabled(true);
-    setCurrentMusicTrack("menu");
     return;
   }
   musicTrack.value = startMusic.value;
