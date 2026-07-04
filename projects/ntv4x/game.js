@@ -57,6 +57,7 @@ const scoreEl = document.getElementById("score");
 const levelEl = document.getElementById("level");
 const virusesEl = document.getElementById("viruses");
 const mobileScoreEl = document.getElementById("mobileScore");
+const mobileLevelEl = document.getElementById("mobileLevel");
 const mobileVirusesEl = document.getElementById("mobileViruses");
 const difficultyEl = document.getElementById("difficulty");
 const statusText = document.getElementById("statusText");
@@ -743,6 +744,7 @@ function updateHud() {
   levelEl.textContent = String(state.level);
   virusesEl.textContent = String(state.viruses);
   mobileScoreEl.textContent = String(state.score);
+  mobileLevelEl.textContent = String(state.level);
   mobileVirusesEl.textContent = String(state.viruses);
   statusText.textContent = statusSummary();
   drawNext();
