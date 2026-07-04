@@ -752,7 +752,7 @@ function updateHud() {
 
 function statusSummary() {
   const next = state.next ? `Next capsule ${state.next.a} and ${state.next.b}.` : "No next capsule.";
-  return `Score ${state.score}. Level ${state.level}. Microbes ${state.viruses}. ${next} Mascot microbes dancing.`;
+  return `Score ${state.score}. Level ${state.level}. Microbes ${state.viruses}. ${next} Dx microbe trio dancing.`;
 }
 
 function ensureAudio() {
@@ -1609,7 +1609,7 @@ function drawVirusWindow(targetCtx, width, height, time) {
 
   targetCtx.font = "700 9px Segoe UI, sans-serif";
   targetCtx.fillStyle = "rgba(244, 240, 223, 0.58)";
-  targetCtx.fillText("Mood", 7, 13);
+  targetCtx.fillText("Dx", 7, 13);
 }
 
 function drawNextCapsule(targetCtx, width, height, time) {
