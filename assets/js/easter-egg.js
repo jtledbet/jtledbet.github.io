@@ -1,5 +1,5 @@
 (function () {
-  const triggers = ['cowboy', 'wizard', 'drugstorecowboypinballwizard'];
+  const triggers = ['pinball', 'wizard', 'pinballwizard'];
   const longPressMs = 700;
   const highScoreKey = 'pinball.highScore.v1';
   const tableWidth = 480;
@@ -1834,9 +1834,9 @@
       });
 
       trigger.addEventListener('click', (event) => {
-        if (!longPressTriggered) return;
         event.preventDefault();
         event.stopPropagation();
+        if (!longPressTriggered) launchEgg();
         longPressTriggered = false;
       }, true);
     });

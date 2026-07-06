@@ -175,6 +175,22 @@
       margin-bottom: 1.25rem;
     }
 
+    .tagline-egg {
+      appearance: none;
+      border: 0;
+      padding: 0;
+      color: inherit;
+      background: transparent;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .tagline-egg:hover,
+    .tagline-egg:focus-visible {
+      color: var(--purple-light);
+      outline: none;
+    }
+
     .hero-actions {
       display: flex;
       gap: 0.75rem;
@@ -523,7 +539,7 @@
 <header>
   <div class="nav-inner">
     <div class="nav-brand">
-      <span class="nav-dot egg-trigger" aria-hidden="true"></span>
+      <span class="nav-dot sisyphus-trigger" aria-hidden="true"></span>
       <a href="/" class="nav-logo">Jon Ledbetter</a>
     </div>
     <ul class="nav-links">
@@ -551,7 +567,11 @@
     <div class="hero-text">
       <h1>Jon Ledbetter</h1>
       <div class="tagline">Security-Focused Software Developer</div>
-      <div class="shadow-tagline">Drugstore Cowboy / Pinball Wizard</div>
+      <div class="shadow-tagline">
+        <button type="button" class="tagline-egg ntv4x-trigger" aria-label="Open NTv4x">Drugstore Cowboy</button>
+        <span aria-hidden="true"> / </span>
+        <button type="button" class="tagline-egg egg-trigger" aria-label="Open pinball">Pinball Wizard</button>
+      </div>
       <div class="hero-actions">
         <a href="/assets/resume/Resume_Jon_Ledbetter_2026.pdf" target="_blank" rel="nofollow noopener noreferrer" class="btn btn-primary">
           Download Résumé
@@ -656,7 +676,8 @@
 <script src="/assets/js/adaptive-experience.js" defer></script>
 <script src="/assets/js/public-metrics.js?v=zero-state-2" data-endpoint="https://metrics.ledsec.dev/v1/public-summary" defer></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"660980ea912a4d8cb965bf6b192283aa"}'></script>
-<script src="/assets/js/easter-egg.js?v=shooter-exit-feed" defer></script>
-<script src="/assets/js/sisyphus-egg.js?v=direct-link" defer></script>
+<script src="/assets/js/easter-egg.js?v=wizard-trigger" defer></script>
+<script src="/assets/js/ntv4x-egg.js?v=rx-cowboy" defer></script>
+<script src="/assets/js/sisyphus-egg.js?v=nav-dot" defer></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 (function () {
   // Sisyphus easter egg: a deliberately unwinnable boulder climb.
-  // Triggered by typing a word, or long-pressing the footer (or any .sisyphus-trigger element).
+  // Triggered by typing a word, or clicking/long-pressing any .sisyphus-trigger element.
   const triggers = ['sisyphus', 'boulder'];
   const directHashes = new Set(['#sisyphus', '#boulder', '#rock']);
   const longPressMs = 700;
@@ -419,9 +419,7 @@
   });
 
   function bindLongPress() {
-    // The footer copyright is the hidden mobile long-press target (parallel to the
-    // pinball egg's nav dot). Any element can also opt in via class .sisyphus-trigger.
-    document.querySelectorAll('footer, .sisyphus-trigger').forEach((trigger) => {
+    document.querySelectorAll('.sisyphus-trigger').forEach((trigger) => {
       // keep the 700ms hold from selecting text or popping the iOS callout menu
       trigger.style.webkitTouchCallout = 'none';
       trigger.style.webkitUserSelect = 'none';
@@ -443,9 +441,9 @@
         });
       });
       trigger.addEventListener('click', (event) => {
-        if (!longPressTriggered) return;
         event.preventDefault();
         event.stopPropagation();
+        if (!longPressTriggered) launchEgg();
         longPressTriggered = false;
       }, true);
     });
