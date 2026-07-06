@@ -11,6 +11,11 @@ const COLOR_HEX = {
   yellow: "#f2ca52",
   blue: "#4f8edb"
 };
+const COLOR_RGB = {
+  red: [228, 83, 83],
+  yellow: [242, 202, 82],
+  blue: [79, 142, 219]
+};
 const DARK_HEX = {
   red: "#8f282c",
   yellow: "#947223",
@@ -39,6 +44,8 @@ const NECK_MAX_COL = 4;
 const VIRUS_START_ROW = HIDDEN_ROWS + 6;
 const DX_SWAP_DURATION = 620;
 const DX_SHOCK_DURATION = 240;
+const DX_EXIT_DURATION = 760;
+const DX_POOF_START = 260;
 
 const canvas = document.getElementById("game");
 const boardWrap = document.querySelector(".board-wrap");
@@ -109,7 +116,10 @@ const state = {
     slots: {},
     previousSlots: {},
     transitionStart: 0,
-    shockUntil: 0
+    shockUntil: 0,
+    visible: {},
+    exiting: {},
+    lastCounts: null
   },
   input: {
     left: false,
@@ -704,6 +714,7 @@ function resolveBoard() {
       setTimeout(step, 70);
       return;
     }
+    syncDxTrio(virusColorCounts(), performance.now(), true);
     state.resolving = false;
     if (state.viruses <= 0) {
       finishLevel();
@@ -779,10 +790,13 @@ function resetDxTrio() {
   state.dxTrio.previousSlots = {};
   state.dxTrio.transitionStart = 0;
   state.dxTrio.shockUntil = 0;
+  state.dxTrio.visible = {};
+  state.dxTrio.exiting = {};
+  state.dxTrio.lastCounts = null;
 }
 
-function rankedVirusColors(counts) {
-  return [...COLORS].sort((a, b) => counts[b] - counts[a] || COLORS.indexOf(a) - COLORS.indexOf(b));
+function rankedVirusColors(counts, colors = COLORS) {
+  return [...colors].sort((a, b) => counts[b] - counts[a] || COLORS.indexOf(a) - COLORS.indexOf(b));
 }
 
 function slotsForRankedColors(ranked) {
@@ -797,21 +811,67 @@ function dxSlotsChanged(nextSlots) {
   return COLORS.some((color) => state.dxTrio.slots[color] !== nextSlots[color]);
 }
 
-function syncDxTrio(counts, time) {
-  const nextSlots = slotsForRankedColors(rankedVirusColors(counts));
+function visibleDxColors(counts) {
+  return COLORS.filter((color) => state.dxTrio.visible[color] && counts[color] > 0 && !state.dxTrio.exiting[color]);
+}
+
+function initializeDxTrio(counts, time) {
+  const colors = COLORS.filter((color) => counts[color] > 0);
+  const nextSlots = slotsForRankedColors(rankedVirusColors(counts, colors));
+  state.dxTrio.initialized = true;
+  state.dxTrio.visible = Object.fromEntries(COLORS.map((color) => [color, counts[color] > 0]));
+  state.dxTrio.exiting = {};
+  state.dxTrio.slots = { ...nextSlots };
+  state.dxTrio.previousSlots = { ...nextSlots };
+  state.dxTrio.transitionStart = time;
+  state.dxTrio.shockUntil = 0;
+  state.dxTrio.lastCounts = { ...counts };
+}
+
+function syncDxTrio(counts, time, boardSettled = false) {
   if (!state.dxTrio.initialized) {
-    state.dxTrio.initialized = true;
-    state.dxTrio.slots = { ...nextSlots };
-    state.dxTrio.previousSlots = { ...nextSlots };
-    state.dxTrio.transitionStart = time;
-    state.dxTrio.shockUntil = 0;
+    initializeDxTrio(counts, time);
     return;
   }
-  if (!dxSlotsChanged(nextSlots)) return;
-  state.dxTrio.previousSlots = { ...state.dxTrio.slots };
+  if (!boardSettled) return;
+
+  let changed = false;
+  const previousSlots = { ...state.dxTrio.slots };
+  for (const color of COLORS) {
+    if (!state.dxTrio.visible[color] && counts[color] > 0) {
+      state.dxTrio.visible[color] = true;
+      changed = true;
+    }
+    if (state.dxTrio.visible[color] && counts[color] <= 0 && !state.dxTrio.exiting[color]) {
+      state.dxTrio.exiting[color] = {
+        start: time,
+        slot: state.dxTrio.slots[color] ?? state.dxTrio.previousSlots[color] ?? 2
+      };
+      changed = true;
+    }
+  }
+
+  const nextSlots = slotsForRankedColors(rankedVirusColors(counts, visibleDxColors(counts)));
+  if (!changed && !dxSlotsChanged(nextSlots)) {
+    state.dxTrio.lastCounts = { ...counts };
+    return;
+  }
+  state.dxTrio.previousSlots = previousSlots;
   state.dxTrio.slots = { ...nextSlots };
   state.dxTrio.transitionStart = time;
   state.dxTrio.shockUntil = time + DX_SHOCK_DURATION;
+  state.dxTrio.lastCounts = { ...counts };
+}
+
+function retireDxExits(time) {
+  for (const color of COLORS) {
+    const exit = state.dxTrio.exiting[color];
+    if (!exit || time - exit.start < DX_EXIT_DURATION) continue;
+    state.dxTrio.visible[color] = false;
+    delete state.dxTrio.exiting[color];
+    delete state.dxTrio.slots[color];
+    delete state.dxTrio.previousSlots[color];
+  }
 }
 
 function easeSwap(value) {
@@ -1659,6 +1719,31 @@ function drawPreviewVirus(targetCtx, x, y, color, time, excited, shocked = false
   targetCtx.restore();
 }
 
+function colorRgba(color, alpha) {
+  const [r, g, b] = COLOR_RGB[color] || [244, 240, 223];
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function drawDxPoof(targetCtx, color, progress, time) {
+  const fade = 1 - progress;
+  targetCtx.save();
+  targetCtx.lineWidth = 2;
+  targetCtx.strokeStyle = `rgba(244, 240, 223, ${0.38 * fade})`;
+  targetCtx.beginPath();
+  targetCtx.arc(0, 0, 16 + progress * 13, 0, Math.PI * 2);
+  targetCtx.stroke();
+  for (let i = 0; i < 9; i++) {
+    const angle = (Math.PI * 2 * i) / 9 + Math.sin(time * 0.006 + i) * 0.18;
+    const distance = 10 + progress * 25 + Math.sin(time * 0.01 + i * 2.1) * 1.5;
+    const size = 1.8 + (i % 3) * 0.7 + (1 - progress) * 1.4;
+    targetCtx.fillStyle = i % 3 === 0 ? colorRgba(color, 0.34 * fade) : `rgba(244, 240, 223, ${0.28 * fade})`;
+    targetCtx.beginPath();
+    targetCtx.arc(Math.cos(angle) * distance, Math.sin(angle) * distance * 0.68, size, 0, Math.PI * 2);
+    targetCtx.fill();
+  }
+  targetCtx.restore();
+}
+
 function dxSlot(rank, width, height) {
   const slots = [
     { x: width * 0.52, y: height * 0.72, scale: 1.16, alpha: 1, layer: 2 },
@@ -1685,17 +1770,38 @@ function drawVirusWindow(targetCtx, width, height, time) {
     targetCtx.stroke();
   }
   const counts = virusColorCounts();
-  syncDxTrio(counts, time);
+  retireDxExits(time);
+  syncDxTrio(counts, time, !state.resolving);
   const swapProgress = easeSwap((time - state.dxTrio.transitionStart) / DX_SWAP_DURATION);
   const excited = state.messageTimer > 0 || state.audio.track === "win";
   const baseScale = Math.min(width / 138, height / 68);
-  const entries = COLORS.map((color) => {
+  const entries = COLORS.filter((color) => state.dxTrio.visible[color] || state.dxTrio.exiting[color]).map((color) => {
+    const exit = state.dxTrio.exiting[color];
+    if (exit) {
+      const exitAge = Math.max(0, time - exit.start);
+      const exitProgress = Math.max(0, Math.min(1, (exitAge - DX_POOF_START) / (DX_EXIT_DURATION - DX_POOF_START)));
+      const slot = dxSlot(exit.slot, width, height);
+      return {
+        color,
+        moved: true,
+        exiting: true,
+        exitProgress,
+        shocked: exitAge < DX_POOF_START,
+        layer: slot.layer + 3,
+        x: slot.x + Math.sin(time * 0.04) * (exitProgress ? 0 : 1.5),
+        y: slot.y - exitProgress * 5,
+        scale: slot.scale * (1 + exitProgress * 0.08),
+        alpha: slot.alpha * (1 - exitProgress)
+      };
+    }
     const fromSlot = dxSlot(state.dxTrio.previousSlots[color] ?? state.dxTrio.slots[color] ?? 2, width, height);
     const toSlot = dxSlot(state.dxTrio.slots[color] ?? 2, width, height);
     return {
       color,
       moved: (state.dxTrio.previousSlots[color] ?? state.dxTrio.slots[color]) !== state.dxTrio.slots[color],
-      count: counts[color],
+      exiting: false,
+      exitProgress: 0,
+      shocked: false,
       layer: toSlot.layer,
       x: lerp(fromSlot.x, toSlot.x, swapProgress),
       y: lerp(fromSlot.y, toSlot.y, swapProgress),
@@ -1707,9 +1813,10 @@ function drawVirusWindow(targetCtx, width, height, time) {
   entries.forEach((entry, index) => {
     targetCtx.save();
     targetCtx.translate(entry.x, entry.y);
-    targetCtx.globalAlpha = entry.count ? entry.alpha : Math.min(entry.alpha, 0.42);
+    targetCtx.globalAlpha = Math.max(0, entry.alpha);
     targetCtx.scale(baseScale * entry.scale, baseScale * entry.scale);
-    drawPreviewVirus(targetCtx, 0, 0, entry.color, time + index * 220, excited, entry.moved && time < state.dxTrio.shockUntil);
+    drawPreviewVirus(targetCtx, 0, 0, entry.color, time + index * 220, excited, entry.shocked || (entry.moved && time < state.dxTrio.shockUntil));
+    if (entry.exiting && entry.exitProgress > 0) drawDxPoof(targetCtx, entry.color, entry.exitProgress, time + index * 37);
     targetCtx.restore();
   });
 
