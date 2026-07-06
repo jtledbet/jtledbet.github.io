@@ -750,9 +750,27 @@ function updateHud() {
   drawNext();
 }
 
+function virusColorCounts() {
+  const counts = Object.fromEntries(COLORS.map((color) => [color, 0]));
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      const cell = state.board[y][x];
+      if (cell?.type === "virus") counts[cell.color]++;
+    }
+  }
+  return counts;
+}
+
+function virusPresenceScale(color, counts) {
+  const maxCount = Math.max(1, ...COLORS.map((current) => counts[current]));
+  if (!counts[color]) return 0.62;
+  return 0.78 + (counts[color] / maxCount) * 0.36;
+}
+
 function statusSummary() {
   const next = state.next ? `Next capsule ${state.next.a} and ${state.next.b}.` : "No next capsule.";
-  return `Score ${state.score}. Level ${state.level}. Microbes ${state.viruses}. ${next} Dx microbe trio dancing.`;
+  const counts = virusColorCounts();
+  return `Score ${state.score}. Level ${state.level}. Microbes ${state.viruses}. ${next} Dx red ${counts.red}, yellow ${counts.yellow}, blue ${counts.blue}.`;
 }
 
 function ensureAudio() {
@@ -1443,9 +1461,8 @@ function drawNext(time = performance.now()) {
   const description = state.next
     ? `Next capsule: ${state.next.a} and ${state.next.b}.`
     : "No next capsule.";
-  const virusDescription = state.messageTimer > 0
-    ? "Microbe trio reacting to the last clear."
-    : "Microbe trio dancing.";
+  const counts = virusColorCounts();
+  const virusDescription = `Dx microbe trio. Red ${counts.red}, yellow ${counts.yellow}, blue ${counts.blue}.`;
   nextCanvas.setAttribute("aria-label", description);
   nextMobileCanvas.setAttribute("aria-label", description);
   virusWindowCanvas.setAttribute("aria-label", virusDescription);
@@ -1594,15 +1611,18 @@ function drawVirusWindow(targetCtx, width, height, time) {
     targetCtx.stroke();
   }
   const colors = COLORS;
+  const counts = virusColorCounts();
   const excited = state.messageTimer > 0 || state.audio.track === "win";
-  const scale = Math.min(width / 138, height / 68);
+  const baseScale = Math.min(width / 138, height / 68);
   const y = height * 0.64;
   const spacing = Math.min(30, width * 0.255);
   colors.forEach((color, index) => {
     const x = width / 2 + (index - 1) * spacing;
+    const presenceScale = virusPresenceScale(color, counts);
     targetCtx.save();
     targetCtx.translate(x, y);
-    targetCtx.scale(scale, scale);
+    targetCtx.globalAlpha = counts[color] ? 1 : 0.48;
+    targetCtx.scale(baseScale * presenceScale, baseScale * presenceScale);
     drawPreviewVirus(targetCtx, 0, 0, color, time + index * 220, excited);
     targetCtx.restore();
   });
