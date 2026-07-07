@@ -2,7 +2,7 @@
   const triggers = ['rx', 'cowboy', 'ntv4x'];
   const directHashes = new Set(['#ntv4x', '#rx']);
   const longPressMs = 700;
-  const targetUrl = '/ntv4x/';
+  const targetUrl = '/projects/ntv4x/';
   let typed = '';
   let pressTimer = null;
   let longPressTriggered = false;
