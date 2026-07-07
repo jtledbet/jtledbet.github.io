@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BB84 Quantum Key Distribution | Jon Ledbetter</title>
+  <meta name="description" content="Interactive BB84 quantum key distribution simulator — build a shared secret key from polarized photons, then catch an eavesdropper by the errors she can't avoid leaving behind." />
+  <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+  <meta name="x-clacks-overhead" content="GNU Terry Pratchett" />
+  <link rel="canonical" href="https://ledsec.dev/projects/qkd/" />
+  <link rel="help" href="http://www.gnuterrypratchett.com/" title="GNU Terry Pratchett" />
+  <meta name="theme-color" content="#05040c" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2305040c'/%3E%3Ccircle cx='6' cy='8' r='4' fill='none' stroke='%2367e8f9' stroke-width='1.4'/%3E%3Ccircle cx='10' cy='8' r='4' fill='none' stroke='%23a884f0' stroke-width='1.4'/%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #05040c; }
+  </style>
+  <link rel="stylesheet" href="styles.css?v=bb84-1" />
+</head>
+<body>
+
+<main>
+  <a class="back" href="/portfolio/">Back to Portfolio</a>
+
+  <header class="hero">
+    <div class="eyebrow">Interactive Cryptography Demo</div>
+    <h1>BB84 Quantum Key Distribution</h1>
+    <p class="dek">
+      Quantum computers running Shor's algorithm will eventually break RSA and elliptic-curve
+      cryptography — and adversaries are already harvesting encrypted traffic to decrypt later.
+      BB84 sidesteps the math entirely: it distributes keys using quantum states, so anyone who
+      eavesdrops physically disturbs what they touch. Run the protocol below, then let Eve loose
+      on the channel and catch her in the act.
+    </p>
+    <div class="hero-facts">
+      <div class="fact"><strong>Security from physics, not math</strong> — measurement itself protects the key</div>
+      <div class="fact"><strong>Eavesdropping leaves fingerprints</strong> — an intercepted channel shows ~25% errors</div>
+    </div>
+    <details class="explainer" id="why-qkd">
+      <summary>Why this matters now</summary>
+      <p>
+        Nearly all of today's key exchange (TLS, SSH, VPNs) rests on problems like integer
+        factoring and discrete logarithms being hard. Shor's algorithm solves both efficiently
+        on a large fault-tolerant quantum computer. No such machine exists yet — but traffic
+        recorded today can be decrypted whenever one does. That "harvest now, decrypt later"
+        threat is why long-lived secrets already need quantum-resistant protection.
+      </p>
+      <p>
+        There are two answers. <strong>Post-quantum cryptography</strong> (lattice-based schemes
+        like ML-KEM) replaces the hard math problems and is the practical near-term fix.
+        <strong>Quantum key distribution</strong>, demonstrated here, takes the other road: it
+        doesn't rely on computational hardness at all. BB84 (Bennett &amp; Brassard, 1984) encodes
+        key bits in the polarization of single photons. Quantum mechanics forbids copying an
+        unknown quantum state and makes measurement in the wrong basis destructive — so an
+        eavesdropper can't read the key without corrupting a detectable fraction of it. The
+        parties don't just get a key; they get evidence about whether anyone listened.
+      </p>
+    </details>
+  </header>
+
+  <div class="crypto-error" id="cryptoError" hidden>
+    This demo requires a cryptographically secure random number generator
+    (<code>crypto.getRandomValues</code>), which this browser doesn't provide. It will not fall
+    back to weaker randomness.
+  </div>
+  <noscript><div class="crypto-error">This demo is an interactive simulation and requires JavaScript.</div></noscript>
+
+  <section class="panel controls-panel" aria-label="Simulation controls">
+    <div class="panel-title">Controls</div>
+    <div class="control-row">
+      <div class="mode-toggle" role="group" aria-label="Run mode">
+        <button id="modeStep" class="mode-btn is-active" type="button" data-mode="step" aria-pressed="true">Step-by-step</button>
+        <button id="modeAuto" class="mode-btn" type="button" data-mode="auto" aria-pressed="false">Auto-run</button>
+      </div>
+      <label class="count-label" for="photonCount">Photons
+        <select id="photonCount">
+          <option value="16" selected>16</option>
+          <option value="64">64</option>
+          <option value="256">256</option>
+        </select>
+      </label>
+      <button id="eveToggle" class="eve-toggle" type="button" aria-pressed="false">🕵️ Eve: off</button>
+    </div>
+    <div class="control-row actions">
+      <button id="runBtn" class="btn btn-run" type="button">Run</button>
+      <button id="stepBtn" class="btn btn-step" type="button" disabled>Step</button>
+      <button id="resetBtn" class="btn btn-reset" type="button" disabled>Reset</button>
+    </div>
+  </section>
+
+  <section class="panel channel-panel" aria-label="Quantum channel visualization">
+    <div class="panel-title">Quantum Channel</div>
+    <div class="channel" id="channel">
+      <div class="lane lane-alice">
+        <div class="lane-avatar" aria-hidden="true">👩‍🔬</div>
+        <div class="lane-name">Alice</div>
+        <div class="lane-readout"><span class="ro-label">bit</span><span class="ro-val" id="aliceBit">–</span></div>
+        <div class="lane-readout"><span class="ro-label">basis</span><span class="ro-val" id="aliceBasis">–</span></div>
+      </div>
+      <div class="channel-track" id="channelTrack">
+        <span class="photon" id="photonEl" hidden aria-hidden="true"></span>
+        <div class="eve-node" id="eveNode">
+          <div class="lane-avatar" aria-hidden="true">🕵️</div>
+          <div class="lane-name">Eve</div>
+          <div class="lane-readout"><span class="ro-label">basis</span><span class="ro-val" id="eveBasis">–</span></div>
+        </div>
+      </div>
+      <div class="lane lane-bob">
+        <div class="lane-avatar" aria-hidden="true">🧑‍💻</div>
+        <div class="lane-name">Bob</div>
+        <div class="lane-readout"><span class="ro-label">basis</span><span class="ro-val" id="bobBasis">–</span></div>
+        <div class="lane-readout"><span class="ro-label">result</span><span class="ro-val" id="bobResult">–</span></div>
+      </div>
+    </div>
+    <div class="channel-status" id="channelStatus" role="status" aria-live="polite">Idle — configure a run and press Run.</div>
+    <div class="channel-legend">
+      Polarization &nbsp; <span class="b-rect">+ basis:</span> 0 = → &nbsp;1 = ↑
+      &nbsp;·&nbsp; <span class="b-diag">× basis:</span> 0 = ↗ &nbsp;1 = ↘
+    </div>
+  </section>
+
+  <section class="panel log-panel" aria-label="Protocol log">
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dot dot-red"></div>
+        <div class="terminal-dot dot-yellow"></div>
+        <div class="terminal-dot dot-green"></div>
+        <span class="terminal-title">public channel — protocol log</span>
+      </div>
+      <div class="table-scroll">
+        <table class="protocol-table" id="protocolTable">
+          <caption class="sr-only">Per-photon protocol log: Alice's bit and basis, the photon sent, Eve's basis when eavesdropping, Bob's basis and measurement result, and whether the bit survives sifting.</caption>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Alice bit</th>
+              <th>Alice basis</th>
+              <th>Photon</th>
+              <th class="col-eve">Eve basis</th>
+              <th>Bob basis</th>
+              <th>Bob result</th>
+              <th>Sifted</th>
+            </tr>
+          </thead>
+          <tbody id="protocolBody"></tbody>
+        </table>
+        <div class="log-empty" id="logEmpty">— no photons transmitted yet —</div>
+      </div>
+      <div class="log-key" id="logKey" hidden>
+        <span class="lk-item"><span class="swatch swatch-sacrificed"></span> sacrificed for error check</span>
+        <span class="lk-item"><span class="swatch swatch-error"></span> error found</span>
+        <span class="lk-item"><span class="swatch swatch-discarded"></span> discarded (basis mismatch)</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel stats-panel" aria-label="Run statistics">
+    <div class="panel-title">Results</div>
+    <div class="stats-grid">
+      <div class="stat-tile"><span class="stat-label">Photons sent</span><strong id="statSent">0</strong></div>
+      <div class="stat-tile"><span class="stat-label">Sifted key bits</span><strong id="statSifted">0</strong></div>
+      <div class="stat-tile"><span class="stat-label">QBER sample</span><strong id="statSample">–</strong></div>
+      <div class="stat-tile">
+        <span class="stat-label">QBER <span class="stat-hint" title="Quantum Bit Error Rate — the fraction of sampled sifted bits where Bob's result disagrees with Alice's bit">ⓘ</span></span>
+        <strong id="statQber">–</strong>
+        <span class="stat-sub">flagged at the ~11% textbook security bound</span>
+      </div>
+    </div>
+    <div class="verdict-row">
+      <span class="verdict-badge verdict-pending" id="verdictBadge" role="status" aria-live="polite">Awaiting data</span>
+      <span class="qber-caveat" id="qberCaveat" hidden>Small sample — the estimate is statistically noisy. Try 256 photons for a stable reading.</span>
+    </div>
+    <div class="key-preview" id="keyPreview" hidden>
+      <span class="stat-label">Final shared key — <span id="keyLen">0</span> bits (sacrificed bits excluded)</span>
+      <code id="keyBits"></code>
+    </div>
+  </section>
+
+  <section class="panel otp-panel" aria-label="One-time pad demonstration">
+    <div class="panel-title">Use the key: one-time pad</div>
+    <p class="otp-intro">
+      A verified key can encrypt with information-theoretic security — unbreakable regardless of
+      computing power — as long as the key is as long as the message and never reused.
+      Each character costs 8 key bits.
+    </p>
+    <div class="otp-row">
+      <input id="otpMessage" maxlength="40" placeholder="Short secret message…" aria-label="Message to encrypt with the shared key" disabled />
+      <button id="otpEncryptBtn" class="btn btn-run" type="button" disabled>Encrypt</button>
+    </div>
+    <div class="otp-warn" id="otpWarn" role="status" hidden></div>
+    <div class="otp-output" id="otpOutput" hidden>
+      <div class="otp-line"><span class="ro-label">ciphertext</span><code id="otpCipher"></code></div>
+      <button id="otpRevealBtn" class="btn btn-step" type="button">Reveal decryption</button>
+      <div class="otp-line" id="otpPlainRow" hidden><span class="ro-label">decrypted</span><code id="otpPlain"></code></div>
+    </div>
+  </section>
+
+  <section class="explainers" aria-label="How this works">
+    <div class="panel-title">How this works</div>
+    <div class="explainer-grid">
+      <details class="callout">
+        <summary>The no-cloning theorem</summary>
+        <p>
+          Quantum mechanics forbids making a perfect copy of an unknown quantum state. A classical
+          wiretap copies bits and forwards them, invisibly. Eve can't do that here: to learn
+          anything about a photon she must measure it, and she can't keep an untouched copy to
+          send along. Whatever she forwards is a reconstruction based on her measurement — and
+          when she measured in the wrong basis, that reconstruction is detectably wrong.
+        </p>
+      </details>
+      <details class="callout">
+        <summary>Why measurement disturbs the state</summary>
+        <p>
+          A photon polarized in the rectilinear basis (↑ or →) has no defined value in the
+          diagonal basis (↗ or ↘) — measuring it diagonally forces a random outcome and
+          re-prepares the photon in that new orientation. The original state is gone.
+          Information gain about one basis necessarily disturbs the other; that trade-off is a
+          law of physics, not an engineering limitation, and it's what turns eavesdropping into
+          a measurable event.
+        </p>
+      </details>
+      <details class="callout">
+        <summary>Why Eve causes ~25% errors</summary>
+        <p>
+          Consider only the bits that survive sifting — where Alice's and Bob's bases match.
+          Eve guesses the right basis half the time; those photons pass through unharmed.
+          The other half, she measures in the wrong basis, gets a random result, and resends the
+          photon in her wrong basis. Bob, measuring in Alice's original basis, now gets a
+          coin-flip: half of those come up wrong. So the error rate is
+          ½ × ½ = <strong>25%</strong> — far above any natural noise floor, and impossible for
+          Eve to avoid with this attack.
+        </p>
+      </details>
+      <details class="callout">
+        <summary>Caveats — what this is and isn't</summary>
+        <p>
+          This simulates the protocol's math, not photons — real QKD contends with detector
+          noise, channel loss, and imperfect single-photon sources, so a real channel has a
+          nonzero baseline QBER and applies error correction and privacy amplification to
+          distill the final key. Security proofs put the tolerable QBER ceiling near 11%, and
+          the verdict here uses that bound. This model has no natural noise, so any error is
+          Eve's — but a small QBER sample can still let her slip past undetected by luck; the
+          demo flags noisy samples and admits it when she gets away. Randomness comes from the
+          browser's CSPRNG
+          (<code>crypto.getRandomValues</code>) standing in for genuine quantum entropy. And
+          BB84 always needs an <em>authenticated</em> classical channel for basis comparison —
+          without it, Eve just impersonates Bob.
+        </p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>Copyright &copy; Jon Ledbetter</span>
+  <span class="clacks-tribute" title="A man is not dead while his name is still spoken.">GNU Terry Pratchett</span>
+</footer>
+
+<script src="/assets/js/adaptive-experience.js" defer></script>
+<script src="qkd.js?v=bb84-1" defer></script>
+</body>
+</html>

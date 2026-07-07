@@ -478,6 +478,24 @@
   <div class="featured-grid">
 
     <div class="featured-card">
+      <div class="featured-img-placeholder" style="display:flex; background: linear-gradient(135deg, #05040c, #123a4a);">⚛️</div>
+      <div class="featured-body">
+        <h2>BB84 Quantum Key Distribution Simulator</h2>
+        <p>An interactive simulation of quantum cryptography: build a shared secret key photon-by-photon, then switch on an eavesdropper and catch her by the ~25% error rate she can't avoid leaving. CSPRNG-backed protocol engine with a one-time-pad payoff — pure vanilla JS, no dependencies.</p>
+        <div class="tags">
+          <span class="tag">Cryptography</span>
+          <span class="tag">Quantum</span>
+          <span class="tag">Security</span>
+          <span class="tag">JavaScript</span>
+        </div>
+        <div class="featured-actions">
+          <a href="/projects/qkd/" class="btn btn-primary">Launch Demo</a>
+          <a href="https://github.com/jtledbet/jtledbet.github.io/tree/master/projects/qkd" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="featured-card">
       <img src="/assets/images/chinchilla.png" class="featured-img" alt="Shell Games"
         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="featured-img-placeholder" style="background: linear-gradient(135deg, #1a0d2e, #3d1a5e);">🎮</div>
@@ -581,13 +599,27 @@
   <!-- ALL PROJECTS -->
   <div class="section-label">All Projects</div>
   <div class="filter-bar">
-    <button class="filter-btn active" data-filter="all">All <span class="count">17</span></button>
+    <button class="filter-btn active" data-filter="all">All <span class="count">18</span></button>
     <button class="filter-btn" data-filter="webapp">Web Apps <span class="count">7</span></button>
     <button class="filter-btn" data-filter="game">Games <span class="count">6</span></button>
-    <button class="filter-btn" data-filter="tool">Tools <span class="count">4</span></button>
+    <button class="filter-btn" data-filter="tool">Tools <span class="count">5</span></button>
   </div>
 
   <div class="projects-grid" id="projects-grid">
+
+    <!-- BB84 QKD Simulator -->
+    <div class="project-card" data-category="tool">
+      <div class="card-img-placeholder" style="display:flex; background: linear-gradient(135deg, #05040c, #123a4a);">⚛️</div>
+      <div class="card-body">
+        <div class="card-title">BB84 QKD Simulator</div>
+        <div class="card-desc">Interactive quantum key distribution demo — sift a secret key from polarized photons and detect eavesdropping through the error rate it leaves behind.</div>
+        <div class="tags"><span class="tag">Cryptography</span><span class="tag">Quantum</span><span class="tag">Vanilla JS</span></div>
+        <div class="card-actions">
+          <a href="/projects/qkd/" class="btn btn-primary">Launch</a>
+          <a href="https://github.com/jtledbet/jtledbet.github.io/tree/master/projects/qkd" target="_blank" class="btn btn-ghost">GitHub</a>
+        </div>
+      </div>
+    </div>
 
     <!-- Charlotte Skyline Lighting -->
     <div class="project-card" data-category="webapp">
