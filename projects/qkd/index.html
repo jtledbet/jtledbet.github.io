@@ -28,7 +28,7 @@
     <h1>BB84 Quantum Key Distribution</h1>
     <p class="dek">
       Quantum computers running Shor's algorithm will eventually break RSA and elliptic-curve
-      cryptography — and adversaries are already harvesting encrypted traffic to decrypt later.
+      cryptography, and adversaries are already harvesting encrypted traffic to decrypt later.
       BB84 sidesteps the math entirely: it distributes keys using quantum states, so anyone who
       eavesdrops physically disturbs what they touch. Run the protocol below, then let Eve loose
       on the channel and catch her in the act.
@@ -42,7 +42,7 @@
       <p>
         Nearly all of today's key exchange (TLS, SSH, VPNs) rests on problems like integer
         factoring and discrete logarithms being hard. Shor's algorithm solves both efficiently
-        on a large fault-tolerant quantum computer. No such machine exists yet — but traffic
+        on a large fault-tolerant quantum computer. No such machine exists yet, but traffic
         recorded today can be decrypted whenever one does. That "harvest now, decrypt later"
         threat is why long-lived secrets already need quantum-resistant protection.
       </p>
@@ -52,7 +52,7 @@
         <strong>Quantum key distribution</strong>, demonstrated here, takes the other road: it
         doesn't rely on computational hardness at all. BB84 (Bennett &amp; Brassard, 1984) encodes
         key bits in the polarization of single photons. Quantum mechanics forbids copying an
-        unknown quantum state and makes measurement in the wrong basis destructive — so an
+        unknown quantum state and makes measurement in the wrong basis destructive, so an
         eavesdropper can't read the key without corrupting a detectable fraction of it. The
         parties don't just get a key; they get evidence about whether anyone listened.
       </p>
@@ -180,8 +180,8 @@
   <section class="panel otp-panel" aria-label="One-time pad demonstration">
     <div class="panel-title">Use the key: one-time pad</div>
     <p class="otp-intro">
-      A verified key can encrypt with information-theoretic security — unbreakable regardless of
-      computing power — as long as the key is as long as the message and never reused.
+      A verified key can encrypt with information-theoretic security (unbreakable regardless of
+      computing power) as long as the key is as long as the message and never reused.
       Each character costs 8 key bits.
     </p>
     <div class="otp-row">
@@ -205,7 +205,7 @@
           Quantum mechanics forbids making a perfect copy of an unknown quantum state. A classical
           wiretap copies bits and forwards them, invisibly. Eve can't do that here: to learn
           anything about a photon she must measure it, and she can't keep an untouched copy to
-          send along. Whatever she forwards is a reconstruction based on her measurement — and
+          send along. Whatever she forwards is a reconstruction based on her measurement, and
           when she measured in the wrong basis, that reconstruction is detectably wrong.
         </p>
       </details>
@@ -213,7 +213,7 @@
         <summary>Why measurement disturbs the state</summary>
         <p>
           A photon polarized in the rectilinear basis (↑ or →) has no defined value in the
-          diagonal basis (↗ or ↘) — measuring it diagonally forces a random outcome and
+          diagonal basis (↗ or ↘). Measuring it diagonally forces a random outcome and
           re-prepares the photon in that new orientation. The original state is gone.
           Information gain about one basis necessarily disturbs the other; that trade-off is a
           law of physics, not an engineering limitation, and it's what turns eavesdropping into
@@ -223,28 +223,28 @@
       <details class="callout">
         <summary>Why Eve causes ~25% errors</summary>
         <p>
-          Consider only the bits that survive sifting — where Alice's and Bob's bases match.
+          Consider only the bits that survive sifting, the ones where Alice's and Bob's bases match.
           Eve guesses the right basis half the time; those photons pass through unharmed.
           The other half, she measures in the wrong basis, gets a random result, and resends the
           photon in her wrong basis. Bob, measuring in Alice's original basis, now gets a
           coin-flip: half of those come up wrong. So the error rate is
-          ½ × ½ = <strong>25%</strong> — far above any natural noise floor, and impossible for
+          ½ × ½ = <strong>25%</strong>, far above any natural noise floor, and impossible for
           Eve to avoid with this attack.
         </p>
       </details>
       <details class="callout">
         <summary>Caveats — what this is and isn't</summary>
         <p>
-          This simulates the protocol's math, not photons — real QKD contends with detector
+          This simulates the protocol's math, not photons. Real QKD contends with detector
           noise, channel loss, and imperfect single-photon sources, so a real channel has a
           nonzero baseline QBER and applies error correction and privacy amplification to
           distill the final key. Security proofs put the tolerable QBER ceiling near 11%, and
           the verdict here uses that bound. This model has no natural noise, so any error is
-          Eve's — but a small QBER sample can still let her slip past undetected by luck; the
+          Eve's, but a small QBER sample can still let her slip past undetected by luck; the
           demo flags noisy samples and admits it when she gets away. Randomness comes from the
           browser's CSPRNG
           (<code>crypto.getRandomValues</code>) standing in for genuine quantum entropy. And
-          BB84 always needs an <em>authenticated</em> classical channel for basis comparison —
+          BB84 always needs an <em>authenticated</em> classical channel for basis comparison;
           without it, Eve just impersonates Bob.
         </p>
       </details>
