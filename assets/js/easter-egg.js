@@ -1834,9 +1834,9 @@
       });
 
       trigger.addEventListener('click', (event) => {
+        if (!longPressTriggered) return;
         event.preventDefault();
         event.stopPropagation();
-        if (!longPressTriggered) launchEgg();
         longPressTriggered = false;
       }, true);
     });

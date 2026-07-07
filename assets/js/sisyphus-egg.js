@@ -1,6 +1,6 @@
 (function () {
   // Sisyphus easter egg: a deliberately unwinnable boulder climb.
-  // Triggered by typing a word, or clicking/long-pressing any .sisyphus-trigger element.
+  // Triggered by typing a word, or long-pressing any .sisyphus-trigger element.
   const triggers = ['sisyphus', 'boulder'];
   const directHashes = new Set(['#sisyphus', '#boulder', '#rock']);
   const longPressMs = 700;
@@ -441,9 +441,9 @@
         });
       });
       trigger.addEventListener('click', (event) => {
+        if (!longPressTriggered) return;
         event.preventDefault();
         event.stopPropagation();
-        if (!longPressTriggered) launchEgg();
         longPressTriggered = false;
       }, true);
     });

@@ -64,13 +64,10 @@
       });
 
       trigger.addEventListener('click', (event) => {
+        if (!longPressTriggered) return;
         event.preventDefault();
         event.stopPropagation();
-        if (longPressTriggered) {
-          longPressTriggered = false;
-          return;
-        }
-        openNtv4x();
+        longPressTriggered = false;
       });
     });
   }
