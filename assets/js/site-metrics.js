@@ -1,11 +1,49 @@
 (function () {
+  const SESSION_KEY = 'ledsec.metrics.session';
   const script = document.currentScript;
-  const endpoint = script && script.dataset.endpoint;
+  const collectEndpoint = script && script.dataset.collectEndpoint;
+  const summaryEndpoint = script && script.dataset.summaryEndpoint;
   const panel = document.getElementById('public-metrics');
   const label = document.getElementById('public-metrics-label');
-  if (!endpoint || !panel) return;
-
   const integer = new Intl.NumberFormat();
+
+  function privacySignalEnabled() {
+    return navigator.globalPrivacyControl === true ||
+      navigator.doNotTrack === '1' ||
+      navigator.msDoNotTrack === '1' ||
+      window.doNotTrack === '1';
+  }
+
+  function entryLooksNew() {
+    if (!document.referrer) return true;
+    try {
+      return new URL(document.referrer).origin !== window.location.origin;
+    } catch {
+      return true;
+    }
+  }
+
+  function isNewVisit() {
+    try {
+      if (window.sessionStorage.getItem(SESSION_KEY) === '1') return false;
+      window.sessionStorage.setItem(SESSION_KEY, '1');
+      return true;
+    } catch {
+      return entryLooksNew();
+    }
+  }
+
+  function collect() {
+    if (!collectEndpoint || privacySignalEnabled()) return;
+    fetch(collectEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newVisit: isNewVisit() }),
+      credentials: 'omit',
+      keepalive: true,
+      mode: 'cors'
+    }).catch(function () {});
+  }
 
   function validMetric(value) {
     return Number.isInteger(value) && value >= 0;
@@ -33,7 +71,7 @@
   }
 
   function setMetric(name, value) {
-    const node = panel.querySelector(`[data-metric="${name}"]`);
+    const node = panel.querySelector('[data-metric="' + name + '"]');
     if (node) node.textContent = integer.format(value);
   }
 
@@ -51,24 +89,27 @@
     const countries = panel.querySelector('[data-metric="recentCountries"]');
     if (countries) {
       countries.textContent = summary.recentCountries.length
-        ? summary.recentCountries.map((country) => country.name).join(' · ')
+        ? summary.recentCountries.map(function (country) { return country.name; }).join(' · ')
         : 'No country data yet';
     }
 
     const preview = panel.querySelector('[data-metric="preview"]');
     if (preview) preview.hidden = source !== 'fixture';
 
-    panel.title = `Updated ${new Date(summary.generatedAt).toLocaleString()}`;
+    panel.title = 'Updated ' + new Date(summary.generatedAt).toLocaleString();
     panel.dataset.state = 'ready';
     panel.setAttribute('aria-busy', 'false');
   }
 
-  async function load() {
+  async function loadSummary() {
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 4000);
+    const timeout = window.setTimeout(function () { controller.abort(); }, 4000);
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch(summaryEndpoint, {
         headers: { Accept: 'application/json' },
+        credentials: 'omit',
+        cache: 'no-store',
+        mode: 'cors',
         signal: controller.signal
       });
       if (!response.ok) throw new Error('Metrics unavailable');
@@ -86,5 +127,6 @@
     }
   }
 
-  load();
+  collect();
+  if (summaryEndpoint && panel) loadSummary();
 })();
