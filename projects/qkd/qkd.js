@@ -218,6 +218,7 @@
     animating: false,
     qberResult: null,
     key: null,
+    keyConsumed: false, // a one-time pad key encrypts exactly one message
     runId: 0, // bumped on start/reset so stale timers/animations abort
     autoTimer: null,
   };
@@ -368,7 +369,8 @@
     el.modeAuto.disabled = !idle;
     el.photonCount.disabled = !idle;
 
-    const keyReady = state.phase === "key-ready" && state.key && state.key.length >= 8;
+    const keyReady = state.phase === "key-ready" && state.key && state.key.length >= 8 &&
+      !state.keyConsumed;
     el.otpMessage.disabled = !keyReady;
     el.otpEncryptBtn.disabled = !keyReady;
   }
@@ -564,7 +566,9 @@
             "QBER " + pct + "% — below the security bound. " + state.key.length +
             " secret bits established." +
             (state.eveEnabled
-              ? " (Eve was listening but this sample missed her — detection is probabilistic. Run again.)"
+              ? " (Eve was listening but the sample missed her; detection is probabilistic." +
+                " Alice's and Bob's keys likely still differ, which real QKD's error" +
+                " correction would expose. Run again.)"
               : state.key.length >= 8 ? " Try encrypting a message below." : "")
           );
         } else {
@@ -609,6 +613,7 @@
 
   function resetOtp() {
     lastCipher = null;
+    state.keyConsumed = false;
     el.otpMessage.value = "";
     el.otpWarn.hidden = true;
     el.otpOutput.hidden = true;
@@ -616,7 +621,7 @@
   }
 
   function encryptMessage() {
-    if (!state.key) return;
+    if (!state.key || state.keyConsumed) return;
     const text = el.otpMessage.value;
     if (!text) return;
     const msgBytes = new TextEncoder().encode(text);
@@ -632,9 +637,16 @@
       return;
     }
     lastCipher = xorBytes(msgBytes, keyBytes);
-    el.otpWarn.hidden = true;
+    // The pad is spent: one key, one message. Allowing a second encryption
+    // with the same bits would be a two-time pad, the classic OTP break.
+    state.keyConsumed = true;
+    updateControls();
     el.otpCipher.textContent = bytesToHex(lastCipher);
     el.otpOutput.hidden = false;
+    el.otpWarn.hidden = false;
+    el.otpWarn.textContent =
+      "Key consumed. A one-time pad key encrypts exactly one message; reset and " +
+      "run the protocol again for a fresh key.";
   }
 
   function revealDecryption() {
