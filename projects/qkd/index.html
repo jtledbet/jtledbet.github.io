@@ -16,7 +16,7 @@
   <style>
     html, body { margin: 0; min-height: 100%; background: #05040c; }
   </style>
-  <link rel="stylesheet" href="styles.css?v=bb84-2" />
+  <link rel="stylesheet" href="styles.css?v=bb84-3" />
 </head>
 <body>
 
@@ -215,6 +215,9 @@
           A photon polarized in the rectilinear basis (↑ or →) has no defined value in the
           diagonal basis (↗ or ↘). Measuring it diagonally forces a random outcome and
           re-prepares the photon in that new orientation. The original state is gone.
+          Think of a stranger who will answer exactly one question and then forget everything:
+          ask the question they were prepared for and you get the truth; ask the wrong one and
+          you get a random blurt, with the truth gone for good.
           Information gain about one basis necessarily disturbs the other; that trade-off is a
           law of physics, not an engineering limitation, and it's what turns eavesdropping into
           a measurable event.
@@ -229,7 +232,8 @@
           photon in her wrong basis. Bob, measuring in Alice's original basis, now gets a
           coin-flip: half of those come up wrong. So the error rate is
           ½ × ½ = <strong>25%</strong>, far above any natural noise floor, and impossible for
-          Eve to avoid with this attack.
+          Eve to avoid with this attack. And notice what she gains when she's caught:
+          nothing. No message was ever sent; only random numbers died.
         </p>
       </details>
       <details class="callout">
@@ -247,6 +251,68 @@
           BB84 always needs an <em>authenticated</em> classical channel for basis comparison;
           without it, Eve just impersonates Bob.
         </p>
+      </details>
+      <details class="callout">
+        <summary>Is this a quantum computer?</summary>
+        <p>
+          No, and the distinction is the whole story. Quantum <em>computers</em> are the
+          attack: a large one running Shor's algorithm would break the math behind RSA and
+          elliptic-curve encryption. What you're watching here is quantum
+          <em>communication</em>, a defense, and it needs no quantum computer at all. Real
+          BB84 hardware is lasers, optical fiber, and single-photon detectors. The two
+          technologies share physics, not purpose: one threatens today's locks, the other
+          builds a lock that tells you when someone has picked at it.
+        </p>
+      </details>
+      <details class="callout">
+        <summary>Common questions</summary>
+        <p class="qa">
+          <strong>Why throw away half the bits?</strong>
+          Bob has to guess how to measure and is only usefully right half the time. The
+          discard is the price of Alice never announcing her encoding in advance, which is
+          exactly what keeps Eve blind too.
+        </p>
+        <p class="qa">
+          <strong>Couldn't Eve just impersonate Bob?</strong>
+          Yes, if the public discussion weren't authenticated. QKD needs a tamper-proof (not
+          secret) classical channel, which in practice means a small pre-shared secret. QKD
+          grows keys; it doesn't create trust from nothing.
+        </p>
+        <p class="qa">
+          <strong>Is this what banks use?</strong>
+          Mostly not. QKD runs in niches (Swiss election data, Chinese backbone links) but
+          needs dedicated hardware. The mainstream quantum defense is new math: post-quantum
+          algorithms like ML-KEM.
+        </p>
+        <p class="qa">
+          <strong>Eve was on, but the verdict said clean. Bug?</strong>
+          Feature. Detection is statistical: small runs sample only a few bits, and a spy
+          occasionally gets lucky. The demo admits it when she does. At 256 photons she is
+          essentially always caught.
+        </p>
+      </details>
+      <details class="callout">
+        <summary>Glossary</summary>
+        <p class="gl"><strong>Photon.</strong> A single particle of light.</p>
+        <p class="gl"><strong>Polarization.</strong> The orientation a light wave oscillates
+          in; how one photon carries one bit.</p>
+        <p class="gl"><strong>Basis.</strong> Which pair of orientations encodes 0 and 1
+          (<span class="b-rect">+</span> is → and ↑, <span class="b-diag">×</span> is ↗ and
+          ↘). Every measurement must pick one.</p>
+        <p class="gl"><strong>Sifting.</strong> Discarding the positions where Alice and Bob
+          measured in different bases.</p>
+        <p class="gl"><strong>QBER.</strong> Quantum bit error rate; the disagreement rate in
+          the sacrificed sample. The eavesdropping alarm.</p>
+        <p class="gl"><strong>Intercept-resend.</strong> Eve's measure-and-forward attack,
+          the one this demo simulates.</p>
+        <p class="gl"><strong>No-cloning theorem.</strong> Unknown quantum states cannot be
+          copied. Ever.</p>
+        <p class="gl"><strong>One-time pad.</strong> XOR a message with an equally long,
+          never-reused random key; unbreakable by any amount of computing power.</p>
+        <p class="gl"><strong>CSPRNG.</strong> The browser's cryptographically secure random
+          number generator, standing in here for quantum entropy.</p>
+        <p class="gl"><strong>ML-KEM.</strong> The lattice-based post-quantum standard; the
+          "new math" answer to the same threat.</p>
       </details>
     </div>
   </section>

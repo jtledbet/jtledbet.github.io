@@ -148,6 +148,12 @@ main {
 .explainer p strong, .callout p strong { color: var(--text); }
 .callout code, .explainer code { font-family: var(--mono); font-size: 0.82em; color: var(--violet-light); }
 
+/* Q&A and glossary entries inside callout cards */
+.callout p.qa { padding-bottom: 0.9rem; }
+.callout p.qa strong { display: block; margin-bottom: 0.2rem; }
+.callout p.gl { padding-bottom: 0.55rem; }
+.callout p.qa:last-of-type, .callout p.gl:last-of-type { padding-bottom: 1.1rem; }
+
 /* ERROR BANNER */
 .crypto-error {
   background: var(--red-dim);
