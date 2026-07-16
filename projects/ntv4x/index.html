@@ -53,12 +53,12 @@
             <span>Phone: drag left/right, tap, swipe down.</span>
           </div>
         </details>
-        <button id="startButton" type="button">Start Game</button>
+        <button id="startButton" type="button" data-metric-event="play">Start Game</button>
       </div>
     </div>
 
     <main class="shell" aria-label="NTv4x game">
-      <section class="play-area">
+      <section class="play-area" data-metric-content="ntv4x-game">
         <div class="mobile-play-hud" aria-label="Current game status">
           <div>
             <span>Score</span>
@@ -81,7 +81,7 @@
             <canvas id="nextMobile" width="112" height="72" aria-label="Next capsule"></canvas>
           </div>
           <div class="mobile-pause">
-            <button id="mobilePause" type="button">Pause</button>
+            <button id="mobilePause" type="button" data-metric-event="pause">Pause</button>
           </div>
         </div>
         <div class="board-wrap">
@@ -89,14 +89,14 @@
           <div id="overlay" class="overlay is-hidden">
             <div id="overlayTitle" class="overlay-title">Paused</div>
             <div class="overlay-actions">
-              <button id="overlayButton" type="button">Resume</button>
-              <button id="overlayMenuButton" type="button">Menu</button>
+              <button id="overlayButton" type="button" data-metric-event="play">Resume</button>
+              <button id="overlayMenuButton" type="button" data-metric-event="reset">Menu</button>
             </div>
           </div>
         </div>
       </section>
 
-      <aside class="panel" aria-label="Game controls and status">
+      <aside class="panel" data-metric-content="ntv4x-controls" aria-label="Game controls and status">
         <header>
           <div class="eyebrow">Current build</div>
           <h1>NTv4x</h1>
@@ -138,12 +138,12 @@
         </div>
 
         <div class="buttons">
-          <button id="newGame" type="button">New Game</button>
-          <button id="pause" type="button">Pause</button>
+          <button id="newGame" type="button" data-metric-event="play">New Game</button>
+          <button id="pause" type="button" data-metric-event="pause">Pause</button>
         </div>
 
         <div class="audio-row">
-          <button id="musicToggle" type="button" aria-pressed="false">Music: Off</button>
+          <button id="musicToggle" type="button" data-metric-event="play" aria-pressed="false">Music: Off</button>
           <label for="musicTrack">
             <span>Track</span>
             <select id="musicTrack">
@@ -179,5 +179,6 @@
 
     <script src="music.js?v=menu-auto"></script>
     <script src="game.js?v=dx-poof"></script>
+    <script src="/assets/js/site-metrics.js?v=aggregate-v4" data-collect-endpoint="https://metrics.ledsec.dev/v1/collect" data-observe-endpoint="https://metrics.ledsec.dev/v1/observe" defer></script>
   </body>
 </html>

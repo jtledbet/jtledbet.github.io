@@ -66,12 +66,12 @@
   </div>
   <noscript><div class="crypto-error">This demo is an interactive simulation and requires JavaScript.</div></noscript>
 
-  <section class="panel controls-panel" aria-label="Simulation controls">
+  <section class="panel controls-panel" data-metric-content="qkd-simulator" aria-label="Simulation controls">
     <div class="panel-title">Controls</div>
     <div class="control-row">
       <div class="mode-toggle" role="group" aria-label="Run mode">
-        <button id="modeStep" class="mode-btn is-active" type="button" data-mode="step" aria-pressed="true">Step-by-step</button>
-        <button id="modeAuto" class="mode-btn" type="button" data-mode="auto" aria-pressed="false">Auto-run</button>
+        <button id="modeStep" class="mode-btn is-active" type="button" data-mode="step" data-metric-event="filter" aria-pressed="true">Step-by-step</button>
+        <button id="modeAuto" class="mode-btn" type="button" data-mode="auto" data-metric-event="filter" aria-pressed="false">Auto-run</button>
       </div>
       <label class="count-label" for="photonCount">Photons
         <select id="photonCount">
@@ -80,12 +80,12 @@
           <option value="256">256</option>
         </select>
       </label>
-      <button id="eveToggle" class="eve-toggle" type="button" aria-pressed="false">🕵️ Eve: off</button>
+      <button id="eveToggle" class="eve-toggle" type="button" data-metric-event="filter" aria-pressed="false">🕵️ Eve: off</button>
     </div>
     <div class="control-row actions">
-      <button id="runBtn" class="btn btn-run" type="button">Run</button>
-      <button id="stepBtn" class="btn btn-step" type="button" disabled>Step</button>
-      <button id="resetBtn" class="btn btn-reset" type="button" disabled>Reset</button>
+      <button id="runBtn" class="btn btn-run" type="button" data-metric-event="simulate">Run</button>
+      <button id="stepBtn" class="btn btn-step" type="button" data-metric-event="step" disabled>Step</button>
+      <button id="resetBtn" class="btn btn-reset" type="button" data-metric-event="reset" disabled>Reset</button>
     </div>
   </section>
 
@@ -177,7 +177,7 @@
     </div>
   </section>
 
-  <section class="panel otp-panel" aria-label="One-time pad demonstration">
+  <section class="panel otp-panel" data-metric-content="qkd-otp" aria-label="One-time pad demonstration">
     <div class="panel-title">Use the key: one-time pad</div>
     <p class="otp-intro">
       A verified key can encrypt with information-theoretic security (unbreakable regardless of
@@ -186,17 +186,17 @@
     </p>
     <div class="otp-row">
       <input id="otpMessage" maxlength="40" placeholder="Short secret message…" aria-label="Message to encrypt with the shared key" disabled />
-      <button id="otpEncryptBtn" class="btn btn-run" type="button" disabled>Encrypt</button>
+      <button id="otpEncryptBtn" class="btn btn-run" type="button" data-metric-event="encrypt" disabled>Encrypt</button>
     </div>
     <div class="otp-warn" id="otpWarn" role="status" hidden></div>
     <div class="otp-output" id="otpOutput" hidden>
       <div class="otp-line"><span class="ro-label">ciphertext</span><code id="otpCipher"></code></div>
-      <button id="otpRevealBtn" class="btn btn-step" type="button">Reveal decryption</button>
+      <button id="otpRevealBtn" class="btn btn-step" type="button" data-metric-event="reveal">Reveal decryption</button>
       <div class="otp-line" id="otpPlainRow" hidden><span class="ro-label">decrypted</span><code id="otpPlain"></code></div>
     </div>
   </section>
 
-  <section class="explainers" aria-label="How this works">
+  <section class="explainers" data-metric-content="qkd-explainer" aria-label="How this works">
     <div class="panel-title">How this works</div>
     <div class="explainer-grid">
       <details class="callout">
@@ -324,6 +324,7 @@
 </footer>
 
 <script src="/assets/js/adaptive-experience.js" defer></script>
+<script src="/assets/js/site-metrics.js?v=aggregate-v4" data-collect-endpoint="https://metrics.ledsec.dev/v1/collect" data-observe-endpoint="https://metrics.ledsec.dev/v1/observe" defer></script>
 <script src="qkd.js?v=bb84-2" defer></script>
 </body>
 </html>

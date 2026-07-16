@@ -79,7 +79,7 @@
     <main>
       <h1>NTv4x Tracks</h1>
       <p>Stable current links plus versioned permalinks for the present mix.</p>
-      <section class="track-list" aria-label="Current NTv4x music tracks">
+      <section class="track-list" data-metric-content="ntv4x-audio-player" aria-label="Current NTv4x music tracks">
         <article>
           <h2>MENU / Quizzical Jar</h2>
           <audio controls src="ntv4x-menu-current.mp3"></audio>
@@ -122,5 +122,6 @@
         </article>
       </section>
     </main>
+    <script src="/assets/js/site-metrics.js?v=aggregate-v4" data-collect-endpoint="https://metrics.ledsec.dev/v1/collect" data-observe-endpoint="https://metrics.ledsec.dev/v1/observe" defer></script>
   </body>
 </html>

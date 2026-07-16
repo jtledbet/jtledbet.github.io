@@ -353,13 +353,13 @@
 
   <main>
     <nav class="tabs" aria-label="Prototype views">
-      <button class="tab active" data-view="request">Submit Request</button>
-      <button class="tab" data-view="admin">Admin Review</button>
-      <button class="tab" data-view="calendar">Calendar</button>
-      <button class="tab" data-view="notifications">Notifications</button>
+      <button class="tab active" data-view="request" data-metric-event="filter">Submit Request</button>
+      <button class="tab" data-view="admin" data-metric-event="filter">Admin Review</button>
+      <button class="tab" data-view="calendar" data-metric-event="filter">Calendar</button>
+      <button class="tab" data-view="notifications" data-metric-event="filter">Notifications</button>
     </nav>
 
-    <section class="panel lighting-preview" id="lighting-preview">
+    <section class="panel lighting-preview" id="lighting-preview" data-metric-content="charlotte-preview">
       <div class="skyline-mini" aria-hidden="true">
         <span class="tower"></span>
         <span class="tower"></span>
@@ -377,7 +377,7 @@
 
     <section id="request" class="view active">
       <div class="grid">
-        <form id="request-form" class="panel">
+        <form id="request-form" class="panel" data-metric-content="charlotte-request" data-metric-feature="charlotte-request">
           <h2>Lighting Request</h2>
           <div class="form-grid">
             <div>
@@ -414,8 +414,8 @@
             </div>
           </div>
           <div class="actions">
-            <button class="btn" type="submit">Submit Request</button>
-            <button class="btn secondary" type="button" id="reset-demo">Reset Demo</button>
+            <button class="btn" type="submit" data-metric-event="submit">Submit Request</button>
+            <button class="btn secondary" type="button" id="reset-demo" data-metric-event="reset">Reset Demo</button>
           </div>
         </form>
 
@@ -439,7 +439,7 @@
       </div>
     </section>
 
-    <section id="admin" class="view">
+    <section id="admin" class="view" data-metric-content="charlotte-workflow">
       <div class="panel">
         <h2>Admin Review Queue</h2>
         <div id="pending-list" class="list"></div>
@@ -527,8 +527,8 @@
       const badgeClass = event.status === "approved" ? "badge approved" : "badge";
       const controls = actions ? `
         <div class="actions">
-          <button class="btn approve" data-approve="${event.id}">Approve</button>
-          <button class="btn reject" data-reject="${event.id}">Reject</button>
+          <button class="btn approve" data-approve="${event.id}" data-metric-event="approve" data-metric-feature="charlotte-review" data-metric-stage="approve">Approve</button>
+          <button class="btn reject" data-reject="${event.id}" data-metric-event="reject" data-metric-feature="charlotte-review" data-metric-stage="reject">Reject</button>
         </div>` : "";
 
       return `
@@ -650,6 +650,6 @@
     updateLightingPreview();
   </script>
   <script src="/assets/js/adaptive-experience.js" defer></script>
-  <script src="/assets/js/site-metrics.js?v=aggregate-v1" data-collect-endpoint="https://metrics.ledsec.dev/v1/collect" defer></script>
+  <script src="/assets/js/site-metrics.js?v=aggregate-v4" data-collect-endpoint="https://metrics.ledsec.dev/v1/collect" data-observe-endpoint="https://metrics.ledsec.dev/v1/observe" defer></script>
 </body>
 </html>

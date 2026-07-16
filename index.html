@@ -539,7 +539,7 @@
 <main>
 
   <!-- HERO -->
-  <div class="hero">
+  <div class="hero" data-metric-content="home-intro">
     <img
       src="/assets/images/jon.png"
       class="hero-photo"
@@ -574,7 +574,7 @@
 
   <!-- BIO -->
   <div class="section-label">About</div>
-  <div class="bio">
+  <div class="bio" data-metric-content="home-background">
     <p>
       I'm a security-focused software developer. I hold a Master's of Science in Cybersecurity,
       a Graduate Certificate in Information Security and Privacy, and a B.A. in Computer Science,
@@ -593,7 +593,7 @@
 
   <!-- CREDENTIALS -->
   <div class="section-label">Education &amp; Certifications</div>
-  <div class="credentials">
+  <div class="credentials" data-metric-content="home-credentials">
 
     <div class="credential-card">
       <div class="icon">🎓</div>
@@ -624,7 +624,7 @@
   </div>
 
   <div id="public-metrics-label" class="section-label">Site traffic</div>
-  <section id="public-metrics" class="metrics-panel" data-state="loading" aria-labelledby="metrics-title" aria-busy="true">
+  <section id="public-metrics" class="metrics-panel" data-state="loading" data-metric-content="home-traffic" aria-labelledby="metrics-title" aria-busy="true">
     <div class="metrics-heading">
       <h2 id="metrics-title">Seen around here</h2>
       <span class="metrics-period">Last 30 days</span>
@@ -658,7 +658,7 @@
 </footer>
 
 <script src="/assets/js/adaptive-experience.js" defer></script>
-<script src="/assets/js/site-metrics.js?v=aggregate-v1" data-collect-endpoint="https://metrics.ledsec.dev/v1/collect" data-summary-endpoint="https://metrics.ledsec.dev/v1/public-summary" defer></script>
+<script src="/assets/js/site-metrics.js?v=aggregate-v4" data-collect-endpoint="https://metrics.ledsec.dev/v1/collect" data-observe-endpoint="https://metrics.ledsec.dev/v1/observe" data-summary-endpoint="https://metrics.ledsec.dev/v1/public-summary" defer></script>
 <script src="/assets/js/easter-egg.js?v=wizard-hold" defer></script>
 <script src="/assets/js/ntv4x-egg.js?v=rx-direct-dark" defer></script>
 <script src="/assets/js/sisyphus-egg.js?v=nav-dot-hold" defer></script>

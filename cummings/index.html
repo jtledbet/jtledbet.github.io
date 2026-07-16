@@ -639,7 +639,7 @@
   </header>
 
   <main>
-    <section class="reader-shell" aria-label="E. E. Cummings reader">
+    <section class="reader-shell" data-metric-content="cummings-library" aria-label="E. E. Cummings reader">
       <aside class="library-panel">
         <div class="section-label">Public Domain Reader</div>
         <h1>e.e. cummings</h1>
@@ -650,9 +650,9 @@
         <input id="poem-search" class="search-field" type="search" autocomplete="off" placeholder="Search title, first line, or book" />
         <div id="book-filters" class="filter-row" aria-label="Filter by book"></div>
         <div class="utility-row">
-          <button id="random-poem" class="random-btn" type="button">Random Poem</button>
+          <button id="random-poem" class="random-btn" type="button" data-metric-event="randomize">Random Poem</button>
         </div>
-        <section class="protected-watch" aria-label="2036 public domain countdown">
+        <section class="protected-watch" data-metric-content="cummings-countdown" aria-label="2036 public domain countdown">
           <div class="section-label">2036 Watch</div>
           <h2 class="watch-title">love is the every only god</h2>
           <p class="watch-note">A protected favorite from <em>50 Poems</em>. This reader can add it when the book enters the public domain.</p>
@@ -666,7 +666,7 @@
         <ol id="poem-list" class="poem-list"></ol>
       </aside>
 
-      <article class="poem-panel" aria-live="polite">
+      <article class="poem-panel" data-metric-content="cummings-reader" aria-live="polite">
         <div class="poem-toolbar">
           <div>
             <div id="poem-kicker" class="poem-kicker"></div>
@@ -675,7 +675,7 @@
           </div>
           <div class="poem-actions">
             <a id="source-link" class="icon-btn" href="https://cummings.ee/" target="_blank" rel="noopener">Source</a>
-            <button id="copy-link" class="icon-btn" type="button">Copy Link</button>
+            <button id="copy-link" class="icon-btn" type="button" data-metric-event="copy">Copy Link</button>
           </div>
         </div>
         <div class="poem-text-wrap">
@@ -701,6 +701,14 @@
   <script>
     const DEFAULT_POEM_ID = 'tulips-and-chimneys/chansons-innocentes-i';
     const PUBLIC_DOMAIN_TARGET = new Date(2036, 0, 1);
+    const BOOK_CONTENT_IDS = {
+      'tulips-and-chimneys': 'cummings-book-tulips',
+      'and': 'cummings-book-ampersand',
+      'xli-poems': 'cummings-book-xli',
+      'is-5': 'cummings-book-is-5'
+    };
+    let searchObserved = false;
+    let searchZeroObserved = false;
 
     const state = {
       data: null,
@@ -760,7 +768,7 @@
       }))];
 
       els.filters.innerHTML = buttons.map((book) => `
-        <button class="filter-btn${book.slug === state.activeBook ? ' active' : ''}" type="button" data-book="${escapeHtml(book.slug)}">
+        <button class="filter-btn${book.slug === state.activeBook ? ' active' : ''}" type="button" data-book="${escapeHtml(book.slug)}" data-metric-event="filter">
           ${escapeHtml(book.title)} (${book.count})
         </button>
       `).join('');
@@ -775,7 +783,7 @@
 
       els.list.innerHTML = poems.map((poem) => `
         <li>
-          <button class="poem-row${poem.id === state.selectedId ? ' active' : ''}" type="button" data-id="${escapeHtml(poem.id)}">
+          <button class="poem-row${poem.id === state.selectedId ? ' active' : ''}" type="button" data-id="${escapeHtml(poem.id)}" data-metric-event="internal-link">
             <strong>${escapeHtml(poem.title)}</strong>
             <span>${escapeHtml(compact(poem.first_line))}</span>
             <span>${escapeHtml(poem.book_title)}, ${poem.year}</span>
@@ -787,6 +795,9 @@
     function setSelectedPoem(id, updateHash = true) {
       const poem = state.data.poems.find((item) => item.id === id) || state.data.poems.find((item) => item.id === DEFAULT_POEM_ID) || state.data.poems[0];
       state.selectedId = poem.id;
+      if (BOOK_CONTENT_IDS[poem.book_slug]) {
+        window.ledsecMetrics?.content(BOOK_CONTENT_IDS[poem.book_slug]);
+      }
       els.kicker.textContent = `${poem.book_title}, ${poem.year}`;
       els.title.textContent = poem.title;
       els.subtitle.textContent = compact(poem.first_line);
@@ -845,6 +856,18 @@
     els.search.addEventListener('input', (event) => {
       state.query = event.target.value;
       render();
+      const hasQuery = state.query.trim().length > 0;
+      const noResults = hasQuery && filteredPoems().length === 0;
+      if (hasQuery && !searchObserved) {
+        searchObserved = true;
+        window.ledsecMetrics?.feature('cummings-search', 'use');
+      }
+      if (noResults && !searchZeroObserved) {
+        searchZeroObserved = true;
+        window.ledsecMetrics?.feature('cummings-search', 'zero-result');
+      }
+      if (!noResults) searchZeroObserved = false;
+      if (!hasQuery) searchObserved = false;
     });
 
     els.filters.addEventListener('click', (event) => {
@@ -852,6 +875,10 @@
       if (!button) return;
       state.activeBook = button.dataset.book;
       render();
+      window.ledsecMetrics?.feature('cummings-filter', 'use');
+      if (filteredPoems().length === 0) {
+        window.ledsecMetrics?.feature('cummings-filter', 'zero-result');
+      }
     });
 
     els.list.addEventListener('click', (event) => {
@@ -866,6 +893,7 @@
       const pool = poems.length ? poems : state.data.poems;
       const poem = pool[Math.floor(Math.random() * pool.length)];
       if (!poem) return;
+      window.ledsecMetrics?.feature('cummings-random', 'use');
       setSelectedPoem(poem.id);
     });
 
@@ -890,7 +918,7 @@
     init();
   </script>
   <script src="/assets/js/adaptive-experience.js" defer></script>
-  <script src="/assets/js/site-metrics.js?v=aggregate-v1" data-collect-endpoint="https://metrics.ledsec.dev/v1/collect" defer></script>
+  <script src="/assets/js/site-metrics.js?v=aggregate-v4" data-collect-endpoint="https://metrics.ledsec.dev/v1/collect" data-observe-endpoint="https://metrics.ledsec.dev/v1/observe" defer></script>
   <script src="/assets/js/easter-egg.js?v=wizard-hold" defer></script>
   <script src="/assets/js/ntv4x-egg.js?v=rx-direct-dark" defer></script>
   <script src="/assets/js/sisyphus-egg.js?v=nav-dot-hold" defer></script>

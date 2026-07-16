@@ -21,6 +21,10 @@
   const TOTAL_AUTO_MS = 4500;
   const PHASE_BEAT_MS = 500;
 
+  function metricFeature(feature, stage) {
+    if (window.ledsecMetrics) window.ledsecMetrics.feature(feature, stage);
+  }
+
   // ---- DOM REFS -----------------------------------------------------------
   const $ = (id) => document.getElementById(id);
   const el = {
@@ -452,6 +456,7 @@
 
   function startRun() {
     if (state.phase !== "idle" || !hasCrypto) return;
+    metricFeature("qkd-exchange", "start");
     state.runId++;
     state.photonCount = parseInt(el.photonCount.value, 10);
     state.photons = [];
@@ -550,6 +555,7 @@
         markSacrificedRows();
         renderStats();
         if (state.qberResult.sampleSize === 0) {
+          metricFeature("qkd-exchange", "inconclusive");
           setPhase("compromised");
           renderVerdict("pending", "Inconclusive");
           setStatus("Too few sifted bits to check for eavesdropping. Reset and try more photons.");
@@ -558,6 +564,7 @@
         const verdict = verdictForQber(state.qberResult.qber);
         const pct = (state.qberResult.qber * 100).toFixed(1);
         if (verdict === "clean") {
+          metricFeature("qkd-exchange", state.eveEnabled ? "eavesdrop-missed" : "secure");
           state.key = deriveFinalKey(state.qberResult.keyPhotons);
           renderKeyPreview();
           setPhase("key-ready");
@@ -572,6 +579,7 @@
               : state.key.length >= 8 ? " Try encrypting a message below." : "")
           );
         } else {
+          metricFeature("qkd-exchange", state.eveEnabled ? "eavesdrop-detected" : "inconclusive");
           state.key = null;
           renderKeyPreview();
           setPhase("compromised");
@@ -586,6 +594,8 @@
   }
 
   function resetRun() {
+    metricFeature("qkd-exchange", "abandon");
+    metricFeature("qkd-encryption", "abandon");
     state.runId++;
     if (state.autoTimer) clearTimeout(state.autoTimer);
     state.photons = [];
@@ -624,10 +634,12 @@
     if (!state.key || state.keyConsumed) return;
     const text = el.otpMessage.value;
     if (!text) return;
+    metricFeature("qkd-encryption", "start");
     const msgBytes = new TextEncoder().encode(text);
     const keyBytes = bitsToBytes(state.key);
     el.otpPlainRow.hidden = true;
     if (msgBytes.length > keyBytes.length) {
+      metricFeature("qkd-encryption", "too-long");
       el.otpOutput.hidden = true;
       el.otpWarn.hidden = false;
       el.otpWarn.textContent =
@@ -640,6 +652,7 @@
     // The pad is spent: one key, one message. Allowing a second encryption
     // with the same bits would be a two-time pad, the classic OTP break.
     state.keyConsumed = true;
+    metricFeature("qkd-encryption", "complete");
     updateControls();
     el.otpCipher.textContent = bytesToHex(lastCipher);
     el.otpOutput.hidden = false;

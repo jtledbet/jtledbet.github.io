@@ -32,6 +32,10 @@ const ARR_DELAY = 58;
 const ROTATION_BUFFER = 140;
 const FIRST_CAPSULE_GRACE = 520;
 const LEVEL_CLEAR_PAUSE = 1050;
+
+function metricFeature(feature, stage) {
+  if (window.ledsecMetrics) window.ledsecMetrics.feature(feature, stage);
+}
 const NECK_CELLS = [
   [3, 0],
   [4, 0],
@@ -218,7 +222,10 @@ function spawn() {
   state.next = makeCapsule();
   if (isNeckBlocked() || collides(state.active)) {
     state.gameOver = true;
-    if (!state.demo) playMusicCue("loss");
+    if (!state.demo) {
+      playMusicCue("loss");
+      metricFeature("ntv4x-game", "loss");
+    }
     showOverlay("Game Over", "Restart", "Menu");
     if (state.demo) startDemo();
   } else if (state.demo) {
@@ -265,6 +272,8 @@ function seedViruses() {
 }
 
 function startGame(resetLevel = true) {
+  metricFeature("ntv4x-game", "abandon");
+  metricFeature("ntv4x-game", "start");
   state.demo = false;
   state.demoPlan = null;
   state.started = true;
@@ -297,6 +306,7 @@ function startGame(resetLevel = true) {
 }
 
 function showMenu() {
+  metricFeature("ntv4x-game", "abandon");
   startDemo();
   startScreen.classList.remove("is-hidden");
   pauseButton.textContent = "Pause";
@@ -356,7 +366,10 @@ function lockPiece() {
   state.active = null;
   if (isNeckBlocked()) {
     state.gameOver = true;
-    if (!state.demo) playMusicCue("loss");
+    if (!state.demo) {
+      playMusicCue("loss");
+      metricFeature("ntv4x-game", "loss");
+    }
     showOverlay("Game Over", "Restart", "Menu");
     return;
   }
@@ -736,6 +749,7 @@ function finishLevel() {
     startDemo();
     return;
   }
+  metricFeature("ntv4x-game", "level-clear");
   playMusicCue("win", 32);
   const completedLevel = state.level;
   state.score += completedLevel * 1000;

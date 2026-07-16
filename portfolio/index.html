@@ -475,7 +475,7 @@
 
   <!-- FEATURED -->
   <div class="section-label">Featured Projects</div>
-  <div class="featured-grid">
+  <div class="featured-grid" data-metric-content="portfolio-featured">
 
     <div class="featured-card">
       <div class="featured-img-placeholder" style="display:flex; background: linear-gradient(135deg, #05040c, #123a4a);">⚛️</div>
@@ -599,13 +599,13 @@
   <!-- ALL PROJECTS -->
   <div class="section-label">All Projects</div>
   <div class="filter-bar">
-    <button class="filter-btn active" data-filter="all">All <span class="count">18</span></button>
-    <button class="filter-btn" data-filter="webapp">Web Apps <span class="count">7</span></button>
-    <button class="filter-btn" data-filter="game">Games <span class="count">6</span></button>
-    <button class="filter-btn" data-filter="tool">Tools <span class="count">5</span></button>
+    <button class="filter-btn active" data-filter="all" data-metric-event="filter">All <span class="count">18</span></button>
+    <button class="filter-btn" data-filter="webapp" data-metric-event="filter">Web Apps <span class="count">7</span></button>
+    <button class="filter-btn" data-filter="game" data-metric-event="filter">Games <span class="count">6</span></button>
+    <button class="filter-btn" data-filter="tool" data-metric-event="filter">Tools <span class="count">5</span></button>
   </div>
 
-  <div class="projects-grid" id="projects-grid">
+  <div class="projects-grid" id="projects-grid" data-metric-content="portfolio-catalog">
 
     <!-- BB84 QKD Simulator -->
     <div class="project-card" data-category="tool">
@@ -902,19 +902,23 @@
       buttons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const filter = btn.dataset.filter;
+      let visible = 0;
       cards.forEach(card => {
         if (filter === 'all' || card.dataset.category === filter) {
           card.classList.remove('hidden');
+          visible += 1;
         } else {
           card.classList.add('hidden');
         }
       });
+      window.ledsecMetrics?.feature('portfolio-filter', 'use');
+      if (visible === 0) window.ledsecMetrics?.feature('portfolio-filter', 'zero-result');
     });
   });
 </script>
 
 <script src="/assets/js/adaptive-experience.js" defer></script>
-<script src="/assets/js/site-metrics.js?v=aggregate-v1" data-collect-endpoint="https://metrics.ledsec.dev/v1/collect" defer></script>
+<script src="/assets/js/site-metrics.js?v=aggregate-v4" data-collect-endpoint="https://metrics.ledsec.dev/v1/collect" data-observe-endpoint="https://metrics.ledsec.dev/v1/observe" defer></script>
 <script src="/assets/js/easter-egg.js?v=wizard-hold" defer></script>
 <script src="/assets/js/ntv4x-egg.js?v=rx-direct-dark" defer></script>
 <script src="/assets/js/sisyphus-egg.js?v=nav-dot-hold" defer></script>
