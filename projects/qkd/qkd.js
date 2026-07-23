@@ -215,7 +215,7 @@
     phase: "idle", // idle | running | sifting | qber-check | key-ready | compromised
     mode: "step",
     eveEnabled: false,
-    photonCount: 16,
+    photonCount: 64,
     photons: [],
     cursor: 0,
     awaitingStep: false,

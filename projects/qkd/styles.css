@@ -116,6 +116,23 @@ main {
 
 .fact strong { color: var(--text); display: block; }
 
+.jump-to-demo {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  margin-bottom: 1.5rem;
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--cyan-dim);
+  color: var(--cyan);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.jump-to-demo:hover { border-color: var(--cyan); }
+
 /* EXPLAINER / DETAILS */
 .explainer, .callout {
   background: var(--panel);
@@ -186,6 +203,8 @@ main {
 }
 
 /* CONTROLS */
+.controls-panel { scroll-margin-top: 1rem; }
+
 .control-row {
   display: flex;
   align-items: center;
@@ -736,6 +755,7 @@ html[data-env-motion="reduce"] .channel.wire-active .channel-track::before { ani
 
 @media (max-width: 640px) {
   main { padding: 1.5rem 1rem 3rem; }
+  .hero-facts { display: none; }
   .panel { padding: 1.1rem 1rem; }
   .control-row { gap: 0.6rem; }
   .control-row.actions .btn { flex: 1; text-align: center; }

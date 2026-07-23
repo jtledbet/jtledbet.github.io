@@ -16,7 +16,7 @@
   <style>
     html, body { margin: 0; min-height: 100%; background: #05040c; }
   </style>
-  <link rel="stylesheet" href="styles.css?v=bb84-3" />
+  <link rel="stylesheet" href="styles.css?v=bb84-4" />
 </head>
 <body>
 
@@ -37,6 +37,7 @@
       <div class="fact"><strong>Security from physics, not math</strong> — measurement itself protects the key</div>
       <div class="fact"><strong>Eavesdropping leaves fingerprints</strong> — an intercepted channel shows ~25% errors</div>
     </div>
+    <a class="jump-to-demo" href="#simulation-controls">Jump to demo ↓</a>
     <details class="explainer" id="why-qkd">
       <summary>Why this matters now</summary>
       <p>
@@ -66,7 +67,7 @@
   </div>
   <noscript><div class="crypto-error">This demo is an interactive simulation and requires JavaScript.</div></noscript>
 
-  <section class="panel controls-panel" data-metric-content="qkd-simulator" aria-label="Simulation controls">
+  <section class="panel controls-panel" id="simulation-controls" data-metric-content="qkd-simulator" aria-label="Simulation controls">
     <div class="panel-title">Controls</div>
     <div class="control-row">
       <div class="mode-toggle" role="group" aria-label="Run mode">
@@ -75,8 +76,8 @@
       </div>
       <label class="count-label" for="photonCount">Photons
         <select id="photonCount">
-          <option value="16" selected>16</option>
-          <option value="64">64</option>
+          <option value="16">16</option>
+          <option value="64" selected>64</option>
           <option value="256">256</option>
         </select>
       </label>
@@ -326,6 +327,6 @@
 <script src="/assets/js/adaptive-experience.js" defer></script>
 <script src="/assets/js/site-metrics.js?v=aggregate-v4" data-collect-endpoint="https://metrics.ledsec.dev/v1/collect" data-observe-endpoint="https://metrics.ledsec.dev/v1/observe" defer></script>
 <script src="/assets/js/easter-egg.js?v=wizard-hold" defer></script>
-<script src="qkd.js?v=bb84-2" defer></script>
+<script src="qkd.js?v=bb84-3" defer></script>
 </body>
 </html>
