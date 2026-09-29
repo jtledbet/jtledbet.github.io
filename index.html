@@ -241,6 +241,35 @@
       color: var(--text);
     }
 
+    /* GAMES */
+    .games { margin-bottom: 3rem; }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .game-link {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 1.25rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      text-decoration: none;
+      transition: border-color 0.2s;
+    }
+
+    .game-link:hover { border-color: var(--purple); }
+    .game-link:focus-visible { outline: 2px solid var(--purple-light); outline-offset: 4px; }
+    .game-link h3 { font-size: 1rem; }
+    .game-link p { color: var(--muted); font-size: 0.85rem; line-height: 1.6; }
+    .game-link span { margin-top: auto; color: var(--purple-light); font-size: 0.85rem; font-weight: 600; }
+
     /* BIO SECTION */
     .section-label {
       font-size: 0.72rem;
@@ -491,6 +520,7 @@
         height: 120px;
       }
 
+      .games-grid,
       .credentials {
         grid-template-columns: 1fr;
       }
@@ -571,6 +601,22 @@
       </div>
     </div>
   </div>
+
+  <section class="games" aria-labelledby="games-title">
+    <h2 id="games-title" class="section-label">Play</h2>
+    <div class="games-grid">
+      <a href="#pinball" class="game-link">
+        <h3>Pinball Wizard</h3>
+        <p>A pocket pinball table with bumpers, combos, and a high score to chase.</p>
+        <span>Play Pinball <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a href="/projects/ntv4x/" class="game-link">
+        <h3>NTv4x</h3>
+        <p>A falling-capsule puzzle game. Match colors and clear the microbes.</p>
+        <span>Play NTv4x <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </div>
+  </section>
 
   <!-- BIO -->
   <div class="section-label">About</div>
@@ -660,7 +706,7 @@
 
 <script src="/assets/js/adaptive-experience.js" defer></script>
 <script src="/assets/js/site-metrics.js?v=aggregate-v4" data-collect-endpoint="https://metrics.ledsec.dev/v1/collect" data-observe-endpoint="https://metrics.ledsec.dev/v1/observe" data-summary-endpoint="https://metrics.ledsec.dev/v1/public-summary" defer></script>
-<script src="/assets/js/easter-egg.js?v=wizard-hold" defer></script>
+<script src="/assets/js/easter-egg.js?v=visible-games" defer></script>
 <script src="/assets/js/ntv4x-egg.js?v=rx-direct-dark" defer></script>
 <script src="/assets/js/sisyphus-egg.js?v=nav-dot-hold" defer></script>
 </body>

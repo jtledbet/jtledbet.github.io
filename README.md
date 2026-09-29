@@ -10,7 +10,7 @@ Personal portfolio for [Jon Ledbetter](https://jtledbet.github.io/), cybersecuri
 
 | File | Route | Description |
 |------|-------|-------------|
-| `index.html` | `/` | About, bio, credentials, social links |
+| `index.html` | `/` | About, bio, credentials, social links, and visible game launchers |
 | `portfolio/index.html` | `/portfolio/` | Project showcase with category filters |
 | `cummings/index.html` | `/cummings/` | Public-domain E. E. Cummings reader |
 | `support/index.html` | `/support/` | Coffee, tips, payment links, and paid-help entry point |
@@ -23,7 +23,9 @@ Vanilla HTML, CSS, and JavaScript. No build step, no framework, no bundler. Host
 
 ## Projects
 
-17 projects across web apps, games, and CLI tools, including live deployments on GitHub Pages and Railway. See [portfolio](portfolio/) for the full list.
+18 projects across web apps, games, and CLI tools, including live deployments on GitHub Pages and Railway. See [portfolio](portfolio/) for the full list.
+
+Pinball Wizard and NTv4x are linked from the About page's Play section, above the bio. Pinball also opens directly at `/#pinball`; NTv4x lives at `/projects/ntv4x/`. The existing long-press and typed easter egg shortcuts remain available.
 
 ## Local Development
 

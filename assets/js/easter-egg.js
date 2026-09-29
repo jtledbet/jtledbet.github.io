@@ -232,6 +232,9 @@
     }
     document.querySelector('.egg-overlay')?.remove();
     active = false;
+    if (isDirectPinballLink()) {
+      window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
+    }
   }
 
   function clearPressTimer() {
