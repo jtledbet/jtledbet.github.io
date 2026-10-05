@@ -32,6 +32,36 @@ select {
   font: inherit;
 }
 
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  padding: calc(4px + env(safe-area-inset-top, 0px)) max(14px, env(safe-area-inset-right, 0px)) 4px max(14px, env(safe-area-inset-left, 0px));
+  background: #111412;
+}
+
+.site-return {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 10px;
+  color: var(--text);
+  font-size: 14px;
+  text-underline-offset: 4px;
+}
+
+.site-return:hover,
+.site-return:focus-visible {
+  color: var(--accent);
+}
+
+.site-return:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .shell {
   display: grid;
   grid-template-columns: minmax(300px, 520px) minmax(260px, 340px);
@@ -46,9 +76,10 @@ select {
   position: fixed;
   inset: 0;
   z-index: 5;
-  display: grid;
-  place-items: center;
-  padding: 18px;
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  padding: calc(70px + env(safe-area-inset-top, 0px)) max(18px, env(safe-area-inset-right, 0px)) max(18px, env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(180deg, rgba(17, 20, 18, 0.72), rgba(32, 35, 30, 0.74));
@@ -59,6 +90,9 @@ select {
 .start-panel {
   display: grid;
   gap: 18px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-block: auto;
   width: min(360px, 100%);
   padding: 22px;
   border: 1px solid var(--line);
