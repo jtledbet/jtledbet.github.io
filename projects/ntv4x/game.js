@@ -2017,6 +2017,17 @@ function gameLoop(time) {
 }
 
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    const target = event.target;
+    if (event.defaultPrevented || event.repeat || event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    if (target instanceof Element && (target.closest("select, input, textarea") || target.isContentEditable)) return;
+    const siteReturn = document.querySelector(".site-return");
+    if (siteReturn) {
+      event.preventDefault();
+      siteReturn.click();
+    }
+    return;
+  }
   const keyMap = {
     ArrowLeft: "left",
     a: "left",
