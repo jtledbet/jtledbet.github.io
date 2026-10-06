@@ -4,13 +4,13 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>e.e. cummings | Jon Ledbetter</title>
+  <title>E. E. Cummings | Jon Ledbetter</title>
   <meta name="description" content="A public-domain E. E. Cummings reader, sourced from cummings.ee." />
   <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
   <meta name="x-clacks-overhead" content="GNU Terry Pratchett" />
   <link rel="canonical" href="https://ledsec.dev/cummings/" />
   <link rel="help" href="http://www.gnuterrypratchett.com/" title="GNU Terry Pratchett" />
-  <meta property="og:title" content="e.e. cummings | Jon Ledbetter" />
+  <meta property="og:title" content="E. E. Cummings | Jon Ledbetter" />
   <meta property="og:description" content="A public-domain E. E. Cummings reader." />
   <meta property="og:url" content="https://ledsec.dev/cummings/" />
   <meta property="og:type" content="website" />
@@ -494,6 +494,16 @@
       border-top: 1px solid var(--border);
     }
 
+    .footer-poetry {
+      color: inherit;
+      text-underline-offset: 0.2em;
+    }
+
+    .footer-poetry:hover,
+    .footer-poetry:focus-visible {
+      color: var(--text);
+    }
+
     .clacks-tribute {
       color: inherit;
       font-size: 0.72rem;
@@ -631,7 +641,6 @@
       <ul class="nav-links">
         <li><a href="/">About</a></li>
         <li><a href="/portfolio/">Portfolio</a></li>
-        <li><a href="/cummings/" class="active">Cummings</a></li>
         <li><a href="/support/">Support</a></li>
         <li><a href="/contact/">Contact</a></li>
       </ul>
@@ -642,7 +651,7 @@
     <section class="reader-shell" data-metric-content="cummings-library" aria-label="E. E. Cummings reader">
       <aside class="library-panel">
         <div class="section-label">Public Domain Reader</div>
-        <h1>e.e. cummings</h1>
+        <h1>E. E. Cummings</h1>
         <p class="intro">An exact-text reader for Cummings poems now in the public domain. Line breaks and spacing are preserved.</p>
         <p id="reader-count" class="reader-count"></p>
 
@@ -695,6 +704,7 @@
 
   <footer>
     <p><span class="egg-trigger copyright-egg-trigger" title="Hold for pinball">&copy;</span> 2026 Jon Ledbetter. Poem texts shown here are public domain.</p>
+    <a class="footer-poetry" href="/cummings/" aria-current="page">E. E. Cummings poetry</a>
     <span class="clacks-tribute" title="A man is not dead while his name is still spoken.">GNU Terry Pratchett</span>
   </footer>
 
@@ -803,7 +813,7 @@
       els.subtitle.textContent = compact(poem.first_line);
       els.text.textContent = poem.text;
       els.sourceLink.href = poem.html_url;
-      document.title = `${poem.title} | e.e. cummings | Jon Ledbetter`;
+      document.title = `${poem.title} | E. E. Cummings | Jon Ledbetter`;
       if (updateHash) {
         history.replaceState(null, '', `#${encodeURIComponent(poem.id)}`);
       }

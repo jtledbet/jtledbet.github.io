@@ -407,6 +407,16 @@
       border-top: 1px solid var(--border);
     }
 
+    .footer-poetry {
+      color: inherit;
+      text-underline-offset: 0.2em;
+    }
+
+    .footer-poetry:hover,
+    .footer-poetry:focus-visible {
+      color: var(--text);
+    }
+
     .clacks-tribute {
       color: inherit;
       font-size: 0.72rem;
@@ -441,7 +451,8 @@
         flex-wrap: wrap;
       }
       .nav-links a {
-        padding: 0.35rem 0.75rem;
+        font-size: 0.85rem;
+        padding: 0.35rem 0.4rem;
       }
       main { padding: 2rem 1rem 4rem; }
     }
@@ -459,7 +470,6 @@
     <ul class="nav-links">
       <li><a href="/">About</a></li>
       <li><a href="/portfolio/" class="active">Portfolio</a></li>
-      <li><a href="/cummings/">Cummings</a></li>
       <li><a href="/support/">Support</a></li>
       <li><a href="/contact/">Contact</a></li>
     </ul>
@@ -890,6 +900,7 @@
 
 <footer>
   <span>Copyright <span class="egg-trigger copyright-egg-trigger" title="Hold for pinball">&copy;</span> Jon Ledbetter</span>
+  <a class="footer-poetry" href="/cummings/">E. E. Cummings poetry</a>
   <span class="clacks-tribute" title="A man is not dead while his name is still spoken.">GNU Terry Pratchett</span>
 </footer>
 
