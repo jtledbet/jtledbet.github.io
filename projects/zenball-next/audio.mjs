@@ -38,8 +38,9 @@ export function scheduleCue(context,output,name,when=context.currentTime) {
 export class QuietAudio {
   constructor(storageKey) {
     this.storageKey=storageKey;this.enabled=true;this.available=!!(globalThis.AudioContext||globalThis.webkitAudioContext);
-    this.context=null;this.output=null;this.previous=null;this.live=new Set();this.lastCue=new Map();this.quiet=true;
+    this.context=null;this.output=null;this.previous=null;this.live=new Set();this.lastCue=new Map();this.quiet=true;this.volume=20;
     try{this.enabled=localStorage.getItem(storageKey)!=='off';}catch{}
+    try{const stored=localStorage.getItem(storageKey+'.volume');if(stored!==null&&Number.isFinite(Number(stored)))this.volume=Math.max(0,Math.min(100,Math.round(Number(stored))));}catch{}
   }
   async arm() {
     if(!this.available||!this.enabled||globalThis.document?.hidden)return;
@@ -49,7 +50,7 @@ export class QuietAudio {
         this.context=new Context({latencyHint:'interactive'});this.output=createOutput(this.context);
       }
       if(this.context.state!=='running')await this.context.resume();
-      if(this.quiet){const gain=this.output.master.gain,now=this.context.currentTime;gain.cancelScheduledValues(now);gain.setValueAtTime(gain.value,now);gain.linearRampToValueAtTime(MASTER_GAIN,now+.015);this.quiet=false;}
+      if(this.quiet){this.applyVolume();this.quiet=false;}
     }catch{this.available=false;}
   }
   async toggle() {
@@ -57,6 +58,8 @@ export class QuietAudio {
     try{localStorage.setItem(this.storageKey,this.enabled?'on':'off');}catch{}
     if(!this.enabled)this.silence();else await this.arm();
   }
+  applyVolume(){if(this.context&&this.output){const gain=this.output.master.gain,now=this.context.currentTime;gain.cancelScheduledValues(now);gain.setValueAtTime(gain.value,now);gain.linearRampToValueAtTime(this.enabled?this.volume/100:0,now+.015);}}
+  setVolume(value){if(!Number.isFinite(value))return;this.volume=Math.max(0,Math.min(100,Math.round(value)));try{localStorage.setItem(this.storageKey+'.volume',String(this.volume));}catch{}if(!this.quiet)this.applyVolume();}
   silence() {
     this.quiet=true;
     if(this.context&&this.output){const gain=this.output.master.gain,now=this.context.currentTime;gain.cancelScheduledValues(now);gain.setValueAtTime(gain.value,now);gain.linearRampToValueAtTime(0,now+.008);}
@@ -94,12 +97,16 @@ export class QuietAudio {
   resetObservation(){this.previous=null;this.silence();}
 }
 
-export function installAudio(button,storageKey) {
+export function installAudio(button,storageKey,{onOpen=()=>{}}={}) {
   const audio=new QuietAudio(storageKey);
-  const update=()=>{button.textContent=audio.available?(audio.enabled?'Sound on':'Sound off'):'Sound unavailable';button.setAttribute('aria-pressed',String(audio.enabled&&audio.available));button.disabled=!audio.available;};
+  const trigger=document.getElementById('sound-settings'),dialog=document.getElementById('sound-dialog'),slider=document.getElementById('sound-volume'),value=document.getElementById('sound-volume-value'),preview=document.getElementById('sound-preview'),note=document.getElementById('sound-note');
+  const update=()=>{button.textContent=audio.available?(audio.enabled?'Sound on':'Sound off'):'Audio unavailable.';button.setAttribute('aria-label',button.textContent);button.setAttribute('aria-pressed',String(audio.enabled&&audio.available));button.disabled=!audio.available;if(trigger){trigger.textContent=audio.available?(audio.enabled?(audio.volume===0?'Sound 0%':'Sound on'):'Sound off'):'Sound';trigger.setAttribute('aria-label',audio.available?`${trigger.textContent}, sound settings, volume ${audio.volume} percent`:'Sound, sound settings, audio unavailable');}if(slider){slider.value=audio.volume;slider.setAttribute('aria-valuetext',`${audio.volume} percent`);slider.disabled=!audio.available;value.textContent=audio.volume+'%';preview.disabled=!audio.available||!audio.enabled||audio.volume===0;note.textContent=audio.available?'Settings are saved in this browser.':'Audio unavailable.';}};
   document.addEventListener('pointerdown',()=>{void audio.arm().then(update);},{capture:true});
   document.addEventListener('keydown',event=>{if(!event.repeat)void audio.arm().then(update);},{capture:true});
   button.addEventListener('click',()=>{void audio.toggle().then(()=>{update();if(audio.enabled)audio.play('flipper');});});
+  trigger?.addEventListener('click',()=>{onOpen();update();dialog.showModal();});
+  slider?.addEventListener('input',()=>{audio.setVolume(Number(slider.value));update();});
+  preview?.addEventListener('click',()=>{void audio.arm().then(()=>audio.play('bumper0'));});
   window.addEventListener('blur',()=>audio.silence());
   document.addEventListener('visibilitychange',()=>{if(document.hidden){audio.silence();if(audio.context?.state==='running')void audio.context.suspend().catch(()=>{});}});
   window.addEventListener('pagehide',()=>{audio.silence();if(audio.context)void audio.context.close().catch(()=>{});});

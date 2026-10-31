@@ -1,8 +1,8 @@
 import {Game,TARGETS,NAMES,TABLE} from './game.mjs?v=physics-1';
-import {installAudio} from './audio.mjs?v=audio-1';
+import {installAudio} from './audio.mjs?v=audio-controls-1';
 export const game=new Game();
 const $=id=>document.getElementById(id),canvas=$('canvas'),ctx=canvas.getContext('2d'),key='zenball.next.progress.v1';
-const audio=installAudio($('sound-toggle'),'zenball.next.sound.v1');
+const audio=installAudio($('sound-toggle'),'zenball.next.sound.v1',{onOpen:()=>{release();if(game.mode==='play')game.pause();save();sync();}});
 let saved='',storageOK=true;
 try{game.restore(localStorage.getItem(key));saved=game.save();}catch{storageOK=false;}
 const save=()=>{const value=game.save();if(value===saved)return;try{localStorage.setItem(key,value);saved=value;}catch{storageOK=false;}};
@@ -19,7 +19,7 @@ $('cancel').addEventListener('click',()=>change(()=>game.toggleFocus()));
 targets.forEach((button,i)=>button.addEventListener('click',()=>change(()=>game.select(i))));
 upgrades.forEach((button,i)=>button.addEventListener('click',()=>change(()=>game.upgrade(i))));
 $('help-toggle').addEventListener('click',()=>{change(()=>{release();game.pause();});$('help').showModal();});
-document.addEventListener('keydown',e=>{if($('help').open||e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key.toLowerCase();if(['a','d','arrowleft','arrowright',' ','p','escape','1','2','3'].includes(k))e.preventDefault();if(e.repeat)return;if(['a','d','arrowleft','arrowright'].includes(k)){keys.add(k);inputs();return;}change(()=>{if(k===' ')game.action();if(k==='p'){release();if(game.mode==='paused')game.resume();else game.pause();}if(k==='escape'){release();if(game.mode==='focus')game.toggleFocus();else game.pause();}if(['1','2','3'].includes(k)){if(game.mode==='upgrade')game.upgrade(+k-1);else game.select(+k-1);}});});
+document.addEventListener('keydown',e=>{if(document.querySelector('dialog[open]')||e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key.toLowerCase();if(['a','d','arrowleft','arrowright',' ','p','escape','1','2','3'].includes(k))e.preventDefault();if(e.repeat)return;if(['a','d','arrowleft','arrowright'].includes(k)){keys.add(k);inputs();return;}change(()=>{if(k===' ')game.action();if(k==='p'){release();if(game.mode==='paused')game.resume();else game.pause();}if(k==='escape'){release();if(game.mode==='focus')game.toggleFocus();else game.pause();}if(['1','2','3'].includes(k)){if(game.mode==='upgrade')game.upgrade(+k-1);else game.select(+k-1);}});});
 document.addEventListener('keyup',e=>{keys.delete(e.key.toLowerCase());inputs();});
 function suspend(){release();game.pause();save();sync();}
 window.addEventListener('blur',suspend);document.addEventListener('visibilitychange',()=>{if(document.hidden)suspend();});window.addEventListener('pagehide',suspend);
