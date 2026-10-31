@@ -1,4 +1,4 @@
-import {Game,TARGETS,NAMES} from './game.mjs?v=1';
+import {Game,TARGETS,NAMES,TABLE} from './game.mjs?v=physics-1';
 export const game=new Game();
 const $=id=>document.getElementById(id),canvas=$('canvas'),ctx=canvas.getContext('2d'),key='zenball.next.progress.v1';
 let saved='',storageOK=true;
@@ -47,14 +47,14 @@ function draw(){
   for(let i=0;i<10;i++)line(30,145+i*55,450,145+i*55,1,'#1e353d');
   line(20,120,20,730,3,'#35565b');line(460,120,460,730,3,'#35565b');line(20,120,460,120,3,'#35565b');
   circle(240,385,84,'#213b42');circle(240,385,81,C.bg);text('B R E A T H E',240,422,13,'#52727a');
-  TARGETS.forEach(([x,y],i)=>{const color=i===1?C.gold:C.teal;circle(x,y,39+game.glow[i]*7,'#29474c');if(game.selected===i)circle(x,y,36,C.ink);circle(x,y,27,color);circle(x,y,20,'#203c43');text(String(i+1),x,y+6,17,color);text(NAMES[i],x,y+60,13,C.ink);text(['GROWTH','SCORE','FOCUS'][i],x,y+78,10,C.muted);});
-  line(30,490,135,620,12,'#35565b');line(450,490,345,620,12,'#35565b');
-  line(135,620,135+85*Math.cos(game.leftAngle),620+85*Math.sin(game.leftAngle),14,C.teal);line(345,620,345+85*Math.cos(game.rightAngle),620+85*Math.sin(game.rightAngle),14,C.teal);
+  TARGETS.forEach(([x,y],i)=>{const color=i===1?C.gold:C.teal;circle(x,y,39+game.glow[i]*7,'#29474c');if(game.selected===i)circle(x,y,36,C.ink);circle(x,y,TABLE.bumperRadius,color);circle(x,y,20,'#203c43');text(String(i+1),x,y+6,17,color);text(NAMES[i],x,y+60,13,C.ink);text(['GROWTH','SCORE','FOCUS'][i],x,y+78,10,C.muted);});
+  line(30,490,135,TABLE.flipperY,TABLE.guideRadius*2,'#35565b');line(450,490,345,TABLE.flipperY,TABLE.guideRadius*2,'#35565b');
+  line(135,TABLE.flipperY,135+TABLE.flipperLength*Math.cos(game.leftAngle),TABLE.flipperY+TABLE.flipperLength*Math.sin(game.leftAngle),TABLE.flipperRadius*2,C.teal);line(345,TABLE.flipperY,345+TABLE.flipperLength*Math.cos(game.rightAngle),TABLE.flipperY+TABLE.flipperLength*Math.sin(game.rightAngle),TABLE.flipperRadius*2,C.teal);
   text('F R E E   P L A Y',240,708,11,'#52727a');
   if(game.mode==='play'){trail.push([game.x,game.y]);if(trail.length>12)trail.shift();}else if(game.mode==='ready')trail.length=0;
   trail.forEach(([x,y],i)=>{ctx.globalAlpha=i/trail.length*.25;circle(x,y,5,C.teal);});ctx.globalAlpha=1;
   if(game.mode==='focus'&&game.selected>=0){let [px,py]=[game.x,game.y];ctx.setLineDash([5,5]);for(let t=.02;t<Math.min(2,.35+game.precision*.15);t+=.02){const[x,y]=game.preview(game.selected,t);line(px,py,x,y,2,C.gold);[px,py]=[x,y];if(x<30||x>450||y<130||y>730)break;}ctx.setLineDash([]);}
-  circle(game.x,game.y,15,'#34575b');circle(game.x,game.y,9,C.ink);circle(game.x-2,game.y-3,3,'white');
+  circle(game.x,game.y,15,'#34575b');circle(game.x,game.y,TABLE.ballRadius,C.ink);circle(game.x-2,game.y-3,3,'white');
 }
 let last=0;
 function frame(now){if(last)game.advance((now-last)/1000);last=now;save();sync();draw();requestAnimationFrame(frame);}
