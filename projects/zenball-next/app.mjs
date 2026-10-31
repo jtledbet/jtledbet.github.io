@@ -1,6 +1,8 @@
 import {Game,TARGETS,NAMES,TABLE} from './game.mjs?v=physics-1';
+import {installAudio} from './audio.mjs?v=audio-1';
 export const game=new Game();
 const $=id=>document.getElementById(id),canvas=$('canvas'),ctx=canvas.getContext('2d'),key='zenball.next.progress.v1';
+const audio=installAudio($('sound-toggle'),'zenball.next.sound.v1');
 let saved='',storageOK=true;
 try{game.restore(localStorage.getItem(key));saved=game.save();}catch{storageOK=false;}
 const save=()=>{const value=game.save();if(value===saved)return;try{localStorage.setItem(key,value);saved=value;}catch{storageOK=false;}};
@@ -9,7 +11,7 @@ const held={left:new Set(),right:new Set()},keys=new Set();
 function inputs(){game.left=game.mode==='play'&&(held.left.size>0||keys.has('a')||keys.has('arrowleft'));game.right=game.mode==='play'&&(held.right.size>0||keys.has('d')||keys.has('arrowright'));$('left').classList.toggle('held',game.left);$('right').classList.toggle('held',game.right);}
 function release(){held.left.clear();held.right.clear();keys.clear();inputs();}
 for(const side of ['left','right']){const button=$(side);button.addEventListener('pointerdown',e=>{e.preventDefault();button.setPointerCapture(e.pointerId);held[side].add(e.pointerId);inputs();});for(const event of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(event,e=>{held[side].delete(e.pointerId);inputs();});}
-function change(fn){fn();save();sync();}
+function change(fn){fn();save();sync();audio.observe(game);}
 $('action').addEventListener('click',()=>change(()=>game.action()));
 $('pause').addEventListener('click',()=>change(()=>{release();if(game.mode==='paused')game.resume();else game.pause();}));
 $('resume').addEventListener('click',()=>change(()=>game.resume()));
@@ -57,5 +59,5 @@ function draw(){
   circle(game.x,game.y,15,'#34575b');circle(game.x,game.y,TABLE.ballRadius,C.ink);circle(game.x-2,game.y-3,3,'white');
 }
 let last=0;
-function frame(now){if(last)game.advance((now-last)/1000);last=now;save();sync();draw();requestAnimationFrame(frame);}
+function frame(now){if(last)game.advance((now-last)/1000);last=now;save();sync();audio.observe(game);draw();requestAnimationFrame(frame);}
 sync();requestAnimationFrame(frame);
