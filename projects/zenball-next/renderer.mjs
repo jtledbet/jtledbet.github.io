@@ -1,4 +1,4 @@
-import {PHYSICS} from './physics.mjs?v=physics-1';
+import {PHYSICS} from './physics.mjs?v=0.1.0';
 
 const C=Object.freeze({bg:'#162b33',ink:'#e6e9df',muted:'#8da4a7',teal:'#79d7bb',gold:'#e8bf79'});
 function circle(ctx,x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}

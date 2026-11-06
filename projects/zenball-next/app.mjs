@@ -1,9 +1,18 @@
-import {Game,TARGETS,NAMES,TABLE,LAUNCH} from './game.mjs?v=draw-1';
-import {installAudio} from './audio.mjs?v=audio-controls-1';
-import {TableEffects} from './effects.mjs?v=effects-1';
-import {TableRenderer} from './renderer.mjs?v=effects-1';
+import {Game,TARGETS,NAMES,TABLE,LAUNCH} from './game.mjs?v=0.1.0';
+import {installAudio} from './audio.mjs?v=0.1.0';
+import {TableEffects} from './effects.mjs?v=0.1.0';
+import {TableRenderer} from './renderer.mjs?v=0.1.0';
+export const BUILD_VERSION='0.1.0';
 export const game=new Game();
 const nodes=new Map(),$=id=>{let node=nodes.get(id);if(!node){node=document.getElementById(id);if(node)nodes.set(id,node);}return node;};
+let versionLabel=$('version');
+if(!versionLabel){
+  const info=document.createElement('span');info.className='build-info';
+  Object.assign(info.style,{display:'flex',flexDirection:'column',alignItems:'center',gap:'2px',minWidth:'0'});
+  const build=$('build');build.before(info);info.append(build);
+  versionLabel=document.createElement('span');versionLabel.id='version';info.append(versionLabel);nodes.set('version',versionLabel);
+}
+versionLabel.textContent=`v${BUILD_VERSION}`;
 const canvas=$('canvas'),key='zenball.next.progress.v1';
 export const effects=new TableEffects(TARGETS,LAUNCH);
 export const renderer=new TableRenderer(canvas,TARGETS,NAMES,TABLE,LAUNCH);

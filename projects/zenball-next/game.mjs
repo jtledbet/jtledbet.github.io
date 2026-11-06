@@ -1,6 +1,6 @@
 // Browser development model. The Java host remains at the preserved baseline.
-import {PHYSICS,TABLE,limitSpeed,integrate,circleContact,segmentContact,wallContacts} from './physics.mjs?v=physics-1';
-export {TABLE} from './physics.mjs?v=physics-1';
+import {PHYSICS,TABLE,limitSpeed,integrate,circleContact,segmentContact,wallContacts} from './physics.mjs?v=0.1.0';
+export {TABLE} from './physics.mjs?v=0.1.0';
 export const TARGETS = [[120,210],[360,210],[240,320]];
 export const NAMES = ['GROVE','FORGE','WELL'];
 export const LAUNCH = Object.freeze({x:400,y:460,drawDistance:48,chargeSeconds:1.4,minSpeed:520,maxSpeed:880});
