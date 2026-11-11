@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#15131d">
+  <meta name="description" content="Play Dungeons of Endregar. Your adventure saves automatically in this browser.">
+  <title>Dungeons of Endregar · ledsec.dev</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <a class="home" href="/">← ledsec.dev</a>
+      <h1>Dungeons of Endregar</h1>
+      <p class="controls">WASD / arrows to move · Enter / left-click to attack or interact</p>
+    </header>
+    <section class="game-frame" aria-label="Game">
+      <canvas id="unity-canvas" width="960" height="600" tabindex="0" aria-label="Dungeon game. Click to focus keyboard controls."></canvas>
+      <div id="loading"><span>Loading the dungeon…</span><progress id="progress" max="1" value="0" aria-label="Game loading progress"></progress></div>
+    </section>
+    <footer>
+      <p id="save-status" role="status">Autosaves in this browser.</p>
+      <div class="actions"><button id="fullscreen" disabled>Fullscreen</button><button id="new-game" disabled>New Game</button></div>
+    </footer>
+    <p class="storage-note">Progress stays in this browser on this device. Clearing site data removes it.</p>
+  </main>
+  <dialog id="reset-dialog" aria-labelledby="reset-title">
+    <h2 id="reset-title">Start a new game?</h2>
+    <p>Your saved progress in this browser will be replaced.</p>
+    <form method="dialog"><button value="cancel" autofocus>Cancel</button><button id="confirm-reset" value="reset">Start over</button></form>
+  </dialog>
+  <script>
+    const canvas = document.querySelector('#unity-canvas');
+    const status = document.querySelector('#save-status');
+    const dialog = document.querySelector('#reset-dialog');
+    let game;
+    document.addEventListener('dungeon-save', event => {
+      const message = event.detail === 'saved'
+        ? 'Progress saved in this browser.'
+        : 'Saving is unavailable. Progress will be lost when you leave.';
+      if (status.textContent !== message) status.textContent = message;
+    });
+    const config = {
+      dataUrl: 'Build/Web.data',
+      frameworkUrl: 'Build/Web.framework.js',
+      codeUrl: 'Build/Web.wasm',
+      streamingAssetsUrl: 'StreamingAssets',
+      companyName: "DefaultCompany",
+      productName: "DungeonsOfEndregar",
+      productVersion: "1.0",
+      showBanner: (message, type) => { if (type === 'error') status.textContent = message; }
+    };
+    const loader = document.createElement('script');
+    loader.src = 'Build/Web.loader.js';
+    loader.onerror = () => { status.textContent = 'The game could not download. Reload to try again.'; };
+    loader.onload = () => createUnityInstance(canvas, config, progress => {
+      document.querySelector('#progress').value = progress;
+    }).then(instance => {
+      game = instance;
+      document.querySelector('#loading').hidden = true;
+      document.querySelector('#fullscreen').disabled = false;
+      document.querySelector('#new-game').disabled = false;
+      canvas.focus();
+    }).catch(error => { console.error(error); status.textContent = 'The game could not start. Reload to try again.'; });
+    document.querySelector('#fullscreen').addEventListener('click', () => game.SetFullscreen(1));
+    document.querySelector('#new-game').addEventListener('click', () => dialog.showModal());
+    dialog.addEventListener('close', () => {
+      if (dialog.returnValue === 'reset') game.SendMessage('GameSession', 'NewGame');
+      canvas.focus();
+    });
+    document.body.appendChild(loader);
+  </script>
+</body>
+</html>
