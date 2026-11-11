@@ -342,6 +342,9 @@
     active = false;
     window.removeEventListener('keydown', onGameKeyDown, true);
     window.removeEventListener('keyup', onGameKeyUp, true);
+    if (directHashes.has(window.location.hash.toLowerCase())) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
   }
 
   function launchFromUrl() {

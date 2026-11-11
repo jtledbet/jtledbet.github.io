@@ -241,35 +241,6 @@
       color: var(--text);
     }
 
-    /* GAMES */
-    .games { margin-bottom: 3rem; }
-
-    .games-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1rem;
-    }
-
-    .game-link {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.6rem;
-      padding: 1.25rem;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      text-decoration: none;
-      transition: border-color 0.2s;
-    }
-
-    .game-link:hover { border-color: var(--purple); }
-    .game-link:focus-visible { outline: 2px solid var(--purple-light); outline-offset: 4px; }
-    .game-link h3 { font-size: 1rem; }
-    .game-link p { color: var(--muted); font-size: 0.85rem; line-height: 1.6; }
-    .game-link span { margin-top: auto; color: var(--purple-light); font-size: 0.85rem; font-weight: 600; }
-
     /* BIO SECTION */
     .section-label {
       font-size: 0.72rem;
@@ -493,39 +464,6 @@
       text-underline-offset: 0.2em;
     }
 
-    /* A quiet nod to The Net. The glyph is small; its touch target is not. */
-    .net-pi {
-      position: absolute;
-      right: max(8px, env(safe-area-inset-right));
-      bottom: max(8px, env(safe-area-inset-bottom));
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 44px;
-      color: var(--muted);
-      font: 20px/1 Georgia, 'Times New Roman', serif;
-      text-decoration: none;
-      border-radius: 4px;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .net-pi--dungeon {
-      left: max(8px, env(safe-area-inset-left));
-      right: auto;
-    }
-
-    .net-pi:hover {
-      color: var(--text);
-    }
-
-    .net-pi:focus-visible {
-      color: var(--text);
-      outline: 2px solid var(--purple-light);
-      outline-offset: 2px;
-    }
-
     .footer-poetry:hover,
     .footer-poetry:focus-visible {
       color: var(--text);
@@ -576,7 +514,6 @@
         height: 120px;
       }
 
-      .games-grid,
       .credentials {
         grid-template-columns: 1fr;
       }
@@ -615,6 +552,7 @@
     <ul class="nav-links">
       <li><a href="/" class="active">About</a></li>
       <li><a href="/portfolio/">Portfolio</a></li>
+      <li><a href="/games/">Games</a></li>
       <li><a href="/support/">Support</a></li>
       <li><a href="/contact/">Contact</a></li>
     </ul>
@@ -656,22 +594,6 @@
       </div>
     </div>
   </div>
-
-  <section class="games" aria-labelledby="games-title">
-    <h2 id="games-title" class="section-label">Play</h2>
-    <div class="games-grid">
-      <a href="#pinball" class="game-link">
-        <h3>Pinball Wizard</h3>
-        <p>A pocket pinball table with bumpers, combos, and a high score to chase.</p>
-        <span>Play Pinball <span aria-hidden="true">&rarr;</span></span>
-      </a>
-      <a href="/projects/ntv4x/" class="game-link">
-        <h3>NTv4x</h3>
-        <p>A falling-capsule puzzle game. Match colors and clear the microbes.</p>
-        <span>Play NTv4x <span aria-hidden="true">&rarr;</span></span>
-      </a>
-    </div>
-  </section>
 
   <!-- BIO -->
   <div class="section-label">About</div>
@@ -758,8 +680,6 @@
   <span>Copyright <span class="egg-trigger copyright-egg-trigger" title="Hold for pinball">&copy;</span> Jon Ledbetter</span>
   <a class="footer-poetry" href="/cummings/">E. E. Cummings poetry</a>
   <span class="clacks-tribute" title="A man is not dead while his name is still spoken.">GNU Terry Pratchett</span>
-  <a class="net-pi" href="/projects/zenball/" aria-label="Open ZenBall, original draft"><span aria-hidden="true">π</span></a>
-  <a class="net-pi net-pi--dungeon" href="/projects/dungeons-of-endregar/" aria-label="Play Dungeons of Endregar"><span aria-hidden="true">π</span></a>
 </footer>
 
 <script src="/assets/js/adaptive-experience.js" defer></script>
