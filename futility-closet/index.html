@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Futility Closet · Dark view</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #111118; color: #e2e8f0; font-family: system-ui, sans-serif; }
+    body { display: flex; flex-direction: column; }
+    header { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; padding: .7rem 1rem; font-size: .85rem; border-bottom: 1px solid #393346; }
+    header strong { margin-right: auto; }
+    a { color: #c4a9ff; text-underline-offset: .2em; }
+    button { font: inherit; border: 1px solid #665879; border-radius: .4rem; padding: .4rem .65rem; background: #252033; color: inherit; cursor: pointer; }
+    a:focus-visible, button:focus-visible { outline: 2px solid #c4a9ff; outline-offset: 3px; }
+    iframe { flex: 1; min-height: 0; width: 100%; border: 0; background: #fafafa; color-scheme: light; }
+    iframe.dark { filter: invert(1) hue-rotate(180deg) contrast(.92); }
+    @media (prefers-reduced-motion: no-preference) { button { transition: background .15s; } }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/">← ledsec.dev</a>
+    <strong>Futility Closet</strong>
+    <button type="button" id="theme" aria-pressed="true">Dark view: on</button>
+    <a href="https://www.futilitycloset.com/">Open original</a>
+  </header>
+  <iframe class="dark" title="Futility Closet — dark view; image colours are also filtered" src="https://www.futilitycloset.com/"></iframe>
+  <script>
+    const toggle = document.querySelector('#theme');
+    const frame = document.querySelector('iframe');
+    toggle.addEventListener('click', () => {
+      const dark = frame.classList.toggle('dark');
+      toggle.setAttribute('aria-pressed', String(dark));
+      toggle.textContent = dark ? 'Dark view: on' : 'Dark view: off';
+    });
+  </script>
+</body>
+</html>
