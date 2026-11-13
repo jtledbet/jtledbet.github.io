@@ -2,10 +2,10 @@
 * { box-sizing: border-box; }
 body { margin: 0; }
 main { width: min(100% - 32px, 960px); margin: 28px auto; }
-.home { color: #bba3e3; text-decoration: none; font-size: .85rem; }
+.home { display: inline-block; padding: 12px 12px 12px 0; margin: -12px 0; color: #bba3e3; text-decoration: none; font-size: .85rem; }
 h1 { font-size: clamp(1.3rem, 4vw, 1.9rem); font-weight: 600; letter-spacing: -.03em; margin: 16px 0 4px; }
 .controls, .storage-note { color: #a9a2b7; font-size: .8rem; margin: 0 0 20px; }
-.game-frame { position: relative; overflow: hidden; border: 1px solid #42374f; background: #211e27; }
+.game-frame { position: relative; overflow: hidden; border: 1px solid #84709b; background: #211e27; }
 canvas { display: block; width: 100%; aspect-ratio: 8 / 5; }
 canvas:focus-visible { outline: 2px solid #bba3e3; outline-offset: -2px; }
 #loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; background: #211e27; color: #c6b9d9; }
@@ -14,14 +14,16 @@ progress { width: min(240px, 70%); height: 6px; accent-color: #bba3e3; }
 footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 16px 0 4px; }
 #save-status { margin: 0; font-size: .8rem; color: #b8b0c6; }
 .actions, dialog form { display: flex; gap: 8px; }
-button { font: inherit; font-size: .8rem; color: #ede9f4; background: #25202f; border: 1px solid #554563; border-radius: 5px; padding: 10px 14px; cursor: pointer; min-height: 44px; }
+button { font: inherit; font-size: .8rem; color: #ede9f4; background: #25202f; border: 1px solid #84709b; border-radius: 5px; padding: 10px 14px; cursor: pointer; min-height: 44px; }
 button:hover { background: #352a42; }
 button:focus-visible, a:focus-visible { outline: 2px solid #d1b9f4; outline-offset: 3px; }
 button:disabled { opacity: .4; cursor: wait; }
-.storage-note { font-size: .73rem; }
-dialog { width: min(420px, calc(100% - 32px)); padding: 24px; background: #211c2a; color: #ede9f4; border: 1px solid #685277; border-radius: 8px; }
+.storage-note { font-size: .73rem; margin-bottom: 4px; }
+.credit { color: #a9a2b7; font-size: .73rem; margin: 0 0 20px; }
+.credit a { color: inherit; }
+dialog { width: min(420px, calc(100% - 32px)); padding: 24px; background: #211c2a; color: #ede9f4; border: 1px solid #84709b; border-radius: 8px; }
 dialog::backdrop { background: #000a; }
 dialog h2 { margin-top: 0; font-size: 1.2rem; }
 dialog p { color: #c4bbcf; font-size: .9rem; }
 dialog form { justify-content: flex-end; margin-top: 24px; }
-@media (max-width: 600px) { main { width: min(100% - 16px, 960px); margin-top: 16px; } footer { flex-wrap: wrap; } .storage-note { margin-top: 10px; } }
+@media (max-width: 600px) { main { width: min(100% - 16px, 960px); margin-top: 16px; } footer { flex-wrap: wrap; } .actions { flex-wrap: wrap; } .storage-note { margin-top: 10px; } }

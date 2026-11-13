@@ -13,17 +13,18 @@
     <header>
       <a class="home" href="/games/">← Games</a>
       <h1>Dungeons of Endregar</h1>
-      <p class="controls">WASD / arrows to move · Space / Enter / left-click to attack or interact</p>
+      <p class="controls" id="controls">WASD / arrows to move · Space / Enter / left-click to attack or interact</p>
     </header>
     <section class="game-frame" aria-label="Game">
-      <canvas id="unity-canvas" width="960" height="600" tabindex="0" aria-label="Dungeon game. Click to focus keyboard controls."></canvas>
+      <canvas id="unity-canvas" width="960" height="600" tabindex="0" role="application" aria-label="Dungeons of Endregar game" aria-describedby="controls"></canvas>
       <div id="loading"><span>Loading the dungeon…</span><progress id="progress" max="1" value="0" aria-label="Game loading progress"></progress></div>
     </section>
     <footer>
       <p id="save-status" role="status">Autosaves in this browser.</p>
-      <div class="actions"><button id="fullscreen" disabled>Fullscreen</button><button id="new-game" disabled>New Game</button></div>
+      <div class="actions"><button id="sound" type="button">Sound on</button><button id="fullscreen" disabled>Fullscreen</button><button id="new-game" disabled>New Game</button></div>
     </footer>
     <p class="storage-note">Progress stays in this browser on this device. Clearing site data removes it.</p>
+    <p class="credit">Based on the <a href="https://mupchurch.itch.io/dungeons-of-endregar" rel="noopener">original game by mupchurch</a>.</p>
   </main>
   <dialog id="reset-dialog" aria-labelledby="reset-title">
     <h2 id="reset-title">Start a new game?</h2>
@@ -34,7 +35,42 @@
     const canvas = document.querySelector('#unity-canvas');
     const status = document.querySelector('#save-status');
     const dialog = document.querySelector('#reset-dialog');
+    const soundButton = document.querySelector('#sound');
     let game;
+
+    // Route all game audio through one gain node per AudioContext so the page can mute it.
+    const MUTE_KEY = 'ledsec.dungeons-of-endregar.muted';
+    const masterGains = [];
+    let muted = false;
+    try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch (error) {}
+    const connectNode = AudioNode.prototype.connect;
+    const masterGainFor = context => {
+      let entry = masterGains.find(item => item.context === context);
+      if (!entry) {
+        entry = { context, gain: context.createGain() };
+        entry.gain.gain.value = muted ? 0 : 1;
+        connectNode.call(entry.gain, context.destination);
+        masterGains.push(entry);
+      }
+      return entry.gain;
+    };
+    AudioNode.prototype.connect = function (destination, ...rest) {
+      if (destination === this.context.destination) destination = masterGainFor(this.context);
+      return connectNode.call(this, destination, ...rest);
+    };
+    const showSoundState = () => { soundButton.textContent = muted ? 'Sound off' : 'Sound on'; };
+    showSoundState();
+    soundButton.addEventListener('click', () => {
+      muted = !muted;
+      masterGains.forEach(entry => { entry.gain.gain.value = muted ? 0 : 1; });
+      try { localStorage.setItem(MUTE_KEY, muted ? '1' : '0'); } catch (error) {}
+      showSoundState();
+    });
+
+    // Movement and attack keys must not scroll the page while the game has focus.
+    canvas.addEventListener('keydown', event => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(event.key)) event.preventDefault();
+    });
     document.addEventListener('dungeon-save', event => {
       const message = event.detail === 'saved'
         ? 'Progress saved in this browser.'
