@@ -36,7 +36,7 @@
   --land: #2c3944; --land-hover: #445664; --green: #14845d; --blue: #2f68c4;
   --sign-ink: #ffffff; --miss: #e2574c; color-scheme: dark;
 }
-html, body { height: 100%; margin: 0; }
+html, body { height: 100%; margin: 0; overscroll-behavior: none; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; }
 * { box-sizing: border-box; }
 .app {
@@ -66,12 +66,17 @@ h1 { font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.01em; line
 button:focus-visible, .state:focus-visible, .callout:focus-visible { outline: 3px solid var(--sign); outline-offset: 2px; }
 
 .board { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 12px; }
-.mapwrap { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
-svg.map { flex: 1; min-height: 0; width: 100%; display: block; touch-action: manipulation; }
+.mapwrap { position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
+svg.map { flex: 1; min-height: 0; width: 100%; display: block; touch-action: none; }
+svg.map.zoomed { cursor: grab; }
+.zoom { position: absolute; right: 0; bottom: 30px; display: flex; flex-direction: column; gap: 4px; }
+.zoom button { width: 38px; height: 38px; padding: 0; font: 600 18px/1 var(--font); border-radius: 6px; cursor: pointer; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); }
+.zoom button.fit { font-size: 12px; padding-top: 2px; }
 .status { min-height: 20px; margin: 0; color: var(--muted); font-size: 14px; }
 .status.bad { color: var(--miss); font-weight: 600; }
 .status.good { color: var(--ink); font-weight: 600; }
 
+.state, .callout rect, .leader { vector-effect: non-scaling-stroke; }
 .state { fill: var(--land); stroke: var(--bg); stroke-width: 1; stroke-linejoin: round; cursor: pointer; transition: fill .15s; outline: none; }
 .state.hot, .armed .state:not(.done):hover { fill: var(--land-hover); }
 .state.done { fill: var(--sign); cursor: default; }
@@ -83,22 +88,24 @@ svg.map { flex: 1; min-height: 0; width: 100%; display: block; touch-action: man
 .callout.hot rect { fill: var(--land-hover); }
 .callout.done rect { fill: var(--sign); }
 .callout.done { cursor: default; }
-.lbl { font: 600 10px var(--font); fill: var(--ink); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.lbl { font: 600 calc(10px * var(--k, 1)) var(--font); fill: var(--ink); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 .lbl.on { fill: var(--sign-ink); }
 .lbl.hint { fill: var(--muted); }
 
 .rack { min-height: 0; display: flex; flex-direction: column; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
 .rack h2 { margin: 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.plates { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 7px; padding: 2px; }
+.plates { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 7px; padding: 5px; }
 .plate {
   font: 600 14px/1 var(--font); color: var(--sign-ink); background: var(--sign);
   border: 0; border-radius: 5px; padding: 9px 11px 6px; cursor: grab; white-space: nowrap;
   box-shadow: inset 0 0 0 2px var(--sign), inset 0 0 0 3.5px var(--sign-ink);
-  touch-action: pan-y; user-select: none; -webkit-user-select: none;
+  touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
 }
 .plate.sel { outline: 3px solid var(--ink); outline-offset: 2px; }
 .plate.lifted { opacity: .25; }
 .ghost { position: fixed; z-index: 50; pointer-events: none; margin: 0; cursor: grabbing; transform: translate(-50%, -50%) rotate(-3deg); box-shadow: inset 0 0 0 2px var(--sign), inset 0 0 0 3.5px var(--sign-ink), 0 6px 14px rgba(0,0,0,.3); }
+.ghost.tip { transform: translate(-50%, calc(-100% - 9px)); }
+.ghost.tip::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -7px; border: 7px solid transparent; border-top: 9px solid var(--sign); border-bottom: 0; }
 .ghost.back { transition: left .25s, top .25s; }
 
 .done-card { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
@@ -106,19 +113,40 @@ svg.map { flex: 1; min-height: 0; width: 100%; display: block; touch-action: man
 .done-card .big { font-size: 20px; font-weight: 800; }
 .done-card .go { font: 600 14px/1 var(--font); padding: 10px 14px 8px; border: 0; border-radius: 6px; background: var(--ink); color: var(--bg); cursor: pointer; }
 
-@media (max-width: 760px) {
+@media (max-width: 760px) and (orientation: portrait) {
   .board { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(150px, 1fr); }
-  svg.map { flex: none; aspect-ratio: 1045 / 610; }
+  svg.map { flex: none; aspect-ratio: 1045 / 612; }
   h1 { font-size: 19px; }
   .stats { margin-left: 0; }
-  .lbl { font-size: 17px; }
-  .lbl.full { display: none; }
   .plates { flex-direction: column; overflow-x: auto; overflow-y: hidden; padding-bottom: 6px; }
   .plates:has(.done-card) { flex-direction: row; }
   .plate { touch-action: pan-x; }
-  .callout .lbl { font-size: 13px; }
+  .zoom { bottom: 0; flex-direction: row; }
+  .status { min-height: 38px; padding-right: 130px; }
 }
-@media (min-width: 761px) { .lbl.abbr.hasfull { display: none; } }
+/* Phone on its side: map takes the full height, a slim rack sits on the right. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .app { gap: 6px; padding-block: 6px; }
+  header { gap: 6px 12px; }
+  h1 { font-size: 16px; }
+  .modes button, .restart { font-size: 13px; padding: 6px 10px 4px; }
+  .stats { font-size: 13px; gap: 10px; }
+  .board { grid-template-columns: minmax(0, 1fr) 172px; gap: 8px; }
+  .mapwrap { gap: 2px; }
+  .rack { padding: 6px; }
+  .rack h2 { display: none; }
+  .plates { gap: 6px; }
+  .plate { font-size: 13px; padding: 8px 9px 5px; }
+  .status { font-size: 12px; min-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .zoom { bottom: 20px; }
+  .zoom button { width: 34px; height: 34px; }
+}
+@media (max-width: 760px), (max-height: 520px) {
+  .lbl { font-size: calc(17px * var(--k, 1)); }
+  .lbl.full { display: none; }
+  .callout .lbl { font-size: calc(13px * var(--k, 1)); }
+}
+@media (min-width: 761px) and (min-height: 521px) { .lbl.abbr.hasfull { display: none; } }
 @media (prefers-reduced-motion: reduce) { .ghost.back { transition: none; } .state, .callout rect { transition: none; } }
 </style>
 </head>
@@ -141,6 +169,11 @@ svg.map { flex: 1; min-height: 0; width: 100%; display: block; touch-action: man
   <div class="board">
     <div class="mapwrap">
       <svg class="map" id="map" viewBox="0 0 1045 612" role="group" aria-label="Map of the United States"></svg>
+      <div class="zoom">
+        <button type="button" id="zin" aria-label="Zoom in">+</button>
+        <button type="button" id="zout" aria-label="Zoom out">&minus;</button>
+        <button type="button" id="zfit" class="fit" aria-label="Show the whole map">Fit</button>
+      </div>
       <p class="status" id="status" aria-live="polite"></p>
     </div>
     <aside class="rack">
@@ -157,8 +190,21 @@ const NS = 'http://www.w3.org/2000/svg';
 const $ = id => document.getElementById(id);
 const app = $('app'), map = $('map'), platesEl = $('plates'), statusEl = $('status');
 const byAbbr = Object.fromEntries(STATES.map(s => [s.abbr, s]));
-let game = { mode: 'states', done: [], misses: 0, order: [] };
+// One round per mode, kept side by side so switching never loses progress.
+let rounds = {}, game = null;
 let selected = null;
+const KEY = 'fifty-nameplates';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ mode: game.mode, rounds })); } catch (_) {} };
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    const ok = r => r && Array.isArray(r.done) && Array.isArray(r.order) && r.order.length === 50 && r.done.every(a => byAbbr[a]) && r.order.every(a => byAbbr[a]);
+    if (s && ok(s.rounds.states) && ok(s.rounds.capitals)) return s;
+  } catch (_) {}
+  return null;
+}
+// The capitals round only labels states already named in the states round, so it can't be used as an answer key.
+const named = ab => rounds.states.done.includes(ab);
 
 const svg = (tag, attrs, parent) => {
   const el = document.createElementNS(NS, tag);
@@ -191,16 +237,15 @@ function buildMap() {
 
 function label(s) {
   s.lblG.textContent = '';
-  const done = game.done.includes(s.abbr);
+  const done = game.done.includes(s.abbr), caps = game.mode === 'capitals', known = caps && named(s.abbr);
   const targets = [s.el, s.call].filter(Boolean);
   targets.forEach(t => {
     t.classList.toggle('done', done);
-    t.setAttribute('aria-label', done ? `${s.name}, capital ${s.capital}` : (game.mode === 'capitals' ? s.name : 'Unnamed state'));
+    t.setAttribute('aria-label', done ? (caps ? `${s.capital}, ${s.name}` : s.name) : (known ? s.name : 'Unnamed state'));
   });
   const x = s.call ? s.cx : s.x, y = s.call ? s.cy : s.y;
-  // Capitals round shows which state is which; the capital is the thing to recall.
-  const full = done ? plateText(s) : (game.mode === 'capitals' ? s.name : '');
-  const short = done || game.mode === 'capitals' ? s.abbr : '';
+  const full = done ? plateText(s) : (known ? s.name : '');
+  const short = done || known ? s.abbr : '';
   if (!short) return;
   const cls = done ? ' on' : ' hint';
   const ab = svg('text', { x, y, class: 'lbl abbr' + cls }, s.lblG);
@@ -209,9 +254,10 @@ function label(s) {
   const ft = svg('text', { x, y, class: 'lbl full' + cls }, s.lblG);
   ft.textContent = full;
   let fits = true;
-  if (s.call) fits = ft.getComputedTextLength() < 76;
+  const len = ft.getComputedTextLength() / Math.sqrt(view.w / BASE.w);
+  if (s.call) fits = len < 76;
   else {
-    const w = ft.getComputedTextLength() / 2 + 2, pt = map.createSVGPoint();
+    const w = len / 2 + 2, pt = map.createSVGPoint();
     for (const [dx, dy] of [[-w, -5], [w, -5], [-w, 5], [w, 5]]) { pt.x = x + dx; pt.y = y + dy; if (!s.el.isPointInFill(pt)) { fits = false; break; } }
   }
   if (fits) ab.classList.add('hasfull'); else ft.remove();
@@ -236,23 +282,29 @@ function finish() {
   platesEl.innerHTML = `<div class="done-card"><p class="big">All 50 placed</p>
     <p>${game.misses === 0 ? 'A perfect round, no misses.' : `${game.misses} miss${game.misses === 1 ? '' : 'es'}, ${pct}% of your drops landed.`}</p>
     <button type="button" class="go" id="next">Play the ${other} round</button></div>`;
-  $('next').onclick = () => start(other);
+  $('next').onclick = () => start(other, rounds[other].done.length === 50);
   say('');
 }
 
 function stats() { $('placed').textContent = game.done.length; $('misses').textContent = game.misses; }
 
-function start(mode, keep) {
-  if (!keep) game = { mode, done: [], misses: 0, order: shuffle(STATES.map(s => s.abbr)) };
-  app.dataset.mode = game.mode;
-  $('mode-states').setAttribute('aria-pressed', game.mode === 'states');
-  $('mode-capitals').setAttribute('aria-pressed', game.mode === 'capitals');
+const fresh = mode => ({ mode, done: [], misses: 0, order: shuffle(STATES.map(s => s.abbr)) });
+const coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+
+function start(mode, reset) {
+  if (reset || !rounds[mode]) rounds[mode] = fresh(mode);
+  game = rounds[mode];
+  app.dataset.mode = mode;
+  $('mode-states').setAttribute('aria-pressed', mode === 'states');
+  $('mode-capitals').setAttribute('aria-pressed', mode === 'capitals');
   select(null);
   STATES.forEach(label);
-  buildRack(); stats();
-  if (game.done.length < 50) say(game.mode === 'states'
-    ? 'Drag a nameplate onto its state, or tap a plate and then tap the state.'
-    : 'Drag each capital onto its state, or tap a plate and then tap the state.');
+  buildRack(); stats(); save();
+  if (game.done.length === 50) return;
+  const how = coarse ? 'Tap a plate, then tap its state. Pinch to zoom.' : 'Drag a plate onto its state, or click a plate and then the state.';
+  if (mode === 'states') say(how);
+  else if (rounds.states.done.length < 50) say(`Only states you have named in the States round are labelled (${rounds.states.done.length} so far). ` + how);
+  else say('Match each capital to its state. ' + how);
 }
 
 /* ---------- placing ---------- */
@@ -270,7 +322,7 @@ function targetAt(x, y) {
   // Near miss: snap to the closest label point (helps with Hawaii and slivers).
   const pt = map.createSVGPoint(); pt.x = x; pt.y = y;
   const p = pt.matrixTransform(map.getScreenCTM().inverse());
-  let best = null, bd = 22 * 22;
+  let best = null, bd = (22 * view.w / BASE.w) ** 2;
   for (const s of STATES) { const d = (s.x - p.x) ** 2 + (s.y - p.y) ** 2; if (d < bd) { bd = d; best = s.abbr; } }
   return best;
 }
@@ -283,12 +335,12 @@ function attempt(plateAb, targetAb) {
     label(t); select(null);
     const plate = platesEl.querySelector(`[data-abbr="${plateAb}"]`);
     if (plate) plate.remove();
-    stats();
+    stats(); save();
     say(game.mode === 'states' ? `${t.name}. Correct.` : `${t.capital} is the capital of ${t.name}.`, 'good');
     if (game.done.length === 50) finish();
     return true;
   }
-  game.misses++; stats();
+  game.misses++; stats(); save();
   [t.el, t.call].filter(Boolean).forEach(el => { el.classList.remove('wrong'); void el.getBoundingClientRect(); el.classList.add('wrong'); });
   say(`Not there. ${plateText(p)} goes somewhere else.`, 'bad');
   return false;
@@ -305,7 +357,7 @@ let drag = null;
 platesEl.addEventListener('pointerdown', e => {
   const plate = e.target.closest('.plate');
   if (!plate || e.button > 0) return;
-  drag = { plate, id: e.pointerId, x0: e.clientX, y0: e.clientY, ghost: null };
+  drag = { plate, id: e.pointerId, x0: e.clientX, y0: e.clientY, ghost: null, lift: e.pointerType === 'touch' ? 30 : 0 };
 });
 window.addEventListener('pointermove', e => {
   if (!drag || e.pointerId !== drag.id) return;
@@ -313,29 +365,76 @@ window.addEventListener('pointermove', e => {
     if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 7) return;
     try { drag.plate.setPointerCapture(e.pointerId); } catch (_) {}
     const g = drag.plate.cloneNode(true);
-    g.classList.remove('sel'); g.classList.add('ghost');
+    g.classList.remove('sel'); g.classList.add('ghost'); if (drag.lift) g.classList.add('tip');
     app.appendChild(g); drag.ghost = g;
     drag.plate.classList.add('lifted');
     select(null);
   }
-  drag.ghost.style.left = e.clientX + 'px'; drag.ghost.style.top = e.clientY + 'px';
-  hot(targetAt(e.clientX, e.clientY));
+  drag.ghost.style.left = e.clientX + 'px'; drag.ghost.style.top = e.clientY - drag.lift + 'px';
+  hot(targetAt(e.clientX, e.clientY - drag.lift));
 });
 function endDrag(e, cancelled) {
   if (!drag || e.pointerId !== drag.id) return;
   const d = drag; drag = null; hot(null);
   if (!d.ghost) return;
   d.plate.dataset.dragged = '1'; setTimeout(() => delete d.plate.dataset.dragged, 0);
-  const target = cancelled ? null : targetAt(e.clientX, e.clientY);
+  const target = cancelled ? null : targetAt(e.clientX, e.clientY - d.lift);
   const ok = target && attempt(d.plate.dataset.abbr, target);
   if (ok) return d.ghost.remove();
   const r = d.plate.getBoundingClientRect();
-  d.ghost.classList.add('back');
+  d.ghost.classList.remove('tip'); d.ghost.classList.add('back');
   d.ghost.style.left = r.left + r.width / 2 + 'px'; d.ghost.style.top = r.top + r.height / 2 + 'px';
   setTimeout(() => { d.ghost.remove(); d.plate.classList.remove('lifted'); }, 260);
 }
 window.addEventListener('pointerup', e => endDrag(e, false));
 window.addEventListener('pointercancel', e => endDrag(e, true));
+
+/* pan and zoom: drag or pinch the map, wheel, or the + / - buttons */
+const BASE = { x: 0, y: 0, w: 1045, h: 612 };
+let view = { ...BASE }, moved = false;
+function setView(v) {
+  const w = Math.min(BASE.w, Math.max(BASE.w / 8, v.w)), h = w * BASE.h / BASE.w;
+  view = { x: Math.min(BASE.w - w, Math.max(0, v.x)), y: Math.min(BASE.h - h, Math.max(0, v.y)), w, h };
+  map.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`);
+  map.style.setProperty('--k', Math.sqrt(w / BASE.w));
+  map.classList.toggle('zoomed', w < BASE.w - 1);
+}
+function zoomAt(cx, cy, f) {
+  const pt = map.createSVGPoint(); pt.x = cx; pt.y = cy;
+  const p = pt.matrixTransform(map.getScreenCTM().inverse());
+  const w = Math.min(BASE.w, Math.max(BASE.w / 8, view.w * f)), r = w / view.w;
+  setView({ x: p.x - (p.x - view.x) * r, y: p.y - (p.y - view.y) * r, w });
+}
+const pts = new Map();
+map.addEventListener('pointerdown', e => { if (!pts.size) moved = false; pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); });
+map.addEventListener('pointermove', e => {
+  const p = pts.get(e.pointerId);
+  if (!p) return;
+  if (pts.size === 1) {
+    const dx = e.clientX - p.x, dy = e.clientY - p.y;
+    if (!moved && Math.hypot(dx, dy) < 8) return;
+    if (!moved) { moved = true; try { map.setPointerCapture(e.pointerId); } catch (_) {} }
+    const a = map.getScreenCTM().a;
+    setView({ x: view.x - dx / a, y: view.y - dy / a, w: view.w });
+    p.x = e.clientX; p.y = e.clientY;
+  } else if (pts.size === 2) {
+    const o = [...pts.entries()].find(([id]) => id !== e.pointerId)[1];
+    const d0 = Math.hypot(p.x - o.x, p.y - o.y), m0 = [(p.x + o.x) / 2, (p.y + o.y) / 2];
+    p.x = e.clientX; p.y = e.clientY; moved = true;
+    const d1 = Math.hypot(p.x - o.x, p.y - o.y), m1 = [(p.x + o.x) / 2, (p.y + o.y) / 2];
+    if (d0 > 0 && d1 > 0) zoomAt(m1[0], m1[1], d0 / d1);
+    const a = map.getScreenCTM().a;
+    setView({ x: view.x - (m1[0] - m0[0]) / a, y: view.y - (m1[1] - m0[1]) / a, w: view.w });
+  }
+});
+const dropPt = e => pts.delete(e.pointerId);
+map.addEventListener('pointerup', dropPt);
+map.addEventListener('pointercancel', dropPt);
+map.addEventListener('wheel', e => { e.preventDefault(); zoomAt(e.clientX, e.clientY, e.deltaY > 0 ? 1.25 : 0.8); }, { passive: false });
+const zoomBtn = f => () => { const r = map.getBoundingClientRect(); zoomAt(r.left + r.width / 2, r.top + r.height / 2, f); };
+$('zin').onclick = zoomBtn(0.6);
+$('zout').onclick = zoomBtn(1 / 0.6);
+$('zfit').onclick = () => setView(BASE);
 
 /* tap / keyboard: pick a plate, then pick a state */
 platesEl.addEventListener('click', e => {
@@ -347,11 +446,12 @@ platesEl.addEventListener('click', e => {
 });
 function mapPick(e) {
   if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+  if (e.type === 'click' && moved) return;
   const ab = e.type === 'click' ? targetAt(e.clientX, e.clientY) : (e.target.closest('[data-abbr]') || {dataset: {}}).dataset.abbr;
   if (!ab) return;
   if (e.type === 'keydown') e.preventDefault();
   const s = byAbbr[ab];
-  if (game.done.includes(ab)) return say(`${s.name}. Capital: ${s.capital}.`);
+  if (game.done.includes(ab)) return say(game.mode === 'states' ? `${s.name}.` : `${s.capital}, ${s.name}.`);
   if (!selected) return say('Pick up a nameplate first.');
   attempt(selected, ab);
 }
@@ -359,14 +459,15 @@ map.addEventListener('click', mapPick);
 map.addEventListener('keydown', mapPick);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') select(null); });
 
-$('mode-states').onclick = () => game.mode !== 'states' && start('states');
-$('mode-capitals').onclick = () => game.mode !== 'capitals' && start('capitals');
-$('restart').onclick = () => start(game.mode);
+$('mode-states').onclick = () => start('states');
+$('mode-capitals').onclick = () => start('capitals');
+$('restart').onclick = () => start(game.mode, true);
 
-function boot(saved) {
+function boot() {
   buildMap();
-  if (saved && saved.game && Array.isArray(saved.game.order)) { game = saved.game; start(game.mode, true); }
-  else start('states');
+  const s = load();
+  if (s) rounds = s.rounds; else rounds = { states: fresh('states'), capitals: fresh('capitals') };
+  start(s && s.mode === 'capitals' ? 'capitals' : 'states');
   const relabel = () => STATES.forEach(label);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(relabel);
 }
