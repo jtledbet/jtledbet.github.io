@@ -63,6 +63,7 @@ h1 { font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.01em; line
   font: 600 14px/1 var(--font); padding: 8px 12px 6px; border-radius: 6px; cursor: pointer;
   border: 1.5px solid var(--line); background: var(--surface); color: var(--ink);
 }
+.restart.armed { border-color: var(--miss); color: var(--miss); }
 button:focus-visible, .state:focus-visible, .callout:focus-visible { outline: 3px solid var(--sign); outline-offset: 2px; }
 
 .board { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 12px; }
@@ -461,13 +462,25 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') select(null)
 
 $('mode-states').onclick = () => start('states');
 $('mode-capitals').onclick = () => start('capitals');
-$('restart').onclick = () => start(game.mode, true);
+// Restart wipes a round, so it takes a second press once there is progress to lose.
+const restartBtn = $('restart');
+let armed = 0;
+const disarm = () => { clearTimeout(armed); armed = 0; restartBtn.textContent = 'Restart'; restartBtn.classList.remove('armed'); };
+restartBtn.onclick = () => {
+  if (!armed && (game.done.length || game.misses)) {
+    restartBtn.textContent = 'Confirm restart'; restartBtn.classList.add('armed');
+    armed = setTimeout(disarm, 3500);
+    return;
+  }
+  disarm(); start(game.mode, true);
+};
 
 function boot() {
   buildMap();
   const s = load();
   if (s) rounds = s.rounds; else rounds = { states: fresh('states'), capitals: fresh('capitals') };
   start(s && s.mode === 'capitals' ? 'capitals' : 'states');
+  if (game.done.length > 0 && game.done.length < 50) say(`Welcome back: ${game.done.length} of 50 placed. Progress saves automatically in this browser.`);
   const relabel = () => STATES.forEach(label);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(relabel);
 }
