@@ -364,9 +364,7 @@ function start(mode, reset) {
   buildRack(); stats(); save();
   if (game.done.length === 50) return;
   const how = coarse ? 'Tap a plate, then tap its state. Pinch to zoom.' : 'Drag a plate onto its state, or click a plate and then the state.';
-  if (mode === 'states') say(how);
-  else if (rounds.states.done.length < 50) say(`Only states you have named in the States round are labelled (${rounds.states.done.length} so far). ` + how);
-  else say('Match each capital to its state. ' + how);
+  say(mode === 'states' ? how : 'Match each capital to its state. ' + how);
 }
 
 /* ---------- placing ---------- */
