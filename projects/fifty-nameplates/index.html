@@ -392,6 +392,8 @@ function attempt(plateAb, targetAb) {
   if (game.done.includes(targetAb)) return false;
   if (plateAb === targetAb) {
     game.done.push(plateAb);
+    // Placing a capital on an unlabelled state shows you know the state, so the states round counts it too.
+    if (game.mode === 'capitals' && !named(plateAb)) rounds.states.done.push(plateAb);
     label(t); select(null);
     const plate = platesEl.querySelector(`[data-abbr="${plateAb}"]`);
     if (plate) plate.remove();
@@ -402,7 +404,7 @@ function attempt(plateAb, targetAb) {
     return true;
   }
   [t.el, t.call].filter(Boolean).forEach(el => { el.classList.remove('wrong'); void el.getBoundingClientRect(); el.classList.add('wrong'); });
-  say(`Not there. ${plateText(p)} goes somewhere else.`, 'bad');
+  say(game.mode === 'states' ? `Not there. ${p.name} goes somewhere else.` : `${p.capital} isn't the capital here.`, 'bad');
   return false;
 }
 
