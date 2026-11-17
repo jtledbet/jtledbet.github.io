@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#102b35">
+  <meta name="description" content="Explore the world, one name at a time. This early preview starts with U.S. states, with more regions planned. Progress saves in your browser.">
+  <title>Globetrotter · ledsec.dev</title>
+  <link rel="canonical" href="https://ledsec.dev/projects/little-atlas/">
+  <link rel="stylesheet" href="style.css">
+  <script src="vendor/d3.min.js" defer></script>
+  <script src="vendor/topojson-client.min.js" defer></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <main class="game">
+    <header class="topbar">
+      <a class="brand site-return" href="/games/" aria-label="Back to games" title="Back to games"><span class="brand-mark" aria-hidden="true">←</span><div>globetrotter<span class="edition">BACK TO GAMES</span></div></a>
+      <div class="top-actions"><button id="explore" aria-pressed="false">Explore</button><button id="sound" aria-label="Mute sound effects" aria-pressed="true" title="Sound effects on">♪</button><button id="help" aria-label="How to play">?</button></div>
+    </header>
+    <section id="flight" class="flight" aria-label="Globe and flight controls">
+      <canvas id="globe" tabindex="0" aria-label="Globe. Use arrow keys or W A S D to fly, plus and minus to zoom, and Space to place your selected state name."></canvas>
+      <div class="map-title"><span class="eyebrow">YOUR FLIGHT DECK</span><span id="location">Loading the globe…</span><span id="coordinates"></span></div>
+      <div class="view-controls" aria-label="Map view"><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button><span></span><button id="home" aria-label="Return to the United States">US</button><button id="world" aria-label="View the whole globe">◎</button></div>
+      <div class="reticle" aria-hidden="true"></div>
+      <div id="plane" class="plane" aria-hidden="true">
+        <svg viewBox="0 0 100 100"><ellipse cx="53" cy="62" rx="28" ry="8" fill="#0b2739" opacity=".22"/><g class="airframe"><path d="M45 39 8 56 8 64 45 57 47 78 32 87 32 92 50 89 68 92 68 87 53 78 55 57 92 64 92 56 55 39Z" fill="#e6c59a" stroke="#173d48" stroke-width="2"/><path d="M50 15C40 15 42 57 47 80L53 80C58 57 60 15 50 15" fill="#f37e61" stroke="#173d48" stroke-width="2"/><path d="M46 34Q50 29 54 34L54 46 46 46Z" fill="#294e5a"/><path d="M13 54 13 62M87 54 87 62" stroke="#e66b50" stroke-width="6"/><path class="propeller" d="M32 17H68" stroke="#fff5df" stroke-width="4" stroke-linecap="round"/></g></svg>
+      </div>
+      <div id="cargo" class="cargo" hidden></div>
+      <div id="notice" class="notice" role="status" aria-live="polite">Choose a name, then fly to its state.</div>
+      <div class="flight-bottom">
+        <div class="joystick-wrap"><div id="joystick" class="joystick" role="group" aria-label="Flight joystick. Keyboard alternative: arrow keys on the globe."><span class="joystick-cross" aria-hidden="true">＋</span><span id="stick" class="stick" aria-hidden="true"></span></div><span class="control-caption">DRAG TO FLY · WASD / ARROWS</span></div>
+        <div class="drop-wrap"><button id="drop" class="drop" disabled><span aria-hidden="true">↓</span> Place name</button><span class="control-caption">OR PRESS SPACE</span></div>
+      </div>
+      <div id="loading" class="loading">Unfolding the world…</div>
+    </section>
+    <aside class="panel" aria-label="State names">
+      <div class="mission-heading"><div><span class="eyebrow">EXPEDITION 01</span><h1>United States</h1></div><span class="stamp" aria-hidden="true">50<br><small>STATES</small></span></div>
+      <p class="mission-copy">Pick a name. Find its home.</p>
+      <div class="progress-line"><span><strong id="count">0</strong> / 50 placed</span><button id="reset" class="text-button">Start over</button></div>
+      <progress id="progress" value="0" max="50" aria-label="States correctly placed"></progress>
+      <div class="tray-heading"><span id="tray-title">YOUR NAME TAGS</span><span id="page-count"></span></div>
+      <div id="labels" class="labels" aria-label="Select or drag a state name"></div>
+      <div class="paging"><button id="previous" aria-label="Previous state names">←</button><span id="tray-hint">Tap to carry · drag to place</span><button id="next" aria-label="Next state names">→</button></div>
+      <p id="save-status" class="save-status" role="status" aria-live="polite">Autosave is on.</p>
+      <div class="field-note"><span aria-hidden="true">✦</span><p>A whole world to explore.<br>One little plane to get you there.</p></div>
+      <footer><button id="credits" class="text-button">Map credits</button></footer>
+    </aside>
+  </main>
+  <dialog id="help-dialog"><button class="dialog-close" aria-label="Close instructions">×</button><span class="eyebrow">WELCOME ABOARD</span><h2>Your first flight</h2><ol><li><strong>Pick a name</strong> from the tray to carry it.</li><li><strong>Fly to its state.</strong> Drag the joystick, drag the globe, or use WASD / arrow keys. The ring beneath your plane is the exact target.</li><li><strong>Place the name</strong> with the button or Space. You can also drag a name directly onto the map.</li></ol><p>Zoom in for small states. Pinch, use + / −, or scroll over the globe. US brings you home; ◎ shows the whole world.</p><p><strong>Explore</strong> reveals the state beneath you and pauses placing. Return to the game when you're ready.</p><button class="primary dialog-close">Let's fly</button></dialog>
+  <dialog id="credits-dialog"><button class="dialog-close" aria-label="Close map credits">×</button><h2>About this little world</h2><p>U.S. boundaries: us-atlas 3.0.1, derived from the U.S. Census Bureau. World land: world-atlas 2.0.2, derived from Natural Earth. Simplified boundaries are intended for a game, not navigation.</p><p>Rendered with D3 7.9.0 and TopoJSON Client 3.1.0. Their licenses are bundled with this app. The airplane is an original SVG drawing.</p><p>Only the fifty U.S. states are scored in this expedition. The rest of the globe is open for flying.</p></dialog>
+  <dialog id="reset-dialog"><h2>Start a fresh expedition?</h2><p>This clears your placed names on this device.</p><div class="dialog-actions"><button class="dialog-close">Keep flying</button><button id="confirm-reset" class="primary">Start over</button></div></dialog>
+  <div id="drag-label" class="drag-label" hidden></div>
+</body>
+</html>
