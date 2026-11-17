@@ -175,7 +175,6 @@ svg.map.zoomed { cursor: grab; }
     </div>
     <div class="stats">
       <span>Placed <b id="placed">0</b>/50</span>
-      <span>Misses <b id="misses">0</b></span>
     </div>
     <button type="button" class="restart" id="restart">Restart</button>
   </header>
@@ -340,19 +339,18 @@ rangesEl.addEventListener('click', e => {
 });
 
 function finish() {
-  const total = 50 + game.misses, pct = Math.round(5000 / total);
   const other = game.mode === 'states' ? 'capitals' : 'states';
   platesEl.innerHTML = `<div class="done-card"><p class="big">All 50 placed</p>
-    <p>${game.misses === 0 ? 'A perfect round, no misses.' : `${game.misses} miss${game.misses === 1 ? '' : 'es'}, ${pct}% of your drops landed.`}</p>
+    <p>${game.mode === 'states' ? 'Every state is named.' : 'Every capital is matched.'}</p>
     <button type="button" class="go" id="next">Play the ${other} round</button></div>`;
   $('next').onclick = () => start(other, rounds[other].done.length === 50);
   rackEl.classList.add('finished'); $('empty').hidden = true;
   say('');
 }
 
-function stats() { $('placed').textContent = game.done.length; $('misses').textContent = game.misses; }
+function stats() { $('placed').textContent = game.done.length; }
 
-const fresh = mode => ({ mode, done: [], misses: 0 });
+const fresh = mode => ({ mode, done: [] });
 const coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
 
 function start(mode, reset) {
@@ -405,7 +403,6 @@ function attempt(plateAb, targetAb) {
     if (game.done.length === 50) finish();
     return true;
   }
-  game.misses++; stats(); save();
   [t.el, t.call].filter(Boolean).forEach(el => { el.classList.remove('wrong'); void el.getBoundingClientRect(); el.classList.add('wrong'); });
   say(`Not there. ${plateText(p)} goes somewhere else.`, 'bad');
   return false;
@@ -531,7 +528,7 @@ const restartBtn = $('restart');
 let armed = 0;
 const disarm = () => { clearTimeout(armed); armed = 0; restartBtn.textContent = 'Restart'; restartBtn.classList.remove('armed'); };
 restartBtn.onclick = () => {
-  if (!armed && (game.done.length || game.misses)) {
+  if (!armed && game.done.length) {
     restartBtn.textContent = 'Confirm restart'; restartBtn.classList.add('armed');
     armed = setTimeout(disarm, 3500);
     return;
