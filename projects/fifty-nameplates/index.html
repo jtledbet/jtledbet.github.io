@@ -95,6 +95,15 @@ svg.map.zoomed { cursor: grab; }
 
 .rack { min-height: 0; display: flex; flex-direction: column; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
 .rack h2 { margin: 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.tools { display: flex; flex-direction: column; gap: 6px; }
+.tools input { width: 100%; min-width: 0; font: 400 16px/1.2 var(--font); padding: 7px 10px 5px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
+.tools input:focus-visible { outline: 3px solid var(--sign); outline-offset: 1px; }
+.ranges { display: flex; flex-wrap: wrap; gap: 4px; }
+.ranges button { flex: none; font: 600 12px/1 var(--font); padding: 7px 7px 5px; border: 1.5px solid var(--line); border-radius: 5px; background: transparent; color: var(--ink); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.ranges button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.ranges button:disabled { opacity: .35; cursor: default; }
+.empty { margin: 0; padding: 0 5px; color: var(--muted); font-size: 14px; }
+.rack.finished .tools { display: none; }
 .plates { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 7px; padding: 5px; }
 .plate {
   font: 600 14px/1 var(--font); color: var(--sign-ink); background: var(--sign);
@@ -136,6 +145,9 @@ svg.map.zoomed { cursor: grab; }
   .mapwrap { gap: 2px; }
   .rack { padding: 6px; }
   .rack h2 { display: none; }
+  .tools { gap: 5px; }
+  .tools input { padding: 5px 8px 3px; }
+  .ranges { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
   .plates { gap: 6px; }
   .plate { font-size: 13px; padding: 8px 9px 5px; }
   .status { font-size: 12px; min-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -179,7 +191,12 @@ svg.map.zoomed { cursor: grab; }
     </div>
     <aside class="rack">
       <h2 id="rack-title">Nameplates</h2>
+      <div class="tools">
+        <input type="search" id="q" placeholder="Search" aria-label="Search nameplates" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <div class="ranges" id="ranges" role="group" aria-label="Show plates by first letter"></div>
+      </div>
       <div class="plates" id="plates"></div>
+      <p class="empty" id="empty" hidden>No plates match.</p>
     </aside>
   </div>
 </div>
@@ -199,7 +216,7 @@ const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ mode: game
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY));
-    const ok = r => r && Array.isArray(r.done) && Array.isArray(r.order) && r.order.length === 50 && r.done.every(a => byAbbr[a]) && r.order.every(a => byAbbr[a]);
+    const ok = r => r && Array.isArray(r.done) && r.done.every(a => byAbbr[a]);
     if (s && ok(s.rounds.states) && ok(s.rounds.capitals)) return s;
   } catch (_) {}
   return null;
@@ -213,7 +230,6 @@ const svg = (tag, attrs, parent) => {
   if (parent) parent.appendChild(el);
   return el;
 };
-const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const plateText = s => game.mode === 'states' ? s.name : s.capital;
 const say = (msg, cls) => { statusEl.textContent = msg; statusEl.className = 'status' + (cls ? ' ' + cls : ''); };
 
@@ -265,17 +281,63 @@ function label(s) {
 }
 
 /* ---------- rack ---------- */
+const RANGES = ['AC', 'DF', 'GI', 'JL', 'MO', 'PR', 'SU', 'VZ'];
+const rangesEl = $('ranges'), qEl = $('q'), rackEl = platesEl.parentNode;
+let range = '';   // '' shows every letter
+const inRange = (text, r) => !r || (text[0] >= r[0] && text[0] <= r[1]);
+
 function buildRack() {
-  platesEl.textContent = '';
+  platesEl.textContent = ''; rangesEl.textContent = '';
+  range = ''; qEl.value = '';
   $('rack-title').textContent = game.mode === 'states' ? 'State nameplates' : 'Capital nameplates';
-  const left = game.order.filter(ab => !game.done.includes(ab));
-  if (!left.length) return finish();
-  left.forEach(ab => {
+  const left = STATES.filter(s => !game.done.includes(s.abbr)).sort((a, b) => plateText(a).localeCompare(plateText(b)));
+  rackEl.classList.toggle('finished', !left.length);
+  if (!left.length) { $('empty').hidden = true; return finish(); }
+  left.forEach(s => {
     const b = document.createElement('button');
-    b.type = 'button'; b.className = 'plate'; b.dataset.abbr = ab; b.textContent = plateText(byAbbr[ab]);
+    b.type = 'button'; b.className = 'plate'; b.dataset.abbr = s.abbr; b.textContent = plateText(s);
     platesEl.appendChild(b);
   });
+  ['', ...RANGES].forEach(r => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.dataset.range = r; b.textContent = r ? `${r[0]}\u2013${r[1]}` : 'All';
+    rangesEl.appendChild(b);
+  });
+  applyFilter();
 }
+
+// Search looks across every plate; the letter chips narrow the tray when the search box is empty.
+function applyFilter(afterPlacing) {
+  // A search that a placement just emptied has done its job.
+  if (afterPlacing && qEl.value.trim() && ![...platesEl.querySelectorAll('.plate')].some(p => p.textContent.toLowerCase().includes(qEl.value.trim().toLowerCase()))) qEl.value = '';
+  const q = qEl.value.trim().toLowerCase(), plates = [...platesEl.querySelectorAll('.plate')];
+  const has = r => plates.some(p => inRange(p.textContent, r));
+  if (range && !has(range)) range = '';
+  let shown = 0;
+  plates.forEach(p => {
+    const text = p.textContent, hide = q ? !text.toLowerCase().includes(q) : !inRange(text, range);
+    p.hidden = hide; if (!hide) shown++;
+    if (hide && selected === p.dataset.abbr) select(null);
+  });
+  rangesEl.querySelectorAll('button').forEach(b => {
+    b.setAttribute('aria-pressed', !q && b.dataset.range === range);
+    b.disabled = !has(b.dataset.range);
+  });
+  $('empty').hidden = shown > 0 || !plates.length;
+  if (!afterPlacing) { platesEl.scrollTop = 0; platesEl.scrollLeft = 0; }
+}
+qEl.addEventListener('input', () => applyFilter());
+qEl.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const hits = [...platesEl.querySelectorAll('.plate:not([hidden])')];
+  if (hits.length === 1) { select(hits[0].dataset.abbr); say(`${hits[0].textContent} picked up. Now choose its state on the map.`); qEl.blur(); }
+});
+rangesEl.addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  range = b.dataset.range; qEl.value = '';
+  applyFilter();
+});
 
 function finish() {
   const total = 50 + game.misses, pct = Math.round(5000 / total);
@@ -284,12 +346,13 @@ function finish() {
     <p>${game.misses === 0 ? 'A perfect round, no misses.' : `${game.misses} miss${game.misses === 1 ? '' : 'es'}, ${pct}% of your drops landed.`}</p>
     <button type="button" class="go" id="next">Play the ${other} round</button></div>`;
   $('next').onclick = () => start(other, rounds[other].done.length === 50);
+  rackEl.classList.add('finished'); $('empty').hidden = true;
   say('');
 }
 
 function stats() { $('placed').textContent = game.done.length; $('misses').textContent = game.misses; }
 
-const fresh = mode => ({ mode, done: [], misses: 0, order: shuffle(STATES.map(s => s.abbr)) });
+const fresh = mode => ({ mode, done: [], misses: 0 });
 const coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
 
 function start(mode, reset) {
@@ -336,6 +399,7 @@ function attempt(plateAb, targetAb) {
     label(t); select(null);
     const plate = platesEl.querySelector(`[data-abbr="${plateAb}"]`);
     if (plate) plate.remove();
+    applyFilter(true);
     stats(); save();
     say(game.mode === 'states' ? `${t.name}. Correct.` : `${t.capital} is the capital of ${t.name}.`, 'good');
     if (game.done.length === 50) finish();
